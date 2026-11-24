@@ -10,6 +10,9 @@
 <meta name="apple-mobile-web-app-title" content="CinéA2">
 <title>CinéA2</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='20' cy='20' r='11' fill='%23fff4dc' stroke='%231d1530' stroke-width='3'/%3E%3Ccircle cx='44' cy='20' r='11' fill='%23fff4dc' stroke='%231d1530' stroke-width='3'/%3E%3Ccircle cx='32' cy='14' r='11' fill='%23fff4dc' stroke='%231d1530' stroke-width='3'/%3E%3Cpath d='M10 26h44l-6 34H16z' fill='%23ff3d57' stroke='%231d1530' stroke-width='3' stroke-linejoin='round'/%3E%3Cpath d='M26 26l2 34M38 26l-2 34' stroke='%23fff4ea' stroke-width='5'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<script>try { if (sessionStorage.getItem("cad.splash") || matchMedia("(prefers-reduced-motion: reduce)").matches) document.documentElement.classList.add("nosplash"); } catch (e) {}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://image.tmdb.org">
@@ -556,9 +559,48 @@ dialog.closing .panel { animation: sheetDown .26s ease-in both; }
 .hero-mascot .m.boing .bob { animation: boing .7s var(--spring); }
 @keyframes boing { 30% { transform: scale(1.12, .88); } 60% { transform: scale(.94, 1.08) translateY(-10px); } }
 
+/* ---------- Intro ---------- */
+#splash {
+  position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; overflow: hidden; cursor: pointer;
+  background:
+    radial-gradient(circle at 22% 12%, rgb(255 61 87 / .38), transparent 48%),
+    radial-gradient(circle at 82% 85%, rgb(90 61 255 / .38), transparent 52%),
+    radial-gradient(circle at 70% 25%, rgb(52 224 176 / .14), transparent 40%),
+    var(--ink);
+}
+.nosplash #splash { display: none; }
+#splash .beam {
+  position: absolute; left: 50%; bottom: -30%; width: 220vmax; height: 220vmax; transform: translateX(-50%);
+  background: conic-gradient(from 150deg at 50% 50%, transparent 0deg, rgb(255 200 58 / .16) 14deg, transparent 30deg, transparent 40deg, rgb(255 122 198 / .12) 52deg, transparent 66deg);
+  animation: sweep 2.6s ease-in-out both; transform-origin: 50% 50%;
+}
+@keyframes sweep { from { transform: translateX(-50%) rotate(-28deg); opacity: 0; } 30% { opacity: 1; } to { transform: translateX(-50%) rotate(14deg); } }
+.sp-in { position: relative; display: grid; justify-items: center; gap: 14px; padding-bottom: 6vh; }
+.sp-m { width: 150px; animation: spDrop 1s var(--spring) .15s both; }
+.sp-m .m { width: 100%; height: auto; }
+@keyframes spDrop {
+  0% { transform: translateY(-75vh) rotate(-25deg) scale(.7); }
+  55% { transform: translateY(0) rotate(4deg) scale(1.12, .86); }
+  75% { transform: translateY(-14px) rotate(-2deg) scale(.96, 1.05); }
+  100% { transform: none; }
+}
+.sp-word { display: flex; font: 800 clamp(40px, 11vw, 64px)/1 var(--display); letter-spacing: -.035em; margin-top: 6px; }
+.sp-word span { display: inline-block; animation: spLetter .7s var(--spring) both; animation-delay: calc(.75s + var(--i) * 60ms); }
+.sp-word .hot { background: linear-gradient(100deg, var(--butter), var(--cherry) 55%, var(--bubble)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+@keyframes spLetter { from { opacity: 0; transform: translateY(36px) scale(.5) rotate(8deg); } }
+.sp-tag { color: var(--muted); font-weight: 600; font-size: 15px; letter-spacing: .02em; animation: spFade .7s ease 1.3s both; }
+@keyframes spFade { from { opacity: 0; transform: translateY(8px); } }
+.sp-dots { display: flex; gap: 8px; animation: spFade .5s ease 1.4s both; }
+.sp-dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--butter); box-shadow: 0 0 10px var(--butter); animation: bulb .5s steps(1) infinite; }
+.sp-dots i:nth-child(even) { animation-delay: .25s; background: var(--cherry); box-shadow: 0 0 10px var(--cherry); }
+#splash.out { animation: spOut .65s cubic-bezier(.7, 0, .3, 1) forwards; pointer-events: none; }
+#splash.out .sp-in { animation: spZoom .65s cubic-bezier(.7, 0, .3, 1) forwards; }
+@keyframes spOut { 60% { opacity: 1; } to { opacity: 0; visibility: hidden; } }
+@keyframes spZoom { to { transform: scale(1.25); opacity: 0; filter: blur(6px); } }
+
 /* ---------- Particules + toasts ---------- */
 .kernel {
-  position: fixed; left: 0; top: 0; z-index: 100; pointer-events: none; width: 16px; height: 14px;
+  position: fixed; left: 0; top: 0; z-index: 300; pointer-events: none; width: 16px; height: 14px;
   border-radius: 52% 48% 55% 45% / 55% 50% 50% 45%;
   background: radial-gradient(circle at 34% 30%, #fffdf6 0 25%, #ffeec2 50%, #f5be4c 100%);
   box-shadow: 0 0 0 1.5px var(--outline);
@@ -609,6 +651,16 @@ dialog.closing .panel { animation: sheetDown .26s ease-in both; }
 </style>
 </head>
 <body>
+
+<div id="splash" aria-hidden="true">
+  <div class="beam"></div>
+  <div class="sp-in">
+    <div class="sp-m"></div>
+    <div class="sp-word"><span style="--i:0">C</span><span style="--i:1">i</span><span style="--i:2">n</span><span style="--i:3">é</span><span class="hot" style="--i:4">A</span><span class="hot" style="--i:5">2</span></div>
+    <div class="sp-tag">On regarde quoi ce soir ?</div>
+    <div class="sp-dots"><i></i><i></i><i></i><i></i><i></i></div>
+  </div>
+</div>
 
 <div class="stage" aria-hidden="true"><div class="spot s1"></div><div class="spot s2"></div><div class="spot s3"></div><div class="spot s4"></div></div>
 
@@ -913,6 +965,27 @@ dialog.closing .panel { animation: sheetDown .26s ease-in both; }
     }
   }
   const centerOf = el => { const r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };
+
+  /* ---------- Intro ---------- */
+  let splashEnd;
+  const splashDone = new Promise(res => { splashEnd = res; });
+  (() => {
+    const sp = $("#splash");
+    if (!sp || document.documentElement.classList.contains("nosplash")) { sp?.remove(); splashEnd(); return; }
+    try { sessionStorage.setItem("cad.splash", "1"); } catch {}
+    const holder = sp.querySelector(".sp-m");
+    holder.innerHTML = mascot("happy");
+    setTimeout(() => { const r = holder.getBoundingClientRect(); burst(r.left + r.width / 2, r.top + r.height * .25, 28, "party"); }, 720);
+    setTimeout(() => { const m = holder.querySelector(".m"); if (m) m.dataset.mood = "love"; }, 1250);
+    let done = false;
+    const end = () => {
+      if (done) return; done = true;
+      sp.classList.add("out");
+      setTimeout(() => { sp.remove(); splashEnd(); }, 650);
+    };
+    setTimeout(end, 2300);
+    sp.addEventListener("click", end);
+  })();
 
   /* ---------- Toasts ---------- */
   function toast(msg, mood = "happy") {
@@ -1581,7 +1654,7 @@ dialog.closing .panel { animation: sheetDown .26s ease-in both; }
     "auth/user-disabled": "Ce compte a été désactivé dans Firebase."
   };
   function loginError(msg) { const el = $("#loginErr"); el.textContent = msg || ""; el.hidden = !msg; }
-  function openLogin(msg) { loginError(msg); openSheet(loginDlg); if (canHover) setTimeout(() => $("#loginEmail").focus(), 350); }
+  function openLogin(msg) { splashDone.then(() => { loginError(msg); openSheet(loginDlg); if (canHover) setTimeout(() => $("#loginEmail").focus(), 350); }); }
   loginDlg.addEventListener("click", e => { if (e.target === loginDlg || e.target.closest("[data-close]")) closeSheet(loginDlg); });
   $("#loginForm").addEventListener("submit", async e => {
     e.preventDefault();
