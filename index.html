@@ -328,6 +328,42 @@ img { max-width: 100%; display: block; }
 .poster .prov img { width: 26px; height: 26px; border-radius: 8px; box-shadow: 0 0 0 2px rgb(12 10 23 / .9); }
 .poster .prov img + img { margin-left: -6px; }
 .poster .prov .more { width: 26px; height: 26px; margin-left: -6px; border-radius: 8px; display: grid; place-items: center; font-size: 11px; font-weight: 700; background: var(--ink-4); box-shadow: 0 0 0 2px rgb(12 10 23 / .9); }
+.acc {
+  display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px 4px 6px; border-radius: 999px; white-space: nowrap;
+  font-size: 10.5px; font-weight: 700; line-height: 1.2; color: var(--outline); background: var(--ac);
+  box-shadow: 0 4px 12px -4px rgb(0 0 0 / .7);
+}
+.acc .ico { width: 12px; height: 12px; stroke-width: 2.6; }
+.acc.other { --ac: var(--butter); }
+.acc.rent { --ac: var(--sky); }
+.acc.none { --ac: #d4cfe6; }
+.poster .acc { position: absolute; right: 10px; bottom: 10px; z-index: 3; }
+@media (max-width: 420px) { .poster .acc { font-size: 10px; padding: 3px 7px 3px 5px; right: 8px; bottom: 9px; } .poster .prov { left: 8px; } }
+.warn { display: flex; gap: 12px; align-items: center; padding: 12px 14px; border-radius: 14px; font-size: 13.5px; line-height: 1.45; background: rgb(255 255 255 / .04); border: 1px solid var(--line-2); }
+.warn.other { background: rgb(255 200 58 / .08); border-color: rgb(255 200 58 / .35); }
+.warn.rent { background: rgb(82 184 255 / .08); border-color: rgb(82 184 255 / .35); }
+.warn .acc { flex: none; }
+.prov-chip.mine { border-color: rgb(52 224 176 / .6); background: rgb(52 224 176 / .1); }
+.prov-chip.mine::after { content: "✓"; color: var(--mint); font-weight: 800; }
+.pchip.zero { opacity: .5; }
+.pchip.add { border-style: dashed; color: var(--butter); }
+.pchip.add .all { background: rgb(255 200 58 / .15); color: var(--butter); }
+.plat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.plat {
+  position: relative; display: flex; align-items: center; gap: 10px; min-width: 0; padding: 6px 8px 6px 6px; border-radius: 14px;
+  border: 1px solid var(--line-2); background: var(--ink); color: var(--muted); font-size: 13px; font-weight: 600; text-align: left;
+  transition: border-color .2s, background .2s, color .2s, transform .3s var(--spring);
+}
+.plat:active { transform: scale(.96); }
+.plat img, .plat .lg { width: 32px; height: 32px; border-radius: 9px; flex: none; object-fit: cover; }
+.plat .lg { display: grid; place-items: center; background: var(--ink-4); color: var(--text); font: 700 12px/1 var(--display); }
+.plat .nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.plat .tick { margin-left: auto; width: 22px; height: 22px; border-radius: 50%; flex: none; display: grid; place-items: center; border: 1.5px solid var(--line-2); color: transparent; transition: background .2s, border-color .2s, color .2s; }
+.plat .tick .ico { width: 13px; height: 13px; stroke-width: 3; }
+.plat[aria-pressed="true"] { border-color: rgb(52 224 176 / .7); background: rgb(52 224 176 / .1); color: var(--text); }
+.plat[aria-pressed="true"] .tick { background: var(--mint); border-color: var(--mint); color: var(--outline); }
+.legend { display: grid; gap: 8px; font-size: 12.5px; color: var(--muted); padding-top: 4px; }
+.legend div { display: flex; align-items: center; gap: 10px; }
 .poster .noprov { position: absolute; left: 10px; bottom: 10px; z-index: 3; font-size: 11px; font-weight: 600; color: rgb(255 255 255 / .75); }
 .ribbon {
   position: absolute; right: 10px; top: 10px; z-index: 3; display: inline-flex; align-items: center; gap: 4px;
@@ -466,7 +502,7 @@ dialog.closing .panel { animation: sheetDown .26s ease-in both; }
 .wlist { display: flex; flex-wrap: wrap; gap: 8px; }
 .prov-chip { display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px 4px 4px; border-radius: 12px; background: rgb(255 255 255 / .05); border: 1px solid var(--line); font-size: 13px; font-weight: 600; }
 .prov-chip img { width: 30px; height: 30px; border-radius: 8px; }
-.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-items: center; }
+p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-items: center; }
 .envies { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .envie { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 14px; background: rgb(255 255 255 / .04); border: 1px solid var(--line); font-size: 13.5px; }
 .envie .av { width: 32px; height: 32px; font-size: 13px; }
@@ -752,6 +788,17 @@ dialog.closing .panel { animation: sheetDown .26s ease-in both; }
         </div>
       </div>
 
+      <div class="fs" id="platFs">
+        <h3><i></i>Nos plateformes</h3>
+        <p class="hint">Cochez les abonnements que vous avez. Les raccourcis n'afficheront que ceux-là, et un symbole signale les titres que vous ne pouvez pas regarder.</p>
+        <div class="plat-grid" id="platGrid"></div>
+        <div class="legend">
+          <div><span class="acc other"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg>Pas chez vous</span>Sur d'autres plateformes que les vôtres</div>
+          <div><span class="acc rent"><svg class="ico" viewBox="0 0 24 24"><path d="M17 6.5A7 7 0 1 0 17 17.5M4 10h9M4 14h9"/></svg>À louer</span>Seulement en location ou à l'achat</div>
+          <div><span class="acc none"><svg class="ico" viewBox="0 0 24 24"><path d="M3 3l18 18M10.6 6.1A9.8 9.8 0 0 1 12 6c5 0 9 6 9 6a16 16 0 0 1-3 3.5M6.5 7.5C4.3 9 3 12 3 12s4 6 9 6a8.6 8.6 0 0 0 4-1"/></svg>Introuvable</span>Disponible nulle part en streaming</div>
+        </div>
+      </div>
+
       <div class="fs">
         <h3><i></i>Recherche des films</h3>
         <div class="field">
@@ -836,7 +883,8 @@ dialog.closing .panel { animation: sheetDown .26s ease-in both; }
   const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
   const imgPath = p => (typeof p === "string" && /^\/[\w\-.]+$/.test(p)) ? p : "";
 
-  let cfg = Object.assign({ key: "", region: "FR", nameA: "", nameB: "" }, load(LS.cfg, {}));
+  let cfg = Object.assign({ key: "", region: "FR", nameA: "", nameB: "", platforms: [] }, load(LS.cfg, {}));
+  if (!Array.isArray(cfg.platforms)) cfg.platforms = [];
   let items = load(LS.items, {});
   let who = load(LS.who, "a") === "b" ? "b" : "a";
   const filt = { status: "todo", type: "all", platform: "" };
@@ -864,6 +912,26 @@ dialog.closing .panel { animation: sheetDown .26s ease-in both; }
     grid: '<svg class="ico" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>',
     dice: '<svg class="ico" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1.3" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/></svg>'
   };
+
+  /* ---------- Nos plateformes ---------- */
+  // « Netflix basic with Ads » et « Netflix » comptent comme la même plateforme
+  const platKey = n => String(n || "").replace(/\s+(standard|basic|essential)?\s*with ads$/i, "").trim();
+  const myPlats = () => new Set((cfg.platforms || []).map(p => p.name));
+  const ACC = {
+    other: ['<svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg>', "Pas chez vous", "Pas sur vos plateformes"],
+    rent: ['<svg class="ico" viewBox="0 0 24 24"><path d="M17 6.5A7 7 0 1 0 17 17.5M4 10h9M4 14h9"/></svg>', "À louer", "Seulement en location ou à l'achat"],
+    none: ['<svg class="ico" viewBox="0 0 24 24"><path d="M3 3l18 18M10.6 6.1A9.8 9.8 0 0 1 12 6c5 0 9 6 9 6a16 16 0 0 1-3 3.5M6.5 7.5C4.3 9 3 12 3 12s4 6 9 6a8.6 8.6 0 0 0 4-1"/></svg>', "Introuvable", "Disponible nulle part en streaming"]
+  };
+  // null tant que vous n'avez pas choisi vos plateformes
+  function access(d) {
+    const mine = myPlats(); if (!mine.size) return null;
+    const flat = (d.providers?.flat || []).map(p => platKey(p.name));
+    if (flat.some(n => mine.has(n))) return "ok";
+    if (flat.length) return "other";
+    if (d.providers?.rent?.length || d.providers?.buy?.length) return "rent";
+    return "none";
+  }
+  const accHtml = k => `<span class="acc ${k}" title="${ACC[k][2]}">${ACC[k][0]}<span class="t">${ACC[k][1]}</span></span>`;
 
   /* ---------- Mascotte : Popcorn ---------- */
   function mascot(mood = "happy", extra = "") {
@@ -1149,7 +1217,17 @@ dialog.closing .panel { animation: sheetDown .26s ease-in both; }
       : `<div class="${cls} ph">${mascot("happy")}<span>${esc(d.title)}</span></div>`;
   }
   function provList(list) {
-    return `<div class="wlist">${list.map(p => `<span class="prov-chip">${imgPath(p.logo) ? `<img src="${IMG}w92${imgPath(p.logo)}" alt="" loading="lazy">` : ""}${esc(p.name)}</span>`).join("")}</div>`;
+    const mine = myPlats();
+    return `<div class="wlist">${list.map(p => `<span class="prov-chip ${mine.has(platKey(p.name)) ? "mine" : ""}">${imgPath(p.logo) ? `<img src="${IMG}w92${imgPath(p.logo)}" alt="" loading="lazy">` : ""}${esc(p.name)}</span>`).join("")}</div>`;
+  }
+
+  function warnHtml(d) {
+    const a = access(d); if (!a || a === "ok") return "";
+    const others = [...new Set((d.providers?.flat || []).map(p => platKey(p.name)))];
+    const txt = a === "other" ? `Pas sur vos plateformes. Disponible sur ${others.slice(0, 4).map(esc).join(", ")}${others.length > 4 ? "…" : ""}.`
+      : a === "rent" ? "Sur aucun abonnement pour l'instant : seulement en location ou à l'achat."
+      : "Disponible nulle part en streaming pour l'instant. Réessayez plus tard avec « Mettre à jour ».";
+    return `<div class="warn ${a}">${accHtml(a)}<span>${txt}</span></div>`;
   }
 
   function detailHtml(d, isPreview) {
@@ -1203,6 +1281,7 @@ dialog.closing .panel { animation: sheetDown .26s ease-in both; }
       </div>
       <div class="d-body">
         <div class="chips">${chips.join("")}</div>
+        ${warnHtml(d)}
         ${d.tagline ? `<p class="tagline">« ${esc(d.tagline)} »</p>` : ""}
         <p class="overview">${esc(d.overview) || "Pas encore de résumé en français."}</p>
         ${credits.length ? `<dl class="credits">${credits.join("")}</dl>` : ""}
@@ -1243,7 +1322,9 @@ dialog.closing .panel { animation: sheetDown .26s ease-in both; }
       persist(d.id); await closeSheet($("#detail"));
       q.value = ""; $("#clearQ").hidden = true;
       if (filt.status !== "todo") setTab("todo");
-      toast(`« ${d.title} » ajouté à votre liste`, "love");
+      const acc = access(d);
+      if (acc && acc !== "ok") toast(`« ${d.title} » ajouté, mais ${acc === "other" ? "pas sur vos plateformes" : acc === "rent" ? "seulement en location" : "pas encore en streaming"}`, "wow");
+      else toast(`« ${d.title} » ajouté à votre liste`, "love");
       revealCard(d.id);
       return;
     }
@@ -1304,7 +1385,7 @@ dialog.closing .panel { animation: sheetDown .26s ease-in both; }
   });
 
   /* ---------- Rendu ---------- */
-  function platformsOf(d) { return (d.providers?.flat || []).map(p => p.name); }
+  function platformsOf(d) { return (d.providers?.flat || []).map(p => platKey(p.name)); }
   function base() { return live().filter(d => filt.type === "all" || d.type === filt.type); }
 
   function renderWho() {
@@ -1347,23 +1428,30 @@ dialog.closing .panel { animation: sheetDown .26s ease-in both; }
 
   function renderPlatforms(all) {
     const counts = new Map(), logos = new Map();
-    all.filter(d => !d.seen).forEach(d => (d.providers?.flat || []).forEach(p => { counts.set(p.name, (counts.get(p.name) || 0) + 1); if (!logos.has(p.name)) logos.set(p.name, p.logo); }));
-    if (filt.platform && !counts.has(filt.platform)) filt.platform = "";
-    const list = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+    all.filter(d => !d.seen).forEach(d => new Set(platformsOf(d)).forEach(k => counts.set(k, (counts.get(k) || 0) + 1)));
+    all.forEach(d => (d.providers?.flat || []).forEach(p => { const k = platKey(p.name); if (!logos.has(k)) logos.set(k, p.logo); }));
+    const mine = cfg.platforms || [];
+    const list = mine.length
+      ? mine.map(p => [p.name, counts.get(p.name) || 0, p.logo || logos.get(p.name)])
+      : [...counts.entries()].sort((x, y) => y[1] - x[1]).map(([n, c]) => [n, c, logos.get(n)]);
+    if (filt.platform && !list.some(x => x[0] === filt.platform)) filt.platform = "";
     const box = $("#platforms");
-    box.hidden = !list.length || filt.status === "seen";
+    box.hidden = filt.status === "seen" || !all.length;
     box.innerHTML = `<button class="pchip" data-pf="" aria-pressed="${!filt.platform}"><span class="all">${IC.grid}</span>Partout</button>` +
-      list.map(([n, c]) => `<button class="pchip" data-pf="${esc(n)}" aria-pressed="${filt.platform === n}">${imgPath(logos.get(n)) ? `<img src="${IMG}w92${imgPath(logos.get(n))}" alt="" loading="lazy">` : ""}${esc(n)}<em>${c}</em></button>`).join("");
+      list.map(([n, c, logo]) => `<button class="pchip ${c ? "" : "zero"}" data-pf="${esc(n)}" aria-pressed="${filt.platform === n}">${imgPath(logo) ? `<img src="${IMG}w92${imgPath(logo)}" alt="" loading="lazy">` : ""}${esc(n)}<em>${c}</em></button>`).join("") +
+      (mine.length ? "" : `<button class="pchip add" data-pf-settings="1"><span class="all">${IC.plus}</span>Choisir nos plateformes</button>`);
   }
 
   function cardHtml(d, isNew, i) {
     const both = d.wants?.a && d.wants?.b;
     const mine = !!d.wants?.[who];
-    const prov = d.providers?.flat || [];
+    const mineSet = myPlats(), acc = access(d);
+    const prov = (d.providers?.flat || []).slice().sort((x, y) => mineSet.has(platKey(y.name)) - mineSet.has(platKey(x.name)));
+    const maxL = acc && acc !== "ok" ? 2 : 3;
     const pImg = imgPath(d.poster);
     const provHtml = prov.length
-      ? `<span class="prov">${prov.slice(0, 3).map(p => imgPath(p.logo) ? `<img src="${IMG}w92${imgPath(p.logo)}" alt="${esc(p.name)}" title="${esc(p.name)}" loading="lazy">` : "").join("")}${prov.length > 3 ? `<span class="more">+${prov.length - 3}</span>` : ""}</span>`
-      : (d.providers?.rent?.length ? `<span class="noprov">En location</span>` : "");
+      ? `<span class="prov">${prov.slice(0, maxL).map(p => imgPath(p.logo) ? `<img src="${IMG}w92${imgPath(p.logo)}" alt="${esc(p.name)}" title="${esc(p.name)}" loading="lazy">` : "").join("")}${prov.length > maxL ? `<span class="more">+${prov.length - maxL}</span>` : ""}</span>`
+      : (!acc && d.providers?.rent?.length ? `<span class="noprov">En location</span>` : "");
     const wantNames = ["a", "b"].filter(w => d.wants?.[w]);
     return `<article class="card ${d.seen ? "seen" : ""} ${isNew ? "enter" : ""}" data-id="${esc(d.id)}" style="--i:${i}">
       ${pImg ? `<img class="glow" src="${IMG}w185${pImg}" alt="" aria-hidden="true" loading="lazy">` : ""}
@@ -1372,6 +1460,7 @@ dialog.closing .panel { animation: sheetDown .26s ease-in both; }
         <span class="shine"></span>
         <span class="tl"><span class="pill ${d.type}">${d.type === "tv" ? "Série" : "Film"}</span></span>
         ${both && !d.seen ? `<span class="ribbon">${IC.heart}MATCH</span>` : ""}
+        ${acc && acc !== "ok" ? accHtml(acc) : ""}
         ${d.seen ? `<span class="stamp">VU</span>` : ""}
         ${provHtml}
       </button>
@@ -1481,7 +1570,10 @@ dialog.closing .panel { animation: sheetDown .26s ease-in both; }
   }
   $("#tabs").addEventListener("click", e => { const b = e.target.closest("button"); if (b) setTab(b.dataset.status); });
   $("#typeSeg").addEventListener("click", e => { const b = e.target.closest("button"); if (b) setType(b.dataset.type); });
-  $("#platforms").addEventListener("click", e => { const b = e.target.closest("[data-pf]"); if (!b) return; filt.platform = b.dataset.pf; shown.clear(); render(); });
+  $("#platforms").addEventListener("click", e => {
+    if (e.target.closest("[data-pf-settings]")) { openSettings(); setTimeout(() => $("#platFs").scrollIntoView({ behavior: "smooth", block: "start" }), 450); return; }
+    const b = e.target.closest("[data-pf]"); if (!b) return; filt.platform = b.dataset.pf; shown.clear(); render();
+  });
   $("#who").addEventListener("click", e => {
     const b = e.target.closest("button"); if (!b || b.dataset.who === who) return;
     who = b.dataset.who; save(LS.who, who); render();
@@ -1559,6 +1651,36 @@ dialog.closing .panel { animation: sheetDown .26s ease-in both; }
 
   /* ---------- Réglages ---------- */
   const sDlg = $("#settingsDlg");
+  let platCatalog = null, platCatalogRegion = "", draftPlat = new Set(), platOpts = new Map();
+  async function loadPlatCatalog() {
+    if (!cfg.key || (platCatalog && platCatalogRegion === cfg.region)) return;
+    try {
+      const res = await Promise.all(["movie", "tv"].map(k => tmdb(`/watch/providers/${k}`, { watch_region: cfg.region, language: "fr-FR" })));
+      const map = new Map();
+      res.flatMap(r => r.results || []).forEach(p => {
+        const k = platKey(p.provider_name), pr = p.display_priorities?.[cfg.region] ?? p.display_priority ?? 999, cur = map.get(k);
+        if (!cur) map.set(k, { name: k, logo: p.logo_path, pr });
+        else { cur.pr = Math.min(cur.pr, pr); if (p.provider_name === k) cur.logo = p.logo_path; }
+      });
+      platCatalog = [...map.values()].sort((x, y) => x.pr - y.pr).slice(0, 30); platCatalogRegion = cfg.region;
+    } catch { /* la grille garde les plateformes déjà connues */ }
+  }
+  function renderPlatGrid() {
+    platOpts = new Map();
+    (platCatalog || []).forEach(p => platOpts.set(p.name, { name: p.name, logo: p.logo }));
+    (cfg.platforms || []).forEach(p => { if (!platOpts.has(p.name)) platOpts.set(p.name, p); });
+    live().forEach(d => (d.providers?.flat || []).forEach(p => { const k = platKey(p.name); if (!platOpts.has(k)) platOpts.set(k, { name: k, logo: p.logo }); }));
+    const g = $("#platGrid");
+    if (!platOpts.size) { g.innerHTML = `<p class="hint">${cfg.key ? "Chargement des plateformes…" : "Ajoutez d'abord la clé TMDB ci-dessous pour voir la liste des plateformes."}</p>`; return; }
+    g.innerHTML = [...platOpts.values()].map(p => `<button type="button" class="plat" data-plat="${esc(p.name)}" aria-pressed="${draftPlat.has(p.name)}">
+      ${imgPath(p.logo) ? `<img src="${IMG}w92${imgPath(p.logo)}" alt="" loading="lazy">` : `<span class="lg">${esc(p.name.slice(0, 2))}</span>`}
+      <span class="nm">${esc(p.name)}</span><span class="tick">${IC.check}</span></button>`).join("");
+  }
+  $("#platGrid").addEventListener("click", e => {
+    const b = e.target.closest("[data-plat]"); if (!b) return;
+    const n = b.dataset.plat; draftPlat.has(n) ? draftPlat.delete(n) : draftPlat.add(n);
+    b.setAttribute("aria-pressed", String(draftPlat.has(n)));
+  });
   function openSettings() {
     $("#tmdbKey").value = cfg.key; $("#region").value = cfg.region; $("#nameA").value = cfg.nameA; $("#nameB").value = cfg.nameB;
     $("#importField").hidden = true;
@@ -1566,6 +1688,9 @@ dialog.closing .panel { animation: sheetDown .26s ease-in both; }
     $("#nameA").disabled = $("#nameB").disabled = c && fromFoyer;
     $("#namesHint").hidden = !(c && fromFoyer); $("#keyCloudHint").hidden = !c;
     renderAccount();
+    draftPlat = new Set((cfg.platforms || []).map(p => p.name));
+    renderPlatGrid();
+    loadPlatCatalog().then(() => { if (sDlg.open) renderPlatGrid(); });
     syncAv(); openSheet(sDlg);
   }
   function syncAv() {
@@ -1581,8 +1706,11 @@ dialog.closing .panel { animation: sheetDown .26s ease-in both; }
     const keyChanged = cfg.key !== $("#tmdbKey").value.trim();
     Object.assign(cfg, { key: $("#tmdbKey").value.trim(), region: $("#region").value });
     if (!(cloud() && fromFoyer)) Object.assign(cfg, { nameA: $("#nameA").value.trim(), nameB: $("#nameB").value.trim() });
-    save(LS.cfg, cfg); closeSheet(sDlg); render();
-    if (cloud() && (keyChanged || regionChanged)) fs.doc("cinea2meta/config").set({ tmdbKey: cfg.key, region: cfg.region }, { merge: true }).catch(writeErr);
+    const before = JSON.stringify(cfg.platforms);
+    cfg.platforms = [...platOpts.values()].filter(p => draftPlat.has(p.name)).map(p => ({ name: p.name, logo: imgPath(p.logo) }));
+    const platsChanged = before !== JSON.stringify(cfg.platforms);
+    save(LS.cfg, cfg); closeSheet(sDlg); shown.clear(); render();
+    if (cloud() && (keyChanged || regionChanged || platsChanged)) fs.doc("cinea2meta/config").set({ tmdbKey: cfg.key, region: cfg.region, platforms: cfg.platforms }, { merge: true }).catch(writeErr);
     toast(regionChanged ? "Réglages enregistrés. Utilisez ↻ dans une fiche pour mettre à jour ses plateformes." : "Réglages enregistrés");
   });
   $("#exportBtn").addEventListener("click", async () => {
@@ -1700,7 +1828,7 @@ dialog.closing .panel { animation: sheetDown .26s ease-in both; }
     }
     if (cfg.key) {
       const meta = await fs.doc("cinea2meta/config").get();
-      if (!(meta.exists && meta.data().tmdbKey)) { batch.set(fs.doc("cinea2meta/config"), { tmdbKey: cfg.key, region: cfg.region }, { merge: true }); writes++; }
+      if (!(meta.exists && meta.data().tmdbKey)) { batch.set(fs.doc("cinea2meta/config"), { tmdbKey: cfg.key, region: cfg.region, platforms: cfg.platforms }, { merge: true }); writes++; }
     }
     if (writes) await batch.commit();
     if (n) toast(`${n} titre${n > 1 ? "s" : ""} ajouté${n > 1 ? "s" : ""} à votre liste partagée`, "love");
@@ -1717,6 +1845,7 @@ dialog.closing .panel { animation: sheetDown .26s ease-in both; }
       const m = s.exists ? s.data() : {};
       if (m.tmdbKey) cfg.key = m.tmdbKey;
       if (m.region) cfg.region = m.region;
+      if (Array.isArray(m.platforms)) cfg.platforms = m.platforms.filter(p => p && typeof p.name === "string").map(p => ({ name: p.name.slice(0, 60), logo: imgPath(p.logo) }));
       save(LS.cfg, cfg); render();
     }, () => {}));
     // Prénoms et « qui est qui » repris de Foyer à deux (lecture seule)

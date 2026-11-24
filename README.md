@@ -17,6 +17,14 @@ CinéA2 utilise le même projet Firebase que Foyer à deux (`firebase-config.js`
 1. Connectez-vous avec votre compte Foyer à deux.
 2. Ouvrez les réglages (⚙︎) et collez votre clé TMDB (gratuite : compte sur [themoviedb.org](https://www.themoviedb.org/signup), puis « Clé d'API » dans [Paramètres → API](https://www.themoviedb.org/settings/api)). Il suffit de le faire une fois : l'autre téléphone la reçoit automatiquement. Elle est rangée dans Firestore, pas dans ce dépôt public.
 
+## Nos plateformes
+
+Dans les réglages, cochez les abonnements que vous avez (Netflix, Prime Video, Disney+…). Le choix est partagé entre vos deux téléphones. Les raccourcis de filtre n'affichent plus que vos plateformes, et un badge signale les titres que vous ne pouvez pas regarder :
+
+- **Pas chez vous** : disponible sur d'autres plateformes que les vôtres ;
+- **À louer** : seulement en location ou à l'achat ;
+- **Introuvable** : disponible nulle part en streaming pour l'instant.
+
 ## Installer sur le téléphone
 
 - **iPhone (Safari)** : bouton **Partager**, puis **Sur l'écran d'accueil**.
