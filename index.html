@@ -3,291 +3,746 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#1b1424">
+<meta name="theme-color" content="#0c0a17">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CinéA2">
 <title>CinéA2</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='20' cy='20' r='11' fill='%23fff4dc' stroke='%231d1530' stroke-width='3'/%3E%3Ccircle cx='44' cy='20' r='11' fill='%23fff4dc' stroke='%231d1530' stroke-width='3'/%3E%3Ccircle cx='32' cy='14' r='11' fill='%23fff4dc' stroke='%231d1530' stroke-width='3'/%3E%3Cpath d='M10 26h44l-6 34H16z' fill='%23ff3d57' stroke='%231d1530' stroke-width='3' stroke-linejoin='round'/%3E%3Cpath d='M26 26l2 34M38 26l-2 34' stroke='%23fff4ea' stroke-width='5'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Inter:wght@400;500;600&display=swap">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://image.tmdb.org">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap">
 <style>
-/* Salle de cinéma : fond velours prune, accent ampoule de marquise, une colonne de cartes affiches */
+/* Séance du soir : nuit d'encre balayée de projecteurs colorés, popcorn rayé rouge et blanc,
+   affiches au premier plan, une mascotte qui réagit à chaque geste. */
 :root {
-  --bg: #1b1424;
-  --surface: #261c33;
-  --surface-2: #322543;
-  --line: #44355a;
-  --fg: #f4ecf7;
-  --muted: #b3a3c2;
-  --accent: #ffb547;
-  --accent-ink: #2a1a05;
-  --love: #ff6b8b;
-  --ok: #6fd6a0;
-  --danger: #ff7b72;
-  --display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
-  --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --r: 14px;
+  --ink: #0c0a17;
+  --ink-2: #15112a;
+  --ink-3: #1f1939;
+  --ink-4: #2b2350;
+  --line: rgb(255 255 255 / .08);
+  --line-2: rgb(255 255 255 / .16);
+  --text: #fbf7ff;
+  --muted: #aba4c7;
+  --faint: #757095;
+  --cherry: #ff3d57;
+  --butter: #ffc83a;
+  --mint: #34e0b0;
+  --sky: #52b8ff;
+  --bubble: #ff7ac6;
+  --cream: #fff4dc;
+  --outline: #1d1530;
+  --pa: var(--butter);
+  --pb: var(--bubble);
+  --display: "Unbounded", "Arial Rounded MT Bold", "Avenir Next", system-ui, sans-serif;
+  --body: "DM Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --r-s: 10px;
+  --r: 18px;
+  --r-l: 28px;
+  --out: cubic-bezier(.2, .9, .25, 1);
+  --spring: cubic-bezier(.34, 1.56, .64, 1);
+  --gutter-l: max(16px, env(safe-area-inset-left, 0px));
+  --gutter-r: max(16px, env(safe-area-inset-right, 0px));
   color-scheme: dark;
 }
+
 * { box-sizing: border-box; }
 html, body { margin: 0; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+html.lock { overflow: hidden; }
 body {
-  background: var(--bg);
-  color: var(--fg);
+  background: var(--ink);
+  color: var(--text);
   font: 15px/1.5 var(--body);
   min-height: 100vh;
-  padding-top: env(safe-area-inset-top, 0px);
   padding-bottom: env(safe-area-inset-bottom, 0px);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
 }
-button, input, select { font: inherit; color: inherit; }
-button { cursor: pointer; }
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+:focus-visible { outline: 2.5px solid var(--butter); outline-offset: 3px; border-radius: 8px; }
 [hidden] { display: none !important; }
 img { max-width: 100%; display: block; }
+.ico { width: 1.15em; height: 1.15em; flex: none; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.ico.fill { fill: currentColor; stroke: none; }
 
-.wrap {
-  max-width: 980px; margin: 0 auto;
-  padding-left: max(16px, env(safe-area-inset-left, 0px));
-  padding-right: max(16px, env(safe-area-inset-right, 0px));
+/* ---------- Ambiance : projecteurs + grain ---------- */
+.stage { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; background: var(--ink); }
+.stage .spot { position: absolute; border-radius: 50%; filter: blur(90px); opacity: .42; will-change: transform; }
+.stage .s1 { width: 60vmax; height: 60vmax; left: -18vmax; top: -22vmax; background: radial-gradient(circle, var(--cherry), transparent 65%); animation: drift1 26s ease-in-out infinite alternate; }
+.stage .s2 { width: 55vmax; height: 55vmax; right: -20vmax; top: 8vmax; background: radial-gradient(circle, #5a3dff, transparent 65%); opacity: .38; animation: drift2 32s ease-in-out infinite alternate; }
+.stage .s3 { width: 48vmax; height: 48vmax; left: 20vmax; bottom: -26vmax; background: radial-gradient(circle, var(--mint), transparent 62%); opacity: .2; animation: drift3 38s ease-in-out infinite alternate; }
+.stage .s4 { width: 36vmax; height: 36vmax; right: 6vmax; bottom: 10vmax; background: radial-gradient(circle, var(--butter), transparent 62%); opacity: .14; animation: drift1 30s ease-in-out infinite alternate-reverse; }
+@keyframes drift1 { to { transform: translate(14vmax, 10vmax) scale(1.15); } }
+@keyframes drift2 { to { transform: translate(-16vmax, 12vmax) scale(.9); } }
+@keyframes drift3 { to { transform: translate(-12vmax, -8vmax) scale(1.2); } }
+.stage::after {
+  content: ""; position: absolute; inset: -50%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: .07; mix-blend-mode: overlay;
 }
 
-/* En-tête */
-header.top { padding-block: 20px 8px; }
-.brand { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.brand h1 {
-  font-family: var(--display); font-weight: 800; font-size: clamp(26px, 6vw, 38px);
-  letter-spacing: -0.02em; margin: 0; line-height: 1;
+.wrap { max-width: 1180px; margin: 0 auto; padding-left: var(--gutter-l); padding-right: var(--gutter-r); }
+
+/* ---------- Barre du haut ---------- */
+.nav {
+  position: sticky; top: 0; z-index: 30;
+  padding-top: env(safe-area-inset-top, 0px);
+  background: rgb(12 10 23 / .62);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4); backdrop-filter: blur(18px) saturate(1.4);
+  border-bottom: 1px solid transparent;
+  transition: border-color .3s, background .3s;
 }
-.brand h1 span { color: var(--accent); }
-.bulbs { display: flex; gap: 6px; margin-top: 10px; }
-.bulbs i { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); opacity: .35; animation: blink 2.4s infinite; }
-.bulbs i:nth-child(odd) { animation-delay: 1.2s; }
-@keyframes blink { 50% { opacity: 1; box-shadow: 0 0 8px var(--accent); } }
-@media (prefers-reduced-motion: reduce) { .bulbs i { animation: none; opacity: .7; } }
+.nav.scrolled { border-bottom-color: var(--line); background: rgb(12 10 23 / .8); }
+.nav .wrap { display: flex; align-items: center; gap: 12px; padding-block: 10px; }
+.logo { display: flex; align-items: center; gap: 8px; text-decoration: none; color: inherit; margin-right: auto; }
+.logo .m { width: 34px; height: 40px; }
+.logo b { font-family: var(--display); font-weight: 800; font-size: 21px; letter-spacing: -.02em; line-height: 1; }
+.logo b span { background: linear-gradient(100deg, var(--butter), var(--cherry) 55%, var(--bubble)); -webkit-background-clip: text; background-clip: text; color: transparent; }
 
-.icon-btn {
-  background: var(--surface); border: 1px solid var(--line); border-radius: 999px;
-  width: 42px; height: 42px; display: grid; place-items: center; flex: none;
+.who { display: inline-flex; gap: 4px; padding: 4px; border-radius: 999px; background: rgb(255 255 255 / .05); border: 1px solid var(--line); }
+.who button { display: inline-flex; align-items: center; gap: 8px; border: 0; background: transparent; border-radius: 999px; padding: 3px 12px 3px 3px; color: var(--muted); font-weight: 600; font-size: 13.5px; transition: background .3s, color .3s; }
+.who button[aria-pressed="true"] { background: rgb(255 255 255 / .1); color: var(--text); }
+.who .nm { max-width: 9ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.av {
+  width: 28px; height: 28px; border-radius: 50%; display: inline-grid; place-items: center; flex: none;
+  font: 700 12px/1 var(--display); color: var(--outline);
+  background: var(--c, var(--pa)); box-shadow: 0 0 0 2px var(--ink);
 }
-.icon-btn svg { width: 20px; height: 20px; }
+.av.a { --c: var(--pa); } .av.b { --c: var(--pb); }
+.who button[aria-pressed="false"] .av { filter: saturate(.3) brightness(.7); }
 
-.who { display: flex; align-items: center; gap: 8px; margin-top: 16px; flex-wrap: wrap; color: var(--muted); font-size: 13px; }
-.seg { display: inline-flex; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 3px; }
-.seg button { border: 0; background: transparent; padding: 6px 14px; border-radius: 999px; color: var(--muted); font-weight: 600; font-size: 13px; }
-.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.gear {
+  position: relative; width: 42px; height: 42px; border-radius: 50%; flex: none;
+  display: grid; place-items: center; border: 1px solid var(--line); background: rgb(255 255 255 / .05); color: var(--text);
+  transition: transform .5s var(--spring), background .2s;
+}
+.gear:hover { transform: rotate(60deg); background: rgb(255 255 255 / .1); }
+.gear .ico { width: 20px; height: 20px; }
+.gear::after { content: ""; position: absolute; right: 2px; top: 2px; width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--ink); background: var(--faint); opacity: 0; transition: opacity .3s; }
+.gear.sync-on::after { background: var(--mint); opacity: 1; }
+.gear.sync-err::after { background: var(--cherry); opacity: 1; }
 
-/* Recherche */
-.search { position: relative; margin-top: 16px; }
+/* ---------- Hero ---------- */
+.hero { position: relative; padding-block: 34px 18px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 32px; align-items: end; }
+.eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--butter); }
+.eyebrow::before { content: ""; width: 22px; height: 2px; border-radius: 2px; background: currentColor; }
+.hero h1 {
+  font-family: var(--display); font-weight: 800; letter-spacing: -.035em; line-height: .98;
+  font-size: clamp(36px, 7.4vw, 76px); margin: 14px 0 0; text-wrap: balance;
+}
+.hero h1 .grad {
+  background: linear-gradient(95deg, var(--butter) 0%, var(--cherry) 45%, var(--bubble) 75%, var(--butter) 100%);
+  background-size: 220% 100%; -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: sheen 7s linear infinite;
+}
+@keyframes sheen { to { background-position: -220% 0; } }
+.hero-mascot { position: relative; width: clamp(120px, 20vw, 210px); justify-self: end; margin-bottom: -6px; }
+.hero-mascot .m { width: 100%; height: auto; overflow: visible; }
+.hero-mascot::before {
+  content: ""; position: absolute; left: 50%; bottom: 0; width: 140%; height: 70%; transform: translateX(-50%);
+  background: radial-gradient(ellipse at 50% 100%, rgb(255 200 58 / .28), transparent 65%); filter: blur(6px); z-index: -1;
+}
+.spark { position: absolute; width: 16px; height: 16px; color: var(--butter); animation: twinkle 2.6s ease-in-out infinite; }
+.spark svg { width: 100%; height: 100%; fill: currentColor; }
+.spark.k1 { left: -6%; top: 18%; }
+.spark.k2 { right: -2%; top: 4%; color: var(--mint); width: 12px; height: 12px; animation-delay: .9s; }
+.spark.k3 { right: -10%; top: 52%; color: var(--bubble); width: 14px; height: 14px; animation-delay: 1.6s; }
+@keyframes twinkle { 0%, 100% { transform: scale(.4) rotate(0); opacity: .2; } 50% { transform: scale(1) rotate(90deg); opacity: 1; } }
+
+.stats { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.stat {
+  display: inline-flex; align-items: center; gap: 8px; padding: 7px 13px 7px 10px; border-radius: 999px;
+  background: rgb(255 255 255 / .05); border: 1px solid var(--line); font-size: 13.5px; color: var(--muted);
+}
+.stat span { white-space: nowrap; }
+.stat b { color: var(--text); font-weight: 700; font-variant-numeric: tabular-nums; }
+.stat i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); box-shadow: 0 0 12px var(--c); }
+
+/* ---------- Recherche ---------- */
+.search { position: relative; grid-column: 1 / -1; margin-top: 18px; z-index: 20; }
+.search-box {
+  position: relative; display: flex; align-items: center; gap: 12px;
+  padding: 6px 6px 6px 20px; border-radius: 999px;
+  background: rgb(21 17 42 / .85); border: 1px solid var(--line-2);
+  box-shadow: 0 20px 50px -20px rgb(0 0 0 / .7), inset 0 1px 0 rgb(255 255 255 / .06);
+  transition: border-color .3s, box-shadow .3s;
+}
+.search-box::before {
+  content: ""; position: absolute; inset: -2px; border-radius: inherit; padding: 2px; z-index: -1;
+  background: conic-gradient(from var(--ang, 0deg), var(--butter), var(--cherry), var(--bubble), var(--sky), var(--mint), var(--butter));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
+  opacity: 0; transition: opacity .35s;
+}
+.search-box:focus-within::before { opacity: 1; animation: spin 4s linear infinite; }
+.search-box:focus-within { border-color: transparent; box-shadow: 0 24px 70px -18px rgb(255 61 87 / .45), inset 0 1px 0 rgb(255 255 255 / .06); }
+@property --ang { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+@keyframes spin { to { --ang: 360deg; } }
+.search-box > .ico { width: 22px; height: 22px; color: var(--muted); }
 .search input {
-  width: 100%; padding: 15px 16px 15px 46px; border-radius: var(--r);
-  background: var(--surface); border: 1px solid var(--line); font-size: 16px;
+  flex: 1; min-width: 0; border: 0; background: transparent; outline: none;
+  font-size: 17px; padding-block: 12px; font-weight: 500;
 }
-.search input::placeholder { color: var(--muted); }
-.search > svg { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; color: var(--muted); pointer-events: none; }
+.search input::placeholder { color: var(--faint); }
+.search input::-webkit-search-cancel-button { display: none; }
+.kbd { font: 600 11px/1 var(--body); color: var(--faint); border: 1px solid var(--line-2); border-radius: 6px; padding: 5px 7px; }
+.clear-q { border: 0; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: rgb(255 255 255 / .07); color: var(--muted); }
+@media (hover: none) { .kbd { display: none; } }
+
 .suggest {
-  position: absolute; z-index: 20; left: 0; right: 0; top: calc(100% + 6px);
-  background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--r);
-  box-shadow: 0 18px 40px rgb(0 0 0 / .45); overflow: hidden; max-height: 70vh; overflow-y: auto;
+  position: absolute; left: 0; right: 0; top: calc(100% + 10px);
+  background: rgb(26 21 50 / .96); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
+  border: 1px solid var(--line-2); border-radius: 22px; padding: 6px;
+  box-shadow: 0 30px 80px -10px rgb(0 0 0 / .75);
+  max-height: min(70vh, 560px); overflow-y: auto; overscroll-behavior: contain;
+  transform-origin: top center; animation: drop .28s var(--out);
 }
-.suggest button {
-  display: grid; grid-template-columns: 40px 1fr auto; gap: 12px; align-items: center;
-  width: 100%; text-align: left; padding: 8px 12px; border: 0; background: transparent;
-  border-bottom: 1px solid var(--line);
+@keyframes drop { from { opacity: 0; transform: translateY(-8px) scale(.98); } }
+.sg {
+  display: grid; grid-template-columns: 46px minmax(0, 1fr) auto; gap: 14px; align-items: center;
+  width: 100%; text-align: left; padding: 8px 10px; border: 0; background: transparent; border-radius: 14px;
+  transition: background .15s;
+  animation: rise .35s var(--out) both; animation-delay: calc(var(--i) * 35ms);
 }
-.suggest button:last-child { border-bottom: 0; }
-.suggest button:hover, .suggest button.active { background: var(--surface); }
-.suggest .thumb { width: 40px; height: 60px; border-radius: 6px; background: var(--line); object-fit: cover; }
-.suggest .t { font-weight: 600; min-width: 0; }
-.suggest .t small { display: block; color: var(--muted); font-weight: 400; font-size: 12px; }
-.suggest .added { font-size: 12px; color: var(--ok); }
-.suggest .msg { padding: 14px 16px; color: var(--muted); }
+.sg:hover, .sg.active { background: rgb(255 255 255 / .07); }
+.sg .th { width: 46px; aspect-ratio: 2 / 3; border-radius: 8px; object-fit: cover; background: var(--ink-4); box-shadow: 0 6px 16px -6px rgb(0 0 0 / .8); }
+.sg .t { min-width: 0; font-weight: 700; font-size: 15px; line-height: 1.25; }
+.sg .t small { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; margin-top: 4px; color: var(--muted); font-weight: 500; font-size: 12.5px; }
+.sg .go { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--butter); color: var(--outline); transform: scale(.85); opacity: .0; transition: transform .25s var(--spring), opacity .2s; }
+.sg:hover .go, .sg.active .go { opacity: 1; transform: scale(1); }
+.sg .done { font-size: 12px; font-weight: 700; color: var(--mint); display: inline-flex; gap: 4px; align-items: center; }
+@media (hover: none) { .sg .go { opacity: 1; transform: scale(.9); } }
+.sg-msg { padding: 18px; color: var(--muted); display: flex; gap: 14px; align-items: center; }
+.sg-msg .m { width: 46px; height: 54px; flex: none; }
+.sk { display: grid; grid-template-columns: 46px 1fr; gap: 14px; align-items: center; padding: 8px 10px; }
+.sk i { display: block; border-radius: 8px; background: linear-gradient(90deg, var(--ink-3) 0%, var(--ink-4) 50%, var(--ink-3) 100%); background-size: 200% 100%; animation: shimmer 1.2s linear infinite; }
+.sk i:first-child { aspect-ratio: 2 / 3; }
+.sk span { display: grid; gap: 8px; }
+.sk span i:first-child { aspect-ratio: auto; height: 13px; width: 70%; }
+.sk span i:last-child { height: 10px; width: 40%; }
+@keyframes shimmer { to { background-position: -200% 0; } }
 
-/* Barre de filtres */
-.bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin-top: 20px; }
-.chips { display: flex; gap: 6px; flex-wrap: wrap; }
-.chip { border: 1px solid var(--line); background: transparent; color: var(--muted); padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; }
-.chip[aria-pressed="true"] { border-color: var(--fg); color: var(--fg); background: var(--surface); }
-.chip .n { font-variant-numeric: tabular-nums; opacity: .7; margin-left: 4px; }
+.pill {
+  display: inline-flex; align-items: center; gap: 5px; font-size: 10.5px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 999px; line-height: 1.3;
+  background: var(--pc, rgb(255 255 255 / .1)); color: var(--pt, var(--text));
+}
+.pill.movie { --pc: rgb(82 184 255 / .18); --pt: #9dd6ff; }
+.pill.tv { --pc: rgb(52 224 176 / .16); --pt: #7cf0cd; }
+
+/* ---------- Coups de cœur communs ---------- */
+.matches { margin-top: 26px; }
+.sec-h { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.sec-h h2 { font-family: var(--display); font-weight: 700; font-size: 19px; margin: 0; letter-spacing: -.01em; display: flex; align-items: center; gap: 10px; }
+.sec-h h2 .ico { color: var(--cherry); }
+.sec-h p { margin: 0; color: var(--muted); font-size: 13px; }
+.rail {
+  display: grid; grid-auto-flow: column; grid-auto-columns: clamp(132px, 30vw, 172px); gap: 16px;
+  overflow-x: auto; scroll-snap-type: x mandatory; padding: 6px 2px 18px; margin-inline: -2px;
+  scrollbar-width: none;
+}
+.rail::-webkit-scrollbar { display: none; }
+.mcard { scroll-snap-align: start; border: 0; padding: 0; background: none; text-align: left; position: relative; }
+.mcard .pf {
+  position: relative; border-radius: 16px; overflow: hidden; aspect-ratio: 2 / 3;
+  box-shadow: 0 0 0 2px var(--cherry), 0 16px 40px -12px rgb(255 61 87 / .55);
+  transition: transform .4s var(--spring), box-shadow .3s;
+}
+.mcard:hover .pf { transform: translateY(-4px) rotate(-1deg); box-shadow: 0 0 0 2px var(--bubble), 0 24px 50px -12px rgb(255 122 198 / .6); }
+.mcard img { width: 100%; height: 100%; object-fit: cover; }
+.mcard .heart { position: absolute; right: 8px; top: 8px; width: 30px; height: 30px; border-radius: 50%; background: var(--cherry); display: grid; place-items: center; color: #fff; box-shadow: 0 4px 14px rgb(255 61 87 / .6); animation: beat 1.8s ease-in-out infinite; }
+.mcard .heart .ico { width: 15px; height: 15px; }
+@keyframes beat { 0%, 60%, 100% { transform: scale(1); } 15% { transform: scale(1.18); } 30% { transform: scale(.96); } 45% { transform: scale(1.08); } }
+.mcard b { display: block; margin-top: 10px; font-weight: 700; font-size: 14px; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.mcard small { color: var(--muted); font-size: 12px; }
+
+/* ---------- Barre d'outils ---------- */
+.tools { margin-top: 26px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
+.tabs { position: relative; display: inline-flex; padding: 4px; border-radius: 999px; background: rgb(255 255 255 / .05); border: 1px solid var(--line); }
+.tabs button { position: relative; z-index: 1; border: 0; background: transparent; padding: 9px 16px; border-radius: 999px; font-weight: 700; font-size: 14px; color: var(--muted); display: inline-flex; gap: 7px; align-items: center; transition: color .3s; white-space: nowrap; }
+.tabs button[aria-selected="true"] { color: var(--outline); }
+.tabs .n { font-variant-numeric: tabular-nums; font-size: 12px; min-width: 20px; padding: 1px 6px; border-radius: 999px; background: rgb(255 255 255 / .1); text-align: center; transition: background .3s; }
+.tabs button[aria-selected="true"] .n { background: rgb(29 21 48 / .16); }
+.tab-ind { position: absolute; top: 4px; bottom: 4px; left: 4px; width: 0; border-radius: 999px; background: var(--butter); transition: left .5s var(--spring), width .5s var(--spring), background .4s; box-shadow: 0 6px 20px -4px var(--glow, rgb(255 200 58 / .55)); }
+.tabs[data-on="match"] .tab-ind { background: linear-gradient(100deg, var(--cherry), var(--bubble)); --glow: rgb(255 61 87 / .55); }
+.tabs[data-on="seen"] .tab-ind { background: var(--mint); --glow: rgb(52 224 176 / .5); }
+.tabs[data-on="match"] button[aria-selected="true"] { color: #fff; }
+
+.seg { display: inline-flex; padding: 3px; border-radius: 999px; border: 1px solid var(--line); background: rgb(255 255 255 / .03); }
+.seg button { border: 0; background: transparent; padding: 6px 13px; border-radius: 999px; font-weight: 600; font-size: 13px; color: var(--muted); transition: background .25s, color .25s; }
+.seg button[aria-pressed="true"] { background: var(--text); color: var(--outline); }
+
+.platforms { display: flex; gap: 8px; overflow-x: auto; padding: 14px 2px 4px; margin-inline: -2px; scrollbar-width: none; }
+.platforms::-webkit-scrollbar { display: none; }
+.pchip {
+  flex: none; display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px 4px 4px; border-radius: 999px;
+  border: 1px solid var(--line); background: rgb(255 255 255 / .04); font-size: 13px; font-weight: 600; color: var(--muted);
+  transition: border-color .2s, background .2s, color .2s, transform .3s var(--spring);
+}
+.pchip:hover { color: var(--text); transform: translateY(-1px); }
+.pchip img, .pchip .all { width: 26px; height: 26px; border-radius: 8px; object-fit: cover; }
+.pchip .all { display: grid; place-items: center; background: linear-gradient(135deg, var(--butter), var(--cherry)); color: var(--outline); }
+.pchip .all .ico { width: 14px; height: 14px; }
+.pchip em { font-style: normal; font-size: 11.5px; color: var(--faint); font-variant-numeric: tabular-nums; }
+.pchip[aria-pressed="true"] { border-color: var(--butter); background: rgb(255 200 58 / .12); color: var(--text); }
+
+/* ---------- Grille d'affiches ---------- */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 30px 20px; margin-block: 22px 70px; }
+@media (max-width: 520px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 14px; } }
+.card { position: relative; min-width: 0; perspective: 900px; }
+.card.enter { animation: rise .6s var(--out) both; animation-delay: calc(min(var(--i), 14) * 45ms); }
+@keyframes rise { from { opacity: 0; transform: translateY(18px) scale(.97); } }
+.card.leave { animation: leave .38s var(--out) forwards; }
+@keyframes leave { to { opacity: 0; transform: scale(.85) rotate(-3deg); } }
+.poster {
+  position: relative; display: block; width: 100%; padding: 0; border: 0; background: var(--ink-3);
+  border-radius: 16px; aspect-ratio: 2 / 3; text-align: left;
+  transform: rotateX(var(--ry, 0deg)) rotateY(var(--rx, 0deg)); transform-style: preserve-3d;
+  transition: transform .5s var(--out), box-shadow .4s;
+  box-shadow: 0 18px 40px -18px rgb(0 0 0 / .9), 0 0 0 1px rgb(255 255 255 / .06);
+}
+.card > .glow { position: absolute; left: 8%; top: 6%; width: 84%; aspect-ratio: 2 / 3; object-fit: cover; filter: blur(28px) saturate(1.8); opacity: 0; transition: opacity .5s; pointer-events: none; border-radius: 30px; }
+.poster .frame { position: absolute; inset: 0; border-radius: inherit; overflow: hidden; }
+.poster .img { width: 100%; height: 100%; object-fit: cover; transition: transform .7s var(--out), filter .4s; }
+.poster .frame::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgb(12 10 23 / .35) 0%, transparent 26%, transparent 60%, rgb(12 10 23 / .85) 100%);
+}
+.poster .shine { position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(115deg, transparent 35%, rgb(255 255 255 / .22) 48%, transparent 60%); background-size: 260% 100%; background-position: 120% 0; mix-blend-mode: overlay; transition: background-position .9s var(--out); z-index: 2; pointer-events: none; }
+@media (hover: hover) {
+  .card:hover .poster { box-shadow: 0 30px 60px -20px rgb(0 0 0 / .95), 0 0 0 1px rgb(255 255 255 / .14); }
+  .card:hover > .glow { opacity: .75; }
+  .card:hover .poster .img { transform: scale(1.05); }
+  .card:hover .poster .shine { background-position: -40% 0; }
+}
+.poster .tl { position: absolute; left: 10px; top: 10px; z-index: 3; }
+.poster .tl .pill { -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); background: rgb(12 10 23 / .55); }
+.poster .tl .pill.movie { color: #9dd6ff; } .poster .tl .pill.tv { color: #7cf0cd; }
+.poster .prov { position: absolute; left: 10px; bottom: 10px; z-index: 3; display: flex; }
+.poster .prov img { width: 26px; height: 26px; border-radius: 8px; box-shadow: 0 0 0 2px rgb(12 10 23 / .9); }
+.poster .prov img + img { margin-left: -6px; }
+.poster .prov .more { width: 26px; height: 26px; margin-left: -6px; border-radius: 8px; display: grid; place-items: center; font-size: 11px; font-weight: 700; background: var(--ink-4); box-shadow: 0 0 0 2px rgb(12 10 23 / .9); }
+.poster .noprov { position: absolute; left: 10px; bottom: 10px; z-index: 3; font-size: 11px; font-weight: 600; color: rgb(255 255 255 / .75); }
+.ribbon {
+  position: absolute; right: 10px; top: 10px; z-index: 3; display: inline-flex; align-items: center; gap: 4px;
+  font: 800 10px/1 var(--display); letter-spacing: .08em; color: #fff; padding: 6px 8px; border-radius: 999px;
+  background: linear-gradient(100deg, var(--cherry), var(--bubble)); box-shadow: 0 6px 18px -4px rgb(255 61 87 / .8);
+}
+.ribbon .ico { width: 11px; height: 11px; animation: beat 1.8s ease-in-out infinite; }
+.stamp {
+  position: absolute; right: 8px; top: 34%; z-index: 3; transform: rotate(-12deg);
+  font: 800 15px/1 var(--display); letter-spacing: .12em; color: var(--mint); padding: 7px 10px; border: 2.5px solid var(--mint); border-radius: 10px;
+  background: rgb(12 10 23 / .55); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+  animation: stampIn .45s var(--spring) both;
+}
+@keyframes stampIn { from { transform: rotate(-12deg) scale(2.2); opacity: 0; } }
+.card.seen .poster .img { filter: grayscale(.85) brightness(.7); }
+.ph {
+  width: 100%; height: 100%; display: grid; place-items: center; align-content: center; gap: 10px; padding: 14px; text-align: center;
+  background: radial-gradient(circle at 30% 20%, var(--ink-4), var(--ink-2)); font: 700 14px/1.25 var(--display); color: var(--muted);
+}
+.ph .m { width: 54px; height: 62px; opacity: .9; }
+
+.info { padding: 12px 2px 0; min-width: 0; }
+.info h3 { margin: 0; font-weight: 700; font-size: 15.5px; line-height: 1.25; letter-spacing: -.005em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.info .sub { color: var(--muted); font-size: 12.5px; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.info .row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 10px; }
+.wants { display: inline-flex; align-items: center; }
+.wants .av { width: 22px; height: 22px; font-size: 10px; box-shadow: 0 0 0 2px var(--ink); }
+.wants .av + .av { margin-left: -5px; }
+.wants .av.off { background: var(--ink-4); color: var(--faint); }
+.wants small { margin-left: 8px; font-size: 11.5px; color: var(--muted); }
+.quick { display: inline-flex; gap: 6px; }
+.qb {
+  width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; border: 1px solid var(--line-2);
+  background: rgb(255 255 255 / .04); color: var(--muted); transition: transform .35s var(--spring), background .2s, color .2s, border-color .2s;
+}
+.qb .ico { width: 16px; height: 16px; }
+.qb:hover { color: var(--text); transform: scale(1.08); }
+.qb:active { transform: scale(.88); }
+.qb.love[aria-pressed="true"] { background: var(--cherry); border-color: var(--cherry); color: #fff; box-shadow: 0 6px 16px -4px rgb(255 61 87 / .7); }
+.qb.seen[aria-pressed="true"] { background: var(--mint); border-color: var(--mint); color: var(--outline); }
+.qb.pop { animation: pop .5s var(--spring); }
+@keyframes pop { 30% { transform: scale(1.35); } }
+
+/* ---------- États vides ---------- */
+.empty { display: grid; justify-items: center; text-align: center; gap: 10px; padding: 46px 20px 60px; margin-block: 22px 60px; border-radius: var(--r-l); border: 1px dashed var(--line-2); background: rgb(255 255 255 / .02); }
+.empty .m { width: 120px; height: 140px; }
+.empty h2 { font-family: var(--display); font-weight: 700; font-size: 22px; margin: 6px 0 0; letter-spacing: -.01em; text-wrap: balance; }
+.empty p { margin: 0; color: var(--muted); max-width: 46ch; }
+
+/* ---------- Boutons ---------- */
 .btn {
-  border: 0; background: var(--accent); color: var(--accent-ink); font-weight: 700;
-  padding: 9px 16px; border-radius: 999px; font-size: 14px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-radius: 999px;
+  padding: 12px 20px; font-weight: 700; font-size: 14.5px; white-space: nowrap; text-decoration: none;
+  background: var(--butter); color: var(--outline);
+  box-shadow: 0 10px 24px -10px rgb(255 200 58 / .8), inset 0 -2px 0 rgb(0 0 0 / .12);
+  transition: transform .3s var(--spring), box-shadow .3s, background .2s;
 }
-.btn.ghost { background: transparent; color: var(--fg); border: 1px solid var(--line); font-weight: 600; }
+.btn:hover { transform: translateY(-2px); }
+.btn:active { transform: scale(.96); }
+.btn.hot { background: linear-gradient(100deg, var(--cherry), var(--bubble)); color: #fff; box-shadow: 0 10px 26px -10px rgb(255 61 87 / .9); }
+.btn.mint { background: var(--mint); box-shadow: 0 10px 24px -10px rgb(52 224 176 / .8); }
+.btn.ghost { background: rgb(255 255 255 / .06); color: var(--text); box-shadow: inset 0 0 0 1px var(--line-2); }
+.btn.danger { background: rgb(255 61 87 / .14); color: #ff8a9a; box-shadow: inset 0 0 0 1px rgb(255 61 87 / .4); }
+.btn.icon { padding: 12px; }
+.btn .ico { width: 18px; height: 18px; }
+.btn[disabled] { opacity: .45; pointer-events: none; }
 
-/* Liste */
-.list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 440px), 1fr)); gap: 14px; margin-block: 16px 40px; }
-.card {
-  display: grid; grid-template-columns: 110px 1fr; gap: 14px;
-  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px;
-  position: relative;
+.roll {
+  position: relative; overflow: hidden;
+  background: linear-gradient(100deg, var(--butter), #ff9f3a 50%, var(--cherry)); color: var(--outline);
 }
-.card.seen { opacity: .62; }
-.card.match { border-color: var(--love); }
-.poster { width: 110px; aspect-ratio: 2/3; border-radius: 10px; object-fit: cover; background: var(--surface-2); }
-.poster.ph { display: grid; place-items: center; color: var(--muted); font-size: 12px; text-align: center; padding: 8px; }
-.body { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
-.body h3 { font-family: var(--display); font-weight: 700; font-size: 19px; line-height: 1.15; margin: 0; text-wrap: balance; }
-.meta { color: var(--muted); font-size: 12.5px; display: flex; flex-wrap: wrap; gap: 4px 10px; }
-.tag { font-size: 10.5px; text-transform: uppercase; letter-spacing: .08em; font-weight: 700; padding: 2px 7px; border-radius: 5px; background: var(--surface-2); color: var(--accent); }
-.overview { font-size: 13px; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin: 0; cursor: pointer; }
-.overview.open { -webkit-line-clamp: unset; }
-.where { display: flex; flex-direction: column; gap: 6px; margin-top: 2px; }
-.where .row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.where .lbl { font-size: 10.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); width: 72px; flex: none; }
-.logo { width: 30px; height: 30px; border-radius: 8px; object-fit: cover; background: var(--surface-2); }
-.none { font-size: 12.5px; color: var(--muted); font-style: italic; }
-.actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: auto; padding-top: 6px; align-items: center; }
-.act { border: 1px solid var(--line); background: transparent; border-radius: 999px; padding: 5px 10px; font-size: 12.5px; font-weight: 600; color: var(--fg); display: inline-flex; gap: 5px; align-items: center; }
-.act.on-love { border-color: var(--love); color: var(--love); }
-.act.on-seen { border-color: var(--ok); color: var(--ok); }
-.act.danger { color: var(--danger); border-color: var(--danger); }
-.act a, a.act { color: inherit; text-decoration: none; }
-.by { font-size: 11.5px; color: var(--muted); }
-.matchflag { position: absolute; top: -9px; right: 12px; background: var(--love); color: #2b0711; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 999px; letter-spacing: .04em; }
+.roll .ico { transition: transform .6s var(--spring); }
+.roll:hover .ico { transform: rotate(200deg); }
 
-.empty { text-align: center; padding: 48px 16px; color: var(--muted); border: 1px dashed var(--line); border-radius: var(--r); margin-block: 16px 40px; }
-.empty h2 { font-family: var(--display); color: var(--fg); margin: 0 0 6px; font-size: 22px; }
-
-/* Panneaux */
-dialog {
-  border: 1px solid var(--line); border-radius: 18px; background: var(--surface); color: var(--fg);
-  width: min(560px, calc(100vw - 24px)); padding: 0; max-height: calc(100vh - 24px);
+/* ---------- Feuilles (fiches, réglages, tirage) ---------- */
+dialog.sheet {
+  border: 0; padding: 0; background: transparent; color: var(--text);
+  width: min(680px, 100vw); max-width: 100vw; max-height: 100dvh; margin: auto auto 0; overflow: visible;
 }
-dialog::backdrop { background: rgb(10 6 14 / .7); }
-.dlg { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
-.dlg h2 { font-family: var(--display); margin: 0; font-size: 22px; }
-.dlg h4 { margin: 6px 0 0; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--accent); }
-.field { display: flex; flex-direction: column; gap: 5px; }
+@media (min-width: 720px) { dialog.sheet { margin: auto; max-height: calc(100dvh - 48px); } }
+dialog.sheet::backdrop { background: rgb(6 4 14 / .7); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); animation: fade .3s ease both; }
+dialog.sheet.closing::backdrop { animation: fade .25s ease reverse both; }
+@keyframes fade { from { opacity: 0; } }
+.panel {
+  position: relative; background: var(--ink-2); border: 1px solid var(--line-2); border-bottom: 0;
+  border-radius: 28px 28px 0 0; overflow: hidden auto; max-height: calc(100dvh - 24px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-shadow: 0 -30px 80px -20px rgb(0 0 0 / .8);
+  animation: sheetUp .5s var(--out) both;
+  overscroll-behavior: contain;
+}
+@media (min-width: 720px) { .panel { border-radius: 28px; border-bottom: 1px solid var(--line-2); max-height: calc(100dvh - 48px); animation-name: sheetPop; } }
+dialog.closing .panel { animation: sheetDown .26s ease-in both; }
+@media (min-width: 720px) { dialog.closing .panel { animation: sheetOut .22s ease-in both; } }
+@keyframes sheetUp { from { transform: translateY(100%); } }
+@keyframes sheetDown { to { transform: translateY(100%); } }
+@keyframes sheetPop { from { opacity: 0; transform: translateY(20px) scale(.96); } }
+@keyframes sheetOut { to { opacity: 0; transform: translateY(12px) scale(.97); } }
+.grab { position: sticky; top: 0; z-index: 5; height: 0; display: flex; justify-content: center; }
+.grab::before { content: ""; width: 44px; height: 5px; border-radius: 5px; background: rgb(255 255 255 / .35); margin-top: 8px; }
+@media (min-width: 720px) { .grab { display: none; } }
+.x {
+  position: absolute; right: 14px; top: 14px; z-index: 6; width: 38px; height: 38px; border-radius: 50%; border: 0;
+  display: grid; place-items: center; background: rgb(12 10 23 / .6); color: var(--text);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); transition: transform .3s var(--spring), background .2s;
+}
+.x:hover { transform: rotate(90deg); background: rgb(12 10 23 / .85); }
+
+/* Fiche */
+.bd { position: relative; aspect-ratio: 16 / 7.5; background: radial-gradient(circle at 30% 30%, var(--ink-4), var(--ink-2)); overflow: hidden; }
+.bd img { width: 100%; height: 100%; object-fit: cover; animation: kenburns 18s ease-out both; }
+@keyframes kenburns { from { transform: scale(1.12); } }
+.bd::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgb(21 17 42 / .1) 0%, rgb(21 17 42 / .35) 50%, var(--ink-2) 100%); }
+.d-head { position: relative; z-index: 2; display: grid; grid-template-columns: 124px minmax(0, 1fr); gap: 18px; align-items: end; padding: 0 22px; margin-top: -86px; }
+.d-poster { width: 124px; aspect-ratio: 2 / 3; border-radius: 14px; object-fit: cover; background: var(--ink-4); box-shadow: 0 20px 40px -12px rgb(0 0 0 / .9), 0 0 0 1px rgb(255 255 255 / .12); animation: rise .6s .1s var(--out) both; }
+.d-poster.ph { display: grid; }
+.d-title { min-width: 0; padding-bottom: 4px; animation: rise .6s .16s var(--out) both; }
+.d-title h2 { font-family: var(--display); font-weight: 800; font-size: clamp(21px, 4.6vw, 30px); line-height: 1.05; letter-spacing: -.025em; margin: 8px 0 0; text-wrap: balance; }
+.d-title .orig { color: var(--muted); font-size: 13px; margin-top: 6px; }
+.d-body { padding: 18px 22px 8px; display: grid; gap: 20px; animation: rise .6s .22s var(--out) both; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { display: inline-flex; align-items: center; gap: 5px; padding: 5px 11px; border-radius: 999px; font-size: 12.5px; font-weight: 600; background: rgb(255 255 255 / .06); border: 1px solid var(--line); color: var(--muted); }
+.chip.star { color: var(--butter); border-color: rgb(255 200 58 / .3); background: rgb(255 200 58 / .08); }
+.chip .ico { width: 13px; height: 13px; }
+.tagline { font-style: italic; color: var(--butter); margin: 0; font-size: 15px; }
+.overview { margin: 0; color: #ddd7ef; font-size: 15px; line-height: 1.65; max-width: 62ch; }
+.credits { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 0; font-size: 13.5px; }
+.credits dt { color: var(--faint); font-weight: 600; }
+.credits dd { margin: 0; color: var(--text); }
+.blk h4 { margin: 0 0 10px; font-size: 11.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.blk h4 button { border: 0; background: none; color: var(--muted); font: 600 12px var(--body); letter-spacing: 0; text-transform: none; display: inline-flex; gap: 5px; align-items: center; padding: 4px 6px; border-radius: 8px; }
+.blk h4 button:hover { color: var(--text); background: rgb(255 255 255 / .06); }
+.wgroup { display: grid; gap: 10px; }
+.wrow { display: flex; align-items: center; gap: 12px; }
+.wrow .lbl { width: 86px; flex: none; font-size: 12px; color: var(--muted); font-weight: 600; }
+.wlist { display: flex; flex-wrap: wrap; gap: 8px; }
+.prov-chip { display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px 4px 4px; border-radius: 12px; background: rgb(255 255 255 / .05); border: 1px solid var(--line); font-size: 13px; font-weight: 600; }
+.prov-chip img { width: 30px; height: 30px; border-radius: 8px; }
+.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-items: center; }
+.envies { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.envie { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 14px; background: rgb(255 255 255 / .04); border: 1px solid var(--line); font-size: 13.5px; }
+.envie .av { width: 32px; height: 32px; font-size: 13px; }
+.envie b { display: block; font-weight: 700; }
+.envie small { color: var(--muted); }
+.envie.on { border-color: rgb(255 61 87 / .45); background: rgb(255 61 87 / .08); }
+.envie.on small { color: #ff8a9a; }
+.d-actions {
+  position: sticky; bottom: 0; z-index: 4; display: flex; flex-wrap: wrap; gap: 8px; padding: 16px 22px 18px;
+  background: linear-gradient(180deg, rgb(21 17 42 / 0), var(--ink-2) 30%);
+}
+.d-actions .grow { flex: 1 1 180px; }
+.d-loading { padding: 80px 20px; display: grid; justify-items: center; gap: 12px; color: var(--muted); }
+.d-loading .m { width: 90px; height: 104px; }
+
+/* Réglages */
+.settings { padding: 28px 22px 22px; display: grid; gap: 22px; }
+.settings h2 { font-family: var(--display); font-weight: 800; font-size: 24px; margin: 0; letter-spacing: -.02em; display: flex; align-items: center; gap: 12px; }
+.settings h2 .m { width: 40px; height: 46px; }
+.fs { display: grid; gap: 12px; padding: 18px; border-radius: 20px; background: rgb(255 255 255 / .03); border: 1px solid var(--line); }
+.fs h3 { margin: 0; font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--butter); display: flex; align-items: center; gap: 8px; }
+.fs h3 i { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.fs:nth-of-type(2) h3 { color: var(--bubble); }
+.fs:nth-of-type(3) h3 { color: var(--mint); }
+.fs:nth-of-type(4) h3 { color: var(--sky); }
+.field { display: grid; gap: 6px; }
 .field label { font-size: 13px; font-weight: 600; }
-.field input, .field select { padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); width: 100%; }
-.hint { font-size: 12.5px; color: var(--muted); margin: 0; }
-.hint a { color: var(--accent); }
-.two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.dlg .foot { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
-
-.pick { display: grid; grid-template-columns: 140px 1fr; gap: 16px; }
-.pick .poster { width: 140px; }
-@media (max-width: 460px) {
-  .card { grid-template-columns: 86px 1fr; }
-  .poster { width: 86px; }
-  .pick { grid-template-columns: 1fr; justify-items: center; text-align: center; }
-  .two { grid-template-columns: 1fr; }
+.field input, .field select, .field textarea {
+  width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line-2); background: var(--ink);
+  font-size: 15px; transition: border-color .2s, box-shadow .2s;
 }
+.field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--butter); box-shadow: 0 0 0 4px rgb(255 200 58 / .15); }
+.field textarea { font: 12px/1.4 ui-monospace, Menlo, monospace; resize: vertical; }
+.hint { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.55; }
+.hint a { color: var(--butter); }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.two .field label { display: flex; align-items: center; gap: 8px; }
+.two .field label .av { width: 22px; height: 22px; font-size: 10px; }
+.row-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.settings .foot { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; position: sticky; bottom: 0; z-index: 3; margin: 0 -22px -22px; padding: 22px 22px 20px; background: linear-gradient(180deg, rgb(21 17 42 / 0), var(--ink-2) 35%); }
 
+/* Tirage au sort */
+.roulette { padding: 30px 22px 24px; display: grid; justify-items: center; text-align: center; gap: 16px; }
+.roulette .eyebrow { justify-self: center; }
+.reel-wrap { position: relative; display: grid; grid-template-columns: 70px 170px 70px; gap: 14px; align-items: center; margin-top: 6px; }
+.reel { position: relative; width: 170px; aspect-ratio: 2 / 3; border-radius: 18px; overflow: hidden; background: var(--ink-3); box-shadow: 0 0 0 3px var(--butter), 0 0 50px -6px rgb(255 200 58 / .6); }
+.reel img { width: 100%; height: 100%; object-fit: cover; }
+.reel img.tick { animation: tick .12s ease-out; }
+@keyframes tick { from { transform: translateY(-14%); filter: blur(3px); } }
+.reel.done { animation: win .7s var(--spring); box-shadow: 0 0 0 3px var(--cherry), 0 0 70px -4px rgb(255 61 87 / .8); }
+@keyframes win { 40% { transform: scale(1.08) rotate(-2deg); } }
+.side { width: 70px; aspect-ratio: 2 / 3; border-radius: 12px; overflow: hidden; opacity: .35; filter: blur(1px); background: var(--ink-3); }
+.side img { width: 100%; height: 100%; object-fit: cover; }
+.bulbs { position: absolute; inset: -16px; pointer-events: none; }
+.bulbs i { position: absolute; width: 7px; height: 7px; border-radius: 50%; background: var(--butter); box-shadow: 0 0 10px var(--butter); animation: bulb .5s steps(1) infinite; }
+.bulbs i:nth-child(even) { animation-delay: .25s; }
+@keyframes bulb { 50% { opacity: .2; box-shadow: none; } }
+.roulette h3 { font-family: var(--display); font-weight: 800; font-size: 24px; margin: 4px 0 0; letter-spacing: -.02em; min-height: 1.2em; text-wrap: balance; }
+.roulette .m { width: 70px; height: 80px; }
+.roulette .acts { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+@media (max-width: 420px) { .reel-wrap { grid-template-columns: 44px 150px 44px; gap: 10px; } .reel { width: 150px; } .side { width: 44px; } }
+
+/* ---------- Mascotte ---------- */
+.m { display: block; overflow: visible; }
+.m .bob { animation: bob 3.4s ease-in-out infinite; transform-origin: 50% 100%; transform-box: fill-box; }
+@keyframes bob { 0%, 100% { transform: translateY(0) rotate(-1.5deg); } 50% { transform: translateY(-5px) rotate(1.5deg); } }
+.m .shadow { animation: shad 3.4s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+@keyframes shad { 50% { transform: scaleX(.85); opacity: .5; } }
+.m .kpop { animation: kpop 4.6s var(--out) infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes kpop { 0%, 70%, 100% { transform: translate(0, 0) rotate(0); } 78% { transform: translate(-3px, -26px) rotate(-40deg); } 88% { transform: translate(-1px, 2px) rotate(-10deg); } 93% { transform: translate(0, -3px); } }
+.m .blink { animation: blink 5.2s infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes blink { 0%, 94%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.08); } }
+.m .pupils { transition: transform .25s ease-out; }
+.m .mood { display: none; }
+.m[data-mood="happy"] .mood-happy, .m[data-mood="love"] .mood-love, .m[data-mood="wow"] .mood-wow, .m[data-mood="sleep"] .mood-sleep { display: inline; }
+.m[data-mood="love"] .bob { animation: bobLove .8s ease-in-out infinite; }
+@keyframes bobLove { 50% { transform: translateY(-8px) scale(1.03); } }
+.m[data-mood="wow"] .bob { animation: shake .35s ease-in-out infinite; }
+@keyframes shake { 25% { transform: rotate(-3deg) translateY(-2px); } 75% { transform: rotate(3deg) translateY(-2px); } }
+.m .zz { animation: zz 2.8s ease-in-out infinite; transform-box: fill-box; }
+@keyframes zz { 0% { opacity: 0; transform: translate(0, 4px); } 30% { opacity: 1; } 100% { opacity: 0; transform: translate(10px, -16px); } }
+.m .lovehearts path { animation: floatHeart 1.6s ease-out infinite; transform-box: fill-box; transform-origin: center; }
+.m .lovehearts path:nth-child(2) { animation-delay: .5s; }
+.m .lovehearts path:nth-child(3) { animation-delay: 1s; }
+@keyframes floatHeart { 0% { opacity: 0; transform: translateY(6px) scale(.5); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(-26px) scale(1); } }
+.logo .m .bob, .sg-msg .m .bob { animation: none; }
+.hero-mascot .m { cursor: pointer; }
+.hero-mascot .m.boing .bob { animation: boing .7s var(--spring); }
+@keyframes boing { 30% { transform: scale(1.12, .88); } 60% { transform: scale(.94, 1.08) translateY(-10px); } }
+
+/* ---------- Particules + toasts ---------- */
+.kernel {
+  position: fixed; left: 0; top: 0; z-index: 100; pointer-events: none; width: 16px; height: 14px;
+  border-radius: 52% 48% 55% 45% / 55% 50% 50% 45%;
+  background: radial-gradient(circle at 34% 30%, #fffdf6 0 25%, #ffeec2 50%, #f5be4c 100%);
+  box-shadow: 0 0 0 1.5px var(--outline);
+}
+.kernel.h { width: 16px; height: 16px; border-radius: 0; background: none; box-shadow: none; color: var(--cherry); }
+.kernel.h svg { width: 100%; height: 100%; fill: currentColor; }
+.kernel.c { width: 8px; height: 12px; border-radius: 2px; box-shadow: none; background: var(--c); }
+
+.toasts { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 90; display: grid; gap: 8px; justify-items: center; width: max-content; max-width: calc(100vw - 32px); pointer-events: none; }
 .toast {
-  position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
-  background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 999px; font-weight: 600; font-size: 14px;
-  z-index: 50; max-width: calc(100vw - 32px);
+  display: inline-flex; align-items: center; gap: 10px; padding: 8px 18px 8px 8px; border-radius: 999px;
+  background: rgb(251 247 255 / .96); color: var(--outline); font-weight: 700; font-size: 14px;
+  box-shadow: 0 18px 40px -12px rgb(0 0 0 / .7);
+  animation: toastIn .5s var(--spring) both;
 }
-.sync { font-size: 12px; color: var(--muted); display: inline-flex; align-items: center; gap: 6px; }
-.sync i { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
-.sync.on i { background: var(--ok); }
-.sync.err i { background: var(--danger); }
+.toast .m { width: 30px; height: 34px; }
+.toast.out { animation: toastOut .3s ease-in forwards; }
+@keyframes toastIn { from { opacity: 0; transform: translateY(24px) scale(.9); } }
+@keyframes toastOut { to { opacity: 0; transform: translateY(12px) scale(.95); } }
+
+/* ---------- Petits écrans ---------- */
+@media (max-width: 640px) {
+  .who .nm { display: none; }
+  .who button { padding: 3px; }
+  .hero { padding-block: 22px 10px; gap: 4px 12px; }
+  .hero-mascot { width: 104px; }
+  .search-box { padding-left: 16px; }
+  .search input { font-size: 16px; }
+  .tools { gap: 10px; }
+  .tabs { width: 100%; }
+  .tabs button { flex: 1; justify-content: center; padding: 9px 8px; font-size: 13px; gap: 5px; }
+  .d-head { grid-template-columns: 96px minmax(0, 1fr); gap: 14px; padding: 0 18px; margin-top: -60px; }
+  .d-poster { width: 96px; }
+  .d-body { padding: 16px 18px 6px; }
+  .d-actions { padding: 14px 18px 16px; }
+  .two, .envies { grid-template-columns: 1fr; }
+  .settings { padding: 26px 18px 18px; }
+  .settings .foot { margin: 0 -18px -18px; padding-inline: 18px; }
+  .stat { font-size: 12.5px; padding: 6px 11px 6px 9px; }
+  .sec-h { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .sec-h h2 { font-size: 17px; }
+}
+@media (max-width: 380px) { .tools .roll span { display: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
+}
 </style>
 </head>
 <body>
 
-<header class="top wrap">
-  <div class="brand">
-    <div>
-      <h1>Ciné<span>A2</span></h1>
-      <div class="bulbs" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+<div class="stage" aria-hidden="true"><div class="spot s1"></div><div class="spot s2"></div><div class="spot s3"></div><div class="spot s4"></div></div>
+
+<header class="nav" id="nav">
+  <div class="wrap">
+    <a class="logo" href="#" aria-label="CinéA2, haut de page"><span id="logoMascot"></span><b>Ciné<span>A2</span></b></a>
+    <div class="who" id="who" role="group" aria-label="Qui utilise l'appli">
+      <button type="button" data-who="a" aria-pressed="true"><span class="av a">A</span><span class="nm">Moi</span></button>
+      <button type="button" data-who="b" aria-pressed="false"><span class="av b">B</span><span class="nm">Ma moitié</span></button>
     </div>
-    <button class="icon-btn" id="openSettings" aria-label="Réglages">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    <button class="gear" id="openSettings" type="button" aria-label="Réglages" title="Réglages">
+      <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     </button>
-  </div>
-
-  <div class="who">
-    <span>C'est qui ?</span>
-    <div class="seg" id="whoSeg" role="group" aria-label="Qui utilise l'appli">
-      <button type="button" data-who="a" aria-pressed="true">A</button>
-      <button type="button" data-who="b" aria-pressed="false">B</button>
-    </div>
-    <span class="sync" id="syncState"><i></i><span>Sur cet appareil</span></span>
-  </div>
-
-  <div class="search">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-    <input id="q" type="search" autocomplete="off" placeholder="Ajouter un film ou une série…" aria-label="Rechercher un film ou une série" aria-controls="suggest">
-    <div class="suggest" id="suggest" role="listbox" hidden></div>
   </div>
 </header>
 
 <main class="wrap">
-  <div class="bar">
-    <div class="chips" id="statusChips">
-      <button class="chip" data-status="todo" aria-pressed="true">À voir<span class="n" id="nTodo"></span></button>
-      <button class="chip" data-status="match" aria-pressed="false">On veut tous les deux<span class="n" id="nMatch"></span></button>
-      <button class="chip" data-status="seen" aria-pressed="false">Vus<span class="n" id="nSeen"></span></button>
+  <section class="hero">
+    <div>
+      <span class="eyebrow" id="greet">Bonsoir</span>
+      <h1>Ce soir, on regarde <span class="grad">quoi&nbsp;?</span></h1>
     </div>
-    <div class="chips" id="typeChips">
-      <button class="chip" data-type="all" aria-pressed="true">Tout</button>
-      <button class="chip" data-type="movie" aria-pressed="false">Films</button>
-      <button class="chip" data-type="tv" aria-pressed="false">Séries</button>
+    <div class="hero-mascot" id="heroMascot" title="Popcorn, votre ouvreur">
+      <span class="spark k1"><svg viewBox="0 0 24 24"><path d="M12 0l2.6 9.4L24 12l-9.4 2.6L12 24l-2.6-9.4L0 12l9.4-2.6z"/></svg></span>
+      <span class="spark k2"><svg viewBox="0 0 24 24"><path d="M12 0l2.6 9.4L24 12l-9.4 2.6L12 24l-2.6-9.4L0 12l9.4-2.6z"/></svg></span>
+      <span class="spark k3"><svg viewBox="0 0 24 24"><path d="M12 0l2.6 9.4L24 12l-9.4 2.6L12 24l-2.6-9.4L0 12l9.4-2.6z"/></svg></span>
     </div>
-  </div>
-  <div class="bar" style="margin-top:10px">
-    <div class="field" style="flex-direction:row;align-items:center;gap:8px">
-      <label for="platformFilter" style="white-space:nowrap;font-weight:500;color:var(--muted);font-size:13px">Dispo sur</label>
-      <select id="platformFilter" style="padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface)"><option value="">Toutes les plateformes</option></select>
-    </div>
-    <button class="btn" id="randomBtn">🎲 On regarde quoi ce soir ?</button>
-  </div>
+    <div class="stats" id="stats"></div>
 
-  <section id="list" class="list" aria-live="polite"></section>
-  <div id="empty" class="empty" hidden></div>
+    <div class="search" id="searchWrap">
+      <div class="search-box">
+        <svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="q" type="search" autocomplete="off" enterkeyhint="search" spellcheck="false"
+               placeholder="Ajouter un film ou une série…" aria-label="Rechercher un film ou une série" aria-controls="suggest" aria-expanded="false">
+        <span class="kbd" aria-hidden="true">/</span>
+        <button class="clear-q" id="clearQ" type="button" aria-label="Effacer la recherche" hidden><svg class="ico" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+      </div>
+      <div class="suggest" id="suggest" role="listbox" hidden></div>
+    </div>
+  </section>
+
+  <section class="matches" id="matches" hidden>
+    <div class="sec-h">
+      <h2><svg class="ico fill" viewBox="0 0 24 24"><path d="M12 21s-7.6-4.7-9.5-9.5C1.3 8.2 3.4 4.5 7 4.5c2.1 0 3.7 1.2 5 3 1.3-1.8 2.9-3 5-3 3.6 0 5.7 3.7 4.5 7C19.6 16.3 12 21 12 21z"/></svg>Vos coups de cœur communs</h2>
+      <p id="matchesNote"></p>
+    </div>
+    <div class="rail" id="rail"></div>
+  </section>
+
+  <div class="tools" id="tools">
+    <div class="tabs" id="tabs" role="tablist" data-on="todo">
+      <span class="tab-ind" id="tabInd" aria-hidden="true"></span>
+      <button role="tab" data-status="todo" aria-selected="true">À voir <span class="n" id="nTodo">0</span></button>
+      <button role="tab" data-status="match" aria-selected="false">Matchs <span class="n" id="nMatch">0</span></button>
+      <button role="tab" data-status="seen" aria-selected="false">Vus <span class="n" id="nSeen">0</span></button>
+    </div>
+    <div class="seg" id="typeSeg" role="group" aria-label="Type">
+      <button type="button" data-type="all" aria-pressed="true">Tout</button>
+      <button type="button" data-type="movie" aria-pressed="false">Films</button>
+      <button type="button" data-type="tv" aria-pressed="false">Séries</button>
+    </div>
+    <button class="btn roll" id="rollBtn" type="button">
+      <svg class="ico" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1.3" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.3" fill="currentColor"/><circle cx="15.5" cy="8.5" r="1.3" fill="currentColor"/><circle cx="8.5" cy="15.5" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/></svg>
+      <span>Tirer au sort</span>
+    </button>
+  </div>
+  <div class="platforms" id="platforms" role="group" aria-label="Plateformes"></div>
+
+  <section class="grid" id="grid" aria-live="polite"></section>
+  <div class="empty" id="empty" hidden></div>
 </main>
 
-<!-- Fiche avant ajout / tirage au sort -->
-<dialog id="pickDlg"><div class="dlg" id="pickBody"></div></dialog>
+<dialog class="sheet" id="detail" aria-label="Fiche"><div class="panel" id="detailPanel"></div></dialog>
+<dialog class="sheet" id="rouletteDlg" aria-label="Tirage au sort"><div class="panel" id="roulettePanel"></div></dialog>
 
-<!-- Réglages -->
-<dialog id="settingsDlg">
-  <form class="dlg" id="settingsForm" method="dialog">
-    <h2>Réglages</h2>
+<dialog class="sheet" id="settingsDlg" aria-label="Réglages">
+  <div class="panel">
+    <div class="grab"></div>
+    <button class="x" type="button" data-close aria-label="Fermer"><svg class="ico" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    <form class="settings" id="settingsForm">
+      <h2><span id="setMascot"></span>Réglages</h2>
 
-    <h4>Recherche des films</h4>
-    <div class="field">
-      <label for="tmdbKey">Clé API TMDB</label>
-      <input id="tmdbKey" type="password" autocomplete="off" placeholder="Clé API (v3) ou jeton de lecture (v4)">
-      <p class="hint">Gratuite : crée un compte sur <a href="https://www.themoviedb.org/signup" target="_blank" rel="noopener">themoviedb.org</a>, puis va dans <a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noopener">Paramètres → API</a> et copie la « Clé d'API ». C'est elle qui fournit titres, affiches et plateformes (données JustWatch).</p>
-    </div>
-    <div class="field">
-      <label for="region">Pays pour les plateformes</label>
-      <select id="region">
-        <option value="FR">France</option><option value="BE">Belgique</option><option value="CH">Suisse</option>
-        <option value="CA">Canada</option><option value="LU">Luxembourg</option><option value="US">États-Unis</option>
-        <option value="GB">Royaume-Uni</option><option value="ES">Espagne</option>
-      </select>
-    </div>
+      <div class="fs">
+        <h3><i></i>Le couple</h3>
+        <div class="two">
+          <div class="field"><label for="nameA"><span class="av a" id="avA">A</span>Prénom 1</label><input id="nameA" maxlength="20" placeholder="Toi" autocomplete="off"></div>
+          <div class="field"><label for="nameB"><span class="av b" id="avB">B</span>Prénom 2</label><input id="nameB" maxlength="20" placeholder="Ta moitié" autocomplete="off"></div>
+        </div>
+      </div>
 
-    <h4>Le couple</h4>
-    <div class="two">
-      <div class="field"><label for="nameA">Prénom 1</label><input id="nameA" maxlength="20" placeholder="Toi"></div>
-      <div class="field"><label for="nameB">Prénom 2</label><input id="nameB" maxlength="20" placeholder="Ta moitié"></div>
-    </div>
+      <div class="fs">
+        <h3><i></i>Recherche des films</h3>
+        <div class="field">
+          <label for="tmdbKey">Clé API TMDB</label>
+          <input id="tmdbKey" type="password" autocomplete="off" placeholder="Colle ta clé ici">
+        </div>
+        <p class="hint">Gratuite : crée un compte sur <a href="https://www.themoviedb.org/signup" target="_blank" rel="noopener">themoviedb.org</a>, puis copie la « Clé d'API » dans <a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noopener">Paramètres → API</a>. Elle donne les titres, les affiches et les plateformes (données JustWatch). Elle reste sur ce téléphone.</p>
+        <div class="field">
+          <label for="region">Pays pour les plateformes</label>
+          <select id="region">
+            <option value="FR">France</option><option value="BE">Belgique</option><option value="CH">Suisse</option>
+            <option value="CA">Canada</option><option value="LU">Luxembourg</option><option value="US">États-Unis</option>
+            <option value="GB">Royaume-Uni</option><option value="ES">Espagne</option>
+          </select>
+        </div>
+      </div>
 
-    <h4>Liste partagée (optionnel)</h4>
-    <p class="hint">Pour avoir la même liste sur vos deux téléphones : crée une base « Realtime Database » gratuite sur <a href="https://console.firebase.google.com" target="_blank" rel="noopener">Firebase</a> (mode test), colle son adresse ici, choisissez un code secret et mettez les mêmes réglages sur les deux téléphones.</p>
-    <div class="field"><label for="syncUrl">Adresse de la base</label><input id="syncUrl" placeholder="https://mon-projet-default-rtdb.europe-west1.firebasedatabase.app"></div>
-    <div class="field"><label for="syncCode">Code secret du couple</label><input id="syncCode" placeholder="ex. popcorn-canape-2847"></div>
+      <div class="fs">
+        <h3><i></i>Liste partagée</h3>
+        <p class="hint">Pour avoir la même liste sur vos deux téléphones : crée une base « Realtime Database » gratuite sur <a href="https://console.firebase.google.com" target="_blank" rel="noopener">Firebase</a> (mode test), colle son adresse ici et choisissez un code secret. Mettez les mêmes réglages sur les deux téléphones.</p>
+        <div class="field"><label for="syncUrl">Adresse de la base</label><input id="syncUrl" inputmode="url" autocomplete="off" placeholder="https://mon-projet-default-rtdb.europe-west1.firebasedatabase.app"></div>
+        <div class="field"><label for="syncCode">Code secret du couple</label><input id="syncCode" autocomplete="off" placeholder="ex. popcorn-canape-2847"></div>
+      </div>
 
-    <h4>Sauvegarde</h4>
-    <div class="foot" style="justify-content:flex-start">
-      <button type="button" class="btn ghost" id="exportBtn">Copier la liste</button>
-      <button type="button" class="btn ghost" id="importBtn">Coller une liste</button>
-    </div>
-    <textarea id="importArea" hidden rows="4" style="width:100%;border-radius:10px;border:1px solid var(--line);background:var(--bg);padding:10px;font:12px monospace" placeholder="Colle ici une liste copiée, puis Importer"></textarea>
-    <div class="foot" id="importFoot" hidden style="justify-content:flex-start"><button type="button" class="btn" id="importDo">Importer</button></div>
+      <div class="fs">
+        <h3><i></i>Sauvegarde</h3>
+        <div class="row-btns">
+          <button type="button" class="btn ghost" id="exportBtn">Copier la liste</button>
+          <button type="button" class="btn ghost" id="importBtn">Coller une liste</button>
+        </div>
+        <div class="field" id="importField" hidden>
+          <label for="importArea">Liste à importer</label>
+          <textarea id="importArea" rows="4" placeholder="Colle ici une liste copiée depuis CinéA2"></textarea>
+          <div class="row-btns"><button type="button" class="btn" id="importDo">Importer</button></div>
+        </div>
+      </div>
 
-    <div class="foot">
-      <button value="cancel" class="btn ghost" formnovalidate>Annuler</button>
-      <button value="save" class="btn" id="saveSettings">Enregistrer</button>
-    </div>
-  </form>
+      <div class="foot">
+        <button type="button" class="btn ghost" data-close>Annuler</button>
+        <button type="submit" class="btn">Enregistrer</button>
+      </div>
+    </form>
+  </div>
 </dialog>
 
-<div class="toast" id="toast" hidden></div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
 
 <script>
 (() => {
@@ -295,27 +750,163 @@ dialog::backdrop { background: rgb(10 6 14 / .7); }
   const IMG = "https://image.tmdb.org/t/p/";
   const API = "https://api.themoviedb.org/3";
   const LS = { items: "cad.items", cfg: "cad.cfg", who: "cad.who" };
+  const REGION_NAME = { FR: "en France", BE: "en Belgique", CH: "en Suisse", CA: "au Canada", LU: "au Luxembourg", US: "aux États-Unis", GB: "au Royaume-Uni", ES: "en Espagne" };
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const canHover = matchMedia("(hover: hover)").matches;
 
   const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const load = (k, d) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } };
   const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+  const imgPath = p => (typeof p === "string" && /^\/[\w\-.]+$/.test(p)) ? p : "";
 
   let cfg = Object.assign({ key: "", region: "FR", nameA: "", nameB: "", syncUrl: "", syncCode: "" }, load(LS.cfg, {}));
-  // items: { [id]: {id, tmdbId, type, title, year, poster, overview, genres, runtime, seasons, providers, link, addedBy, addedAt, wants:{a,b}, seen, seenAt, deleted, updatedAt} }
   let items = load(LS.items, {});
-  let who = load(LS.who, "a");
+  let who = load(LS.who, "a") === "b" ? "b" : "a";
   const filt = { status: "todo", type: "all", platform: "" };
+  const shown = new Set();
 
   const nameOf = w => (w === "a" ? cfg.nameA : cfg.nameB) || (w === "a" ? "Moi" : "Ma moitié");
+  const initial = w => { const n = (w === "a" ? cfg.nameA : cfg.nameB).trim(); return n ? n[0].toUpperCase() : (w === "a" ? "1" : "2"); };
+  const live = () => Object.values(items).filter(d => d && !d.deleted);
+
+  /* ---------- Icônes ---------- */
+  const IC = {
+    heart: '<svg class="ico fill" viewBox="0 0 24 24"><path d="M12 21s-7.6-4.7-9.5-9.5C1.3 8.2 3.4 4.5 7 4.5c2.1 0 3.7 1.2 5 3 1.3-1.8 2.9-3 5-3 3.6 0 5.7 3.7 4.5 7C19.6 16.3 12 21 12 21z"/></svg>',
+    heartO: '<svg class="ico" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-8.7-8.8C2.2 8.2 4.1 5 7.2 5c1.9 0 3.4 1.1 4.8 2.8C13.4 6.1 14.9 5 16.8 5c3.1 0 5 3.2 3.9 6.2C19 15.6 12 20 12 20z"/></svg>',
+    check: '<svg class="ico" viewBox="0 0 24 24"><path d="M4.5 12.5l5 5 10-11"/></svg>',
+    plus: '<svg class="ico" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',
+    x: '<svg class="ico" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>',
+    play: '<svg class="ico fill" viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z"/></svg>',
+    ext: '<svg class="ico" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>',
+    refresh: '<svg class="ico" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.7-4.4L4 8M4 4v4h4M4 13a8 8 0 0 0 14.7 4.4L20 16M20 20v-4h-4"/></svg>',
+    trash: '<svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>',
+    star: '<svg class="ico fill" viewBox="0 0 24 24"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"/></svg>',
+    clock: '<svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+    arrow: '<svg class="ico" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+    tv: '<svg class="ico" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M8 21h8M9 2l3 4 3-4"/></svg>',
+    grid: '<svg class="ico" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>',
+    dice: '<svg class="ico" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1.3" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/></svg>'
+  };
+
+  /* ---------- Mascotte : Popcorn ---------- */
+  function mascot(mood = "happy", extra = "") {
+    const O = "#1d1530";
+    const kern = [[110, 26, 13, "kpop"], [66, 62, 18], [96, 48, 20], [126, 54, 19], [148, 72, 16], [80, 80, 22], [52, 96, 19], [108, 74, 24], [136, 84, 21], [156, 100, 16]];
+    const kernels = kern.sort((a, b) => a[1] - b[1]).map(([x, y, r, c]) =>
+      `<g${c ? ` class="${c}"` : ""}><circle cx="${x}" cy="${y}" r="${r}" fill="#fff4dc" stroke="${O}" stroke-width="4"/>` +
+      `<circle cx="${x + r * .3}" cy="${y + r * .32}" r="${r * .5}" fill="#ffd77a" opacity=".55"/>` +
+      `<circle cx="${x - r * .32}" cy="${y - r * .34}" r="${r * .26}" fill="#fff"/></g>`).join("");
+    const N = 7, tl = 38, tr = 162, bl = 58, br = 142, ty = 104, by = 226;
+    let stripes = "";
+    for (let i = 0; i < N; i++) {
+      const x1 = tl + (tr - tl) * i / N, x2 = tl + (tr - tl) * (i + 1) / N, x3 = bl + (br - bl) * (i + 1) / N, x4 = bl + (br - bl) * i / N;
+      stripes += `<path d="M${x1} ${ty}L${x2} ${ty}L${x3} ${by}L${x4} ${by}Z" fill="${i % 2 ? "#fff4ea" : "#ff3d57"}"/>`;
+    }
+    const heart = (x, y, s) => `<path transform="translate(${x} ${y}) scale(${s})" d="M0 5C-7 0-7-6.5-3-7.2c1.6-.3 2.6.6 3 1.6.4-1 1.4-1.9 3-1.6C7-6.5 7 0 0 5z"/>`;
+    return `<svg class="m ${extra}" data-mood="${mood}" viewBox="0 0 200 250" aria-hidden="true">
+      <ellipse class="shadow" cx="100" cy="240" rx="52" ry="7" fill="#000" opacity=".35"/>
+      <g class="bob">
+        ${kernels}
+        ${stripes}
+        <path d="M38 104L162 104L145 220Q144 228 136 228L64 228Q56 228 55 220Z" fill="none" stroke="${O}" stroke-width="5" stroke-linejoin="round"/>
+        <rect x="30" y="94" width="140" height="20" rx="9" fill="#ff3d57" stroke="${O}" stroke-width="5"/>
+        <rect x="40" y="99" width="64" height="4" rx="2" fill="#fff" opacity=".5"/>
+        <rect x="64" y="128" width="72" height="60" rx="24" fill="#fff4dc" stroke="${O}" stroke-width="4.5"/>
+        <g class="mood mood-happy">
+          <g class="pupils"><g class="blink">
+            <ellipse cx="87" cy="152" rx="5.5" ry="7" fill="${O}"/><ellipse cx="113" cy="152" rx="5.5" ry="7" fill="${O}"/>
+            <circle cx="89" cy="149" r="2" fill="#fff"/><circle cx="115" cy="149" r="2" fill="#fff"/>
+          </g></g>
+          <circle cx="76" cy="166" r="5.5" fill="#ff7ac6" opacity=".75"/><circle cx="124" cy="166" r="5.5" fill="#ff7ac6" opacity=".75"/>
+          <path d="M90 165Q100 176 110 165" fill="none" stroke="${O}" stroke-width="4" stroke-linecap="round"/>
+        </g>
+        <g class="mood mood-love">
+          <g fill="#ff3d57" stroke="${O}" stroke-width="1.2">${heart(87, 153, 1.35)}${heart(113, 153, 1.35)}</g>
+          <circle cx="76" cy="168" r="5.5" fill="#ff7ac6" opacity=".85"/><circle cx="124" cy="168" r="5.5" fill="#ff7ac6" opacity=".85"/>
+          <path d="M88 164Q100 182 112 164Z" fill="${O}" stroke="${O}" stroke-width="3" stroke-linejoin="round"/>
+          <path d="M95 171Q100 176 105 171" fill="#ff7a8c"/>
+          <g class="lovehearts" fill="#ff3d57">${heart(40, 60, 1.2)}${heart(165, 46, 1)}${heart(150, 20, .8)}</g>
+        </g>
+        <g class="mood mood-wow">
+          <circle cx="87" cy="151" r="7.5" fill="${O}"/><circle cx="113" cy="151" r="7.5" fill="${O}"/>
+          <circle cx="89.5" cy="148" r="2.6" fill="#fff"/><circle cx="115.5" cy="148" r="2.6" fill="#fff"/>
+          <ellipse cx="100" cy="172" rx="6" ry="7.5" fill="${O}"/>
+          <path d="M78 136l8 4M122 136l-8 4" stroke="${O}" stroke-width="3.5" stroke-linecap="round"/>
+        </g>
+        <g class="mood mood-sleep">
+          <path d="M81 153Q87 158 93 153M107 153Q113 158 119 153" fill="none" stroke="${O}" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="76" cy="166" r="5" fill="#ff7ac6" opacity=".6"/><circle cx="124" cy="166" r="5" fill="#ff7ac6" opacity=".6"/>
+          <path d="M95 170Q100 173 105 170" fill="none" stroke="${O}" stroke-width="3.5" stroke-linecap="round"/>
+          <text class="zz" x="150" y="40" font-family="Unbounded, sans-serif" font-weight="800" font-size="22" fill="#52b8ff" stroke="${O}" stroke-width="1">z</text>
+        </g>
+      </g>
+    </svg>`;
+  }
+
+  $("#logoMascot").innerHTML = mascot("happy");
+  $("#heroMascot").insertAdjacentHTML("beforeend", mascot("happy"));
+  $("#setMascot").innerHTML = mascot("happy");
+  const heroM = () => $("#heroMascot .m");
+  let moodT;
+  function setMood(mood, ms = 2200) {
+    const m = heroM(); if (!m) return;
+    m.dataset.mood = mood; clearTimeout(moodT);
+    if (ms) moodT = setTimeout(() => { m.dataset.mood = "happy"; }, ms);
+  }
+  $("#heroMascot").addEventListener("click", e => {
+    const m = heroM(); m.classList.remove("boing"); void m.getBoundingClientRect(); m.classList.add("boing");
+    const r = m.getBoundingClientRect(); burst(r.left + r.width / 2, r.top + r.height * .25, 14);
+  });
+  // les yeux suivent le pointeur
+  if (canHover && !reduced) addEventListener("pointermove", e => {
+    const m = heroM(); if (!m) return;
+    const r = m.getBoundingClientRect(); const cx = r.left + r.width / 2, cy = r.top + r.height * .6;
+    const a = Math.atan2(e.clientY - cy, e.clientX - cx), d = Math.min(1, Math.hypot(e.clientX - cx, e.clientY - cy) / 300);
+    const p = m.querySelector(".mood-happy .pupils"); if (p) p.style.transform = `translate(${Math.cos(a) * 3.2 * d}px, ${Math.sin(a) * 3 * d}px)`;
+  }, { passive: true });
+
+  /* ---------- Particules ---------- */
+  function burst(x, y, n = 18, kind = "pop") {
+    if (reduced) return;
+    const colors = ["#ffc83a", "#ff3d57", "#34e0b0", "#52b8ff", "#ff7ac6"];
+    for (let i = 0; i < n; i++) {
+      const el = document.createElement("span");
+      const t = kind === "love" ? (i % 2 ? "h" : "") : kind === "party" ? (i % 3 ? "c" : "") : "";
+      el.className = "kernel" + (t ? " " + t : "");
+      if (t === "h") el.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 21s-7.6-4.7-9.5-9.5C1.3 8.2 3.4 4.5 7 4.5c2.1 0 3.7 1.2 5 3 1.3-1.8 2.9-3 5-3 3.6 0 5.7 3.7 4.5 7C19.6 16.3 12 21 12 21z"/></svg>';
+      if (t === "c") el.style.setProperty("--c", colors[i % colors.length]);
+      document.body.appendChild(el);
+      const ang = -Math.PI / 2 + (Math.random() - .5) * Math.PI * 1.3;
+      const v = 90 + Math.random() * 150, dx = Math.cos(ang) * v, up = Math.sin(ang) * v;
+      const fall = 160 + Math.random() * 200, rot = (Math.random() - .5) * 720, s = .7 + Math.random() * .6;
+      el.animate([
+        { transform: `translate(${x}px, ${y}px) scale(.2) rotate(0)`, opacity: 1 },
+        { transform: `translate(${x + dx * .6}px, ${y + up}px) scale(${s}) rotate(${rot * .5}deg)`, opacity: 1, offset: .35 },
+        { transform: `translate(${x + dx}px, ${y + up + fall}px) scale(${s * .9}) rotate(${rot}deg)`, opacity: 0 }
+      ], { duration: 1000 + Math.random() * 500, easing: "cubic-bezier(.2,.6,.4,1)" }).onfinish = () => el.remove();
+    }
+  }
+  const centerOf = el => { const r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };
+
+  /* ---------- Toasts ---------- */
+  function toast(msg, mood = "happy") {
+    const t = document.createElement("div");
+    t.className = "toast"; t.innerHTML = mascot(mood); t.append(document.createTextNode(msg));
+    const box = $("#toasts"); box.appendChild(t);
+    while (box.children.length > 3) box.firstChild.remove();
+    setTimeout(() => { t.classList.add("out"); setTimeout(() => t.remove(), 320); }, 2600);
+  }
 
   /* ---------- TMDB ---------- */
   async function tmdb(path, params = {}) {
-    if (!cfg.key) throw Object.assign(new Error("nokey"), { code: "nokey" });
+    const key = cfg.key;
+    if (!key) throw Object.assign(new Error("nokey"), { code: "nokey" });
     const url = new URL(API + path);
     Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
     const headers = { accept: "application/json" };
-    if (cfg.key.length > 60) headers.Authorization = "Bearer " + cfg.key; else url.searchParams.set("api_key", cfg.key);
+    if (key.length > 60) headers.Authorization = "Bearer " + key; else url.searchParams.set("api_key", key);
     const r = await fetch(url, { headers });
     if (r.status === 401) throw Object.assign(new Error("badkey"), { code: "badkey" });
     if (!r.ok) throw new Error("http " + r.status);
@@ -325,310 +916,604 @@ dialog::backdrop { background: rgb(10 6 14 / .7); }
   function providersFrom(wp) {
     const res = wp?.results?.[cfg.region];
     if (!res) return { flat: [], rent: [], buy: [], link: "" };
-    const map = a => (a || []).sort((x, y) => (x.display_priority ?? 99) - (y.display_priority ?? 99))
+    const seen = new Set();
+    const map = a => (a || []).slice().sort((x, y) => (x.display_priority ?? 99) - (y.display_priority ?? 99))
+      .filter(p => !seen.has(p.provider_id) && seen.add(p.provider_id))
       .map(p => ({ id: p.provider_id, name: p.provider_name, logo: p.logo_path }));
-    return { flat: map([...(res.flatrate || []), ...(res.free || []), ...(res.ads || [])]), rent: map(res.rent), buy: map(res.buy), link: res.link || "" };
+    const flat = map([...(res.flatrate || []), ...(res.free || []), ...(res.ads || [])]);
+    seen.clear(); const rent = map(res.rent); seen.clear(); const buy = map(res.buy);
+    return { flat, rent, buy, link: res.link || "" };
   }
 
   async function fetchDetails(type, tmdbId) {
-    const d = await tmdb(`/${type}/${tmdbId}`, { language: "fr-FR", append_to_response: "watch/providers" });
+    const d = await tmdb(`/${type}/${tmdbId}`, { language: "fr-FR", append_to_response: "watch/providers,videos,credits", include_video_language: "fr,en,null" });
     const date = d.release_date || d.first_air_date || "";
     const prov = providersFrom(d["watch/providers"]);
+    const vids = (d.videos?.results || []).filter(v => v.site === "YouTube" && /Trailer|Teaser/.test(v.type));
+    const trailer = (vids.find(v => v.iso_639_1 === "fr" && v.type === "Trailer") || vids.find(v => v.type === "Trailer") || vids[0])?.key || "";
+    const director = type === "movie"
+      ? (d.credits?.crew || []).filter(c => c.job === "Director").map(c => c.name).slice(0, 2)
+      : (d.created_by || []).map(c => c.name).slice(0, 2);
+    const statusTv = { "Returning Series": "En cours", "Ended": "Terminée", "Canceled": "Annulée", "In Production": "En production" }[d.status] || "";
     return {
       id: `${type}-${tmdbId}`, tmdbId, type,
       title: d.title || d.name || d.original_title || d.original_name,
       original: d.original_title || d.original_name || "",
       year: date.slice(0, 4),
-      poster: d.poster_path || "",
-      overview: d.overview || "",
+      poster: d.poster_path || "", backdrop: d.backdrop_path || "",
+      overview: d.overview || "", tagline: d.tagline || "",
       genres: (d.genres || []).map(g => g.name).slice(0, 3),
       runtime: d.runtime || (d.episode_run_time || [])[0] || 0,
-      seasons: d.number_of_seasons || 0,
+      seasons: d.number_of_seasons || 0, episodes: d.number_of_episodes || 0, tvStatus: type === "tv" ? statusTv : "",
       rating: d.vote_average ? Math.round(d.vote_average * 10) / 10 : 0,
+      cast: (d.credits?.cast || []).slice(0, 5).map(c => c.name),
+      director, trailer,
       providers: { flat: prov.flat, rent: prov.rent, buy: prov.buy },
       link: prov.link || `https://www.themoviedb.org/${type}/${tmdbId}/watch?locale=${cfg.region}`,
-      region: cfg.region,
-      checkedAt: Date.now()
+      region: cfg.region, checkedAt: Date.now()
     };
   }
 
-  /* ---------- Autocomplétion ---------- */
+  /* ---------- Recherche ---------- */
   const q = $("#q"), sug = $("#suggest");
   let results = [], active = -1, timer, reqId = 0;
+
+  function showSug(html) { sug.innerHTML = html; sug.hidden = false; q.setAttribute("aria-expanded", "true"); }
+  function hideSug() { sug.hidden = true; active = -1; q.setAttribute("aria-expanded", "false"); }
 
   q.addEventListener("input", () => {
     clearTimeout(timer);
     const term = q.value.trim();
+    $("#clearQ").hidden = !q.value;
     if (term.length < 2) { hideSug(); return; }
-    timer = setTimeout(() => search(term), 250);
+    showSug(Array.from({ length: 3 }, () => `<div class="sk"><i></i><span><i></i><i></i></span></div>`).join(""));
+    setMood("wow", 0);
+    timer = setTimeout(() => search(term), 260);
   });
+  q.addEventListener("focus", () => { if (q.value.trim().length >= 2 && results.length) { renderResults(); } });
   q.addEventListener("keydown", e => {
+    if (e.key === "Escape") { hideSug(); q.blur(); return; }
     if (sug.hidden || !results.length) return;
     if (e.key === "ArrowDown") { active = (active + 1) % results.length; paintActive(); e.preventDefault(); }
     else if (e.key === "ArrowUp") { active = (active - 1 + results.length) % results.length; paintActive(); e.preventDefault(); }
     else if (e.key === "Enter") { e.preventDefault(); choose(results[Math.max(active, 0)]); }
-    else if (e.key === "Escape") hideSug();
   });
-  document.addEventListener("click", e => { if (!e.target.closest(".search")) hideSug(); });
-
-  function hideSug() { sug.hidden = true; active = -1; }
-  function paintActive() { [...sug.querySelectorAll("button")].forEach((b, i) => b.classList.toggle("active", i === active)); }
+  $("#clearQ").addEventListener("click", () => { q.value = ""; $("#clearQ").hidden = true; hideSug(); q.focus(); });
+  document.addEventListener("click", e => { if (!e.target.closest("#searchWrap")) hideSug(); });
+  document.addEventListener("keydown", e => {
+    if (e.key === "/" && !e.target.closest("input, textarea, select") && !document.querySelector("dialog[open]")) { e.preventDefault(); q.focus(); }
+  });
+  function paintActive() { $$(".sg", sug).forEach((b, i) => { b.classList.toggle("active", i === active); if (i === active) b.scrollIntoView({ block: "nearest" }); }); }
 
   async function search(term) {
     const my = ++reqId;
-    sug.hidden = false;
-    sug.innerHTML = `<div class="msg">Recherche…</div>`;
     try {
       const data = await tmdb("/search/multi", { query: term, language: "fr-FR", include_adult: "false", region: cfg.region });
       if (my !== reqId) return;
       results = (data.results || []).filter(r => r.media_type === "movie" || r.media_type === "tv")
         .sort((a, b) => (b.popularity || 0) - (a.popularity || 0)).slice(0, 8);
-      if (!results.length) { sug.innerHTML = `<div class="msg">Aucun film ni série trouvé pour « ${esc(term)} ».</div>`; return; }
-      sug.innerHTML = results.map(r => {
-        const title = r.title || r.name, date = (r.release_date || r.first_air_date || "").slice(0, 4);
-        const orig = r.original_title || r.original_name;
-        const already = items[`${r.media_type}-${r.id}`] && !items[`${r.media_type}-${r.id}`].deleted;
-        return `<button type="button" role="option">
-          ${r.poster_path ? `<img class="thumb" src="${IMG}w92${esc(r.poster_path)}" alt="" loading="lazy">` : `<div class="thumb"></div>`}
-          <span class="t">${esc(title)}<small>${r.media_type === "tv" ? "Série" : "Film"}${date ? " · " + esc(date) : ""}${orig && orig !== title ? " · " + esc(orig) : ""}</small></span>
-          ${already ? `<span class="added">Déjà dans la liste</span>` : ""}
-        </button>`;
-      }).join("");
-      [...sug.querySelectorAll("button")].forEach((b, i) => b.addEventListener("click", () => choose(results[i])));
-      active = -1;
+      setMood("happy", 0);
+      if (!results.length) { showSug(`<div class="sg-msg">${mascot("sleep")}<span>Aucun film ni série trouvé pour « ${esc(term)} ». Essaie le titre original ?</span></div>`); return; }
+      renderResults();
     } catch (err) {
       if (my !== reqId) return;
-      sug.innerHTML = `<div class="msg">${err.code === "nokey" ? "Ajoute ta clé TMDB dans les réglages (⚙︎) pour lancer la recherche."
+      setMood("happy", 0);
+      showSug(`<div class="sg-msg">${mascot("sleep")}<span>${err.code === "nokey" ? "Ajoute ta clé TMDB dans les réglages pour lancer la recherche."
         : err.code === "badkey" ? "La clé TMDB est refusée. Vérifie-la dans les réglages."
-        : "Pas de connexion à TMDB. Vérifie ta connexion internet et réessaie."}</div>`;
+        : "Impossible de joindre TMDB. Vérifie ta connexion et réessaie."}</span></div>`);
     }
+  }
+  function renderResults() {
+    showSug(results.map((r, i) => {
+      const title = r.title || r.name, date = (r.release_date || r.first_air_date || "").slice(0, 4);
+      const orig = r.original_title || r.original_name;
+      const id = `${r.media_type}-${r.id}`, already = items[id] && !items[id].deleted;
+      const p = imgPath(r.poster_path);
+      return `<button type="button" class="sg" role="option" style="--i:${i}">
+        ${p ? `<img class="th" src="${IMG}w92${p}" alt="" loading="lazy">` : `<span class="th"></span>`}
+        <span class="t">${esc(title)}<small><span class="pill ${r.media_type}">${r.media_type === "tv" ? "Série" : "Film"}</span>${date ? esc(date) : ""}${orig && orig !== title ? ` · ${esc(orig)}` : ""}${r.vote_average ? ` · ★ ${String(Math.round(r.vote_average * 10) / 10).replace(".", ",")}` : ""}</small></span>
+        ${already ? `<span class="done">${IC.check}Ajouté</span>` : `<span class="go">${IC.plus}</span>`}
+      </button>`;
+    }).join(""));
+    $$(".sg", sug).forEach((b, i) => b.addEventListener("click", () => choose(results[i])));
+    active = -1;
   }
 
   async function choose(r) {
     hideSug();
     const id = `${r.media_type}-${r.id}`;
-    if (items[id] && !items[id].deleted) { toast("Déjà dans votre liste"); q.value = ""; scrollToCard(id); return; }
-    openPick(`<p class="hint">Chargement de la fiche…</p>`);
+    if (items[id] && !items[id].deleted) { openDetail(id); return; }
+    openSheet($("#detail"));
+    $("#detailPanel").innerHTML = `<div class="grab"></div><div class="d-loading">${mascot("wow")}<span>On prépare la fiche…</span></div>`;
     try {
       const d = await fetchDetails(r.media_type, r.id);
-      showPick(d, true);
-    } catch { openPick(`<p>Impossible de charger la fiche. Réessaie dans un instant.</p><div class="foot"><button class="btn ghost" data-close>Fermer</button></div>`); }
+      preview = d;
+      $("#detailPanel").innerHTML = detailHtml(d, true);
+      $("#detailPanel").scrollTop = 0;
+    } catch {
+      $("#detailPanel").innerHTML = `<div class="grab"></div><div class="d-loading">${mascot("sleep")}<span>Impossible de charger la fiche. Réessaie dans un instant.</span><button class="btn ghost" data-close>Fermer</button></div>`;
+    }
   }
 
-  /* ---------- Fiche (ajout ou tirage) ---------- */
-  const pickDlg = $("#pickDlg"), pickBody = $("#pickBody");
-  function openPick(html) { pickBody.innerHTML = html; if (!pickDlg.open) pickDlg.showModal(); }
-  pickDlg.addEventListener("click", e => { if (e.target === pickDlg || e.target.closest("[data-close]")) pickDlg.close(); });
+  /* ---------- Fiche ---------- */
+  let preview = null, currentId = null;
 
-  function showPick(d, adding) {
-    openPick(`
-      <div class="pick">
-        ${posterHtml(d, "w342")}
-        <div class="body">
-          <span class="tag" style="align-self:${innerWidth <= 460 ? "center" : "flex-start"}">${d.type === "tv" ? "Série" : "Film"}</span>
-          <h3 style="font-size:24px">${esc(d.title)}</h3>
-          <div class="meta">${metaHtml(d)}</div>
-          <p class="overview open">${esc(d.overview) || "Pas de résumé en français."}</p>
-          ${whereHtml(d)}
+  function fmtRuntime(m) { return m ? `${Math.floor(m / 60)} h ${String(m % 60).padStart(2, "0")}` : ""; }
+  function subLine(d) {
+    const bits = [];
+    if (d.year) bits.push(d.year);
+    if (d.type === "movie" && d.runtime) bits.push(fmtRuntime(d.runtime));
+    if (d.type === "tv" && d.seasons) bits.push(`${d.seasons} saison${d.seasons > 1 ? "s" : ""}`);
+    return bits.map(esc).join(" · ");
+  }
+  function posterImg(d, size, cls) {
+    const p = imgPath(d.poster);
+    return p ? `<img class="${cls}" src="${IMG}${size}${p}" alt="Affiche de ${esc(d.title)}" loading="lazy" decoding="async">`
+      : `<div class="${cls} ph">${mascot("happy")}<span>${esc(d.title)}</span></div>`;
+  }
+  function provList(list) {
+    return `<div class="wlist">${list.map(p => `<span class="prov-chip">${imgPath(p.logo) ? `<img src="${IMG}w92${imgPath(p.logo)}" alt="" loading="lazy">` : ""}${esc(p.name)}</span>`).join("")}</div>`;
+  }
+
+  function detailHtml(d, isPreview) {
+    const p = d.providers || {};
+    const bd = imgPath(d.backdrop);
+    const chips = [];
+    if (d.year) chips.push(`<span class="chip">${esc(d.year)}</span>`);
+    if (d.type === "movie" && d.runtime) chips.push(`<span class="chip">${IC.clock}${fmtRuntime(d.runtime)}</span>`);
+    if (d.type === "tv" && d.seasons) chips.push(`<span class="chip">${IC.tv}${d.seasons} saison${d.seasons > 1 ? "s" : ""}${d.episodes ? ` · ${d.episodes} épisodes` : ""}</span>`);
+    if (d.tvStatus) chips.push(`<span class="chip">${esc(d.tvStatus)}</span>`);
+    if (d.rating) chips.push(`<span class="chip star">${IC.star}${String(d.rating).replace(".", ",")} / 10</span>`);
+    (d.genres || []).forEach(g => chips.push(`<span class="chip">${esc(g)}</span>`));
+
+    const rows = [];
+    if (p.flat?.length) rows.push(`<div class="wrow"><span class="lbl">Abonnement</span>${provList(p.flat)}</div>`);
+    if (p.rent?.length) rows.push(`<div class="wrow"><span class="lbl">Location</span>${provList(p.rent.slice(0, 5))}</div>`);
+    if (!p.rent?.length && p.buy?.length) rows.push(`<div class="wrow"><span class="lbl">Achat</span>${provList(p.buy.slice(0, 5))}</div>`);
+    const where = rows.length ? `<div class="wgroup">${rows.join("")}</div>` : `<p class="none">Pas encore disponible en streaming ${esc(REGION_NAME[d.region || cfg.region] || "")}.</p>`;
+
+    const credits = [];
+    if (d.director?.length) credits.push(`<dt>${d.type === "tv" ? "Création" : "Réalisation"}</dt><dd>${d.director.map(esc).join(", ")}</dd>`);
+    if (d.cast?.length) credits.push(`<dt>Avec</dt><dd>${d.cast.map(esc).join(", ")}</dd>`);
+
+    const envie = w => {
+      const on = !!d.wants?.[w];
+      return `<div class="envie ${on ? "on" : ""}"><span class="av ${w}">${esc(initial(w))}</span><div><b>${esc(nameOf(w))}</b><small>${on ? "Envie de le voir" : "Pas encore d'avis"}</small></div></div>`;
+    };
+    const mine = !!d.wants?.[who];
+    const trailer = d.trailer && /^[\w-]{6,20}$/.test(d.trailer) ? `https://www.youtube.com/watch?v=${d.trailer}` : "";
+    const link = /^https:\/\//.test(d.link || "") ? d.link : "";
+
+    const actions = isPreview
+      ? `<button class="btn grow" data-do="add">${IC.plus}Ajouter à notre liste</button>
+         ${trailer ? `<a class="btn ghost icon" href="${esc(trailer)}" target="_blank" rel="noopener" aria-label="Bande-annonce" title="Bande-annonce">${IC.play}</a>` : ""}`
+      : `<button class="btn grow ${mine ? "hot" : ""}" data-do="want">${mine ? IC.heart : IC.heartO}${mine ? "J'en ai envie" : "Moi aussi, envie"}</button>
+         <button class="btn ${d.seen ? "mint" : "ghost"}" data-do="seen">${IC.check}${d.seen ? "Vu" : "On l'a vu"}</button>
+         ${trailer ? `<a class="btn ghost icon" href="${esc(trailer)}" target="_blank" rel="noopener" aria-label="Bande-annonce" title="Bande-annonce">${IC.play}</a>` : ""}
+         ${link ? `<a class="btn ghost icon" href="${esc(link)}" target="_blank" rel="noopener" aria-label="Où regarder" title="Où regarder">${IC.ext}</a>` : ""}
+         <button class="btn ghost icon" data-do="del" aria-label="Retirer de la liste" title="Retirer de la liste">${IC.trash}</button>`;
+
+    return `<div class="grab"></div>
+      <button class="x" type="button" data-close aria-label="Fermer">${IC.x}</button>
+      <div class="bd">${bd ? `<img src="${IMG}w1280${bd}" alt="">` : ""}</div>
+      <div class="d-head">
+        ${posterImg(d, "w342", "d-poster")}
+        <div class="d-title">
+          <span class="pill ${d.type}">${d.type === "tv" ? "Série" : "Film"}</span>
+          <h2>${esc(d.title)}</h2>
+          ${d.original && d.original !== d.title ? `<div class="orig">${esc(d.original)}</div>` : ""}
         </div>
       </div>
-      <div class="foot">
-        <button class="btn ghost" data-close>${adding ? "Annuler" : "Fermer"}</button>
-        ${adding ? `<button class="btn" id="confirmAdd">Ajouter à notre liste</button>` : `<button class="btn" id="markSeenPick">On l'a vu ✓</button>`}
-      </div>`);
-    if (adding) $("#confirmAdd").addEventListener("click", () => {
-      const now = Date.now();
-      items[d.id] = Object.assign(d, { addedBy: who, addedAt: now, wants: { a: who === "a", b: who === "b" }, seen: false, deleted: false, updatedAt: now });
-      commit(); pickDlg.close(); q.value = "";
-      setFilter("status", "todo");
-      toast(`« ${d.title} » ajouté`);
-      scrollToCard(d.id);
-    });
-    else $("#markSeenPick").addEventListener("click", () => { update(d.id, { seen: true, seenAt: Date.now() }); pickDlg.close(); toast("Bon film !"); });
+      <div class="d-body">
+        <div class="chips">${chips.join("")}</div>
+        ${d.tagline ? `<p class="tagline">« ${esc(d.tagline)} »</p>` : ""}
+        <p class="overview">${esc(d.overview) || "Pas encore de résumé en français."}</p>
+        ${credits.length ? `<dl class="credits">${credits.join("")}</dl>` : ""}
+        <div class="blk"><h4>Où le regarder ${esc(REGION_NAME[d.region || cfg.region] || "")}${isPreview ? "" : `<button type="button" data-do="refresh">${IC.refresh}Mettre à jour</button>`}</h4>${where}</div>
+        ${isPreview ? "" : `<div class="blk"><h4>Vos envies</h4><div class="envies">${envie("a")}${envie("b")}</div></div>
+          <p class="hint">Ajouté par ${esc(nameOf(d.addedBy))} le ${new Date(d.addedAt || Date.now()).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}${d.seen && d.seenAt ? ` · vu le ${new Date(d.seenAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}` : ""}.</p>`}
+      </div>
+      <div class="d-actions">${actions}</div>`;
   }
+
+  async function openDetail(id) {
+    const d = items[id]; if (!d) return;
+    currentId = id; preview = null;
+    $("#detailPanel").innerHTML = detailHtml(d, false);
+    openSheet($("#detail"));
+    $("#detailPanel").scrollTop = 0;
+    // complète les fiches anciennes (image de fond, casting, bande-annonce)
+    if (d.backdrop === undefined && cfg.key) {
+      try {
+        const f = await fetchDetails(d.type, d.tmdbId);
+        const { id: _i, ...rest } = f;
+        items[id] = Object.assign({}, items[id], rest, { updatedAt: Date.now() });
+        commit(false);
+        if (currentId === id && $("#detail").open) { const st = $("#detailPanel").scrollTop; $("#detailPanel").innerHTML = detailHtml(items[id], false); $("#detailPanel").scrollTop = st; }
+      } catch {}
+    }
+  }
+
+  $("#detail").addEventListener("click", async e => {
+    if (e.target === e.currentTarget || e.target.closest("[data-close]")) { closeSheet(e.currentTarget); return; }
+    const b = e.target.closest("[data-do]"); if (!b) return;
+    const act = b.dataset.do;
+    if (act === "add" && preview) {
+      const d = preview, now = Date.now();
+      items[d.id] = Object.assign({}, d, { addedBy: who, addedAt: now, wants: { a: who === "a", b: who === "b" }, seen: false, seenAt: 0, deleted: false, updatedAt: now });
+      const [x, y] = centerOf(b); burst(x, y, 26);
+      setMood("love", 2400);
+      commit(); await closeSheet($("#detail"));
+      q.value = ""; $("#clearQ").hidden = true;
+      if (filt.status !== "todo") setTab("todo");
+      toast(`« ${d.title} » ajouté à votre liste`, "love");
+      revealCard(d.id);
+      return;
+    }
+    const id = currentId, d = items[id]; if (!d) return;
+    if (act === "want") toggleWant(id, b);
+    if (act === "seen") toggleSeen(id, b);
+    if (act === "del") {
+      if (b.dataset.confirm) {
+        update(id, { deleted: true }); await closeSheet($("#detail")); toast(`« ${d.title} » retiré`, "sleep");
+      } else {
+        b.dataset.confirm = "1"; b.classList.remove("icon"); b.classList.add("danger"); b.innerHTML = `${IC.trash}Retirer ?`;
+        setTimeout(() => { if (b.isConnected && b.dataset.confirm) { delete b.dataset.confirm; b.classList.add("icon"); b.classList.remove("danger"); b.innerHTML = IC.trash; } }, 3500);
+      }
+      return;
+    }
+    if (act === "refresh") {
+      b.disabled = true; b.innerHTML = `${IC.refresh}Mise à jour…`;
+      try {
+        const f = await fetchDetails(d.type, d.tmdbId); const { id: _i, ...rest } = f;
+        update(id, rest); toast("Plateformes à jour");
+      } catch { toast("Mise à jour impossible pour l'instant", "sleep"); }
+    }
+    if ($("#detail").open && items[id]) { const st = $("#detailPanel").scrollTop; $("#detailPanel").innerHTML = detailHtml(items[id], false); $("#detailPanel").scrollTop = st; }
+  });
+
+  function toggleWant(id, el) {
+    const d = items[id]; const was = !!d.wants?.[who];
+    const wants = Object.assign({ a: false, b: false }, d.wants, { [who]: !was });
+    update(id, { wants });
+    if (!was) {
+      const [x, y] = centerOf(el);
+      if (wants.a && wants.b && !d.seen) { burst(x, y, 30, "love"); setMood("love", 2600); toast(`C'est un match : « ${d.title} »`, "love"); }
+      else burst(x, y, 10, "love");
+    }
+  }
+  function toggleSeen(id, el) {
+    const d = items[id];
+    update(id, { seen: !d.seen, seenAt: d.seen ? 0 : Date.now() });
+    if (!d.seen) { const [x, y] = centerOf(el); burst(x, y, 22, "party"); toast("Bon film ! Rangé dans « Vus »"); }
+  }
+
+  /* ---------- Feuilles ---------- */
+  function openSheet(dlg) {
+    if (dlg.open) return;
+    dlg.classList.remove("closing"); dlg.showModal(); document.documentElement.classList.add("lock");
+  }
+  function closeSheet(dlg) {
+    return new Promise(res => {
+      if (!dlg.open) return res();
+      if (reduced) { dlg.close(); return res(); }
+      dlg.classList.add("closing");
+      setTimeout(() => { dlg.classList.remove("closing"); dlg.close(); res(); }, 240);
+    });
+  }
+  $$("dialog.sheet").forEach(dlg => {
+    dlg.addEventListener("close", () => { if (!$("dialog[open]")) document.documentElement.classList.remove("lock"); if (dlg.id === "rouletteDlg") stopRoll = true; });
+    dlg.addEventListener("cancel", e => { e.preventDefault(); closeSheet(dlg); });
+  });
 
   /* ---------- Rendu ---------- */
-  function posterHtml(d, size = "w342") {
-    return d.poster ? `<img class="poster" src="${IMG}${size}${esc(d.poster)}" alt="Affiche de ${esc(d.title)}" loading="lazy">`
-      : `<div class="poster ph">${esc(d.title)}</div>`;
-  }
-  function metaHtml(d) {
-    const bits = [];
-    if (d.year) bits.push(esc(d.year));
-    if (d.type === "movie" && d.runtime) bits.push(`${Math.floor(d.runtime / 60)} h ${String(d.runtime % 60).padStart(2, "0")}`);
-    if (d.type === "tv" && d.seasons) bits.push(`${d.seasons} saison${d.seasons > 1 ? "s" : ""}`);
-    if (d.genres?.length) bits.push(d.genres.map(esc).join(", "));
-    if (d.rating) bits.push(`★ ${String(d.rating).replace(".", ",")}`);
-    return bits.map(b => `<span>${b}</span>`).join("");
-  }
-  function logos(list) {
-    return list.map(p => `<img class="logo" src="${IMG}w92${esc(p.logo)}" alt="${esc(p.name)}" title="${esc(p.name)}" loading="lazy">`).join("");
-  }
-  function whereHtml(d) {
-    const p = d.providers || {};
-    const rows = [];
-    if (p.flat?.length) rows.push(`<div class="row"><span class="lbl">Inclus</span>${logos(p.flat)}</div>`);
-    if (!p.flat?.length && p.rent?.length) rows.push(`<div class="row"><span class="lbl">Location</span>${logos(p.rent.slice(0, 6))}</div>`);
-    if (!p.flat?.length && !p.rent?.length && p.buy?.length) rows.push(`<div class="row"><span class="lbl">Achat</span>${logos(p.buy.slice(0, 6))}</div>`);
-    if (!rows.length) rows.push(`<span class="none">Pas encore disponible en streaming (${esc(d.region || cfg.region)})</span>`);
-    return `<div class="where">${rows.join("")}</div>`;
-  }
-
   function platformsOf(d) { return (d.providers?.flat || []).map(p => p.name); }
+  function base() { return live().filter(d => filt.type === "all" || d.type === filt.type); }
 
-  function visible() {
-    return Object.values(items).filter(d => !d.deleted)
-      .filter(d => filt.type === "all" || d.type === filt.type)
-      .filter(d => !filt.platform || platformsOf(d).includes(filt.platform));
+  function renderWho() {
+    $$("#who button").forEach(b => {
+      const w = b.dataset.who;
+      b.setAttribute("aria-pressed", String(w === who));
+      b.querySelector(".av").textContent = initial(w);
+      b.querySelector(".nm").textContent = nameOf(w);
+      b.title = `C'est ${nameOf(w)}`;
+    });
+    const h = new Date().getHours();
+    const hello = h >= 18 || h < 5 ? "Bonsoir" : "Bonjour";
+    $("#greet").textContent = `${hello}, ${nameOf(who)}`;
   }
 
-  function render() {
-    // libellés A/B
-    $("#whoSeg").querySelectorAll("button").forEach(b => { b.textContent = nameOf(b.dataset.who); b.setAttribute("aria-pressed", String(b.dataset.who === who)); });
-
-    // filtre plateformes
-    const allPlat = [...new Set(Object.values(items).filter(d => !d.deleted && !d.seen).flatMap(platformsOf))].sort();
-    const sel = $("#platformFilter");
-    if (filt.platform && !allPlat.includes(filt.platform)) filt.platform = "";
-    sel.innerHTML = `<option value="">Toutes les plateformes</option>` + allPlat.map(p => `<option ${p === filt.platform ? "selected" : ""}>${esc(p)}</option>`).join("");
-
-    const base = visible();
-    const todo = base.filter(d => !d.seen), seen = base.filter(d => d.seen), match = todo.filter(d => d.wants?.a && d.wants?.b);
-    $("#nTodo").textContent = todo.length; $("#nSeen").textContent = seen.length; $("#nMatch").textContent = match.length;
-
-    let shown = filt.status === "seen" ? seen.sort((x, y) => (y.seenAt || 0) - (x.seenAt || 0))
-      : (filt.status === "match" ? match : todo).sort((x, y) => (y.addedAt || 0) - (x.addedAt || 0));
-
-    const list = $("#list"), empty = $("#empty");
-    list.innerHTML = shown.map(cardHtml).join("");
-    const total = Object.values(items).filter(d => !d.deleted).length;
-    empty.hidden = shown.length > 0;
-    if (!shown.length) {
-      empty.innerHTML = !cfg.key ? `<h2>Bienvenue !</h2><p>Pour commencer, ajoute ta clé TMDB gratuite dans les réglages.<br>Ensuite tape un titre en haut : l'affiche et les plateformes arrivent toutes seules.</p><p><button class="btn" id="emptySettings">Ouvrir les réglages</button></p>`
-        : !total ? `<h2>Votre liste est vide</h2><p>Tape le nom d'un film ou d'une série dans la barre de recherche.</p>`
-        : filt.status === "seen" ? `<h2>Rien de vu pour l'instant</h2><p>Marquez un film « Vu » quand vous l'avez regardé.</p>`
-        : filt.status === "match" ? `<h2>Pas encore de coup de cœur commun</h2><p>Appuyez sur ♥ « Envie » chacun de votre côté : ceux que vous voulez voir tous les deux arrivent ici.</p>`
-        : `<h2>Rien ici avec ces filtres</h2><p>Change de type ou de plateforme.</p>`;
-      $("#emptySettings")?.addEventListener("click", openSettings);
-    }
-    $("#randomBtn").disabled = !todo.length;
+  function renderStats(all) {
+    const todo = all.filter(d => !d.seen), match = todo.filter(d => d.wants?.a && d.wants?.b);
+    const minutes = todo.filter(d => d.type === "movie").reduce((s, d) => s + (d.runtime || 0), 0);
+    const series = todo.filter(d => d.type === "tv").length;
+    const st = [
+      [`<b>${todo.length}</b> à voir`, "var(--butter)"],
+      [`<b>${match.length}</b> match${match.length > 1 ? "s" : ""}`, "var(--cherry)"],
+    ];
+    if (minutes) st.push([`<b>${Math.round(minutes / 60)} h</b> de films`, "var(--sky)"]);
+    if (series) st.push([`<b>${series}</b> série${series > 1 ? "s" : ""}`, "var(--mint)"]);
+    $("#stats").hidden = !all.length;
+    $("#stats").innerHTML = st.map(([t, c]) => `<span class="stat" style="--c:${c}"><i></i><span>${t}</span></span>`).join("");
   }
 
-  function cardHtml(d) {
+  function renderMatches(all) {
+    const m = all.filter(d => !d.seen && d.wants?.a && d.wants?.b).sort((x, y) => (y.updatedAt || 0) - (x.updatedAt || 0));
+    const sec = $("#matches");
+    sec.hidden = !(m.length && filt.status === "todo");
+    if (sec.hidden) return;
+    $("#matchesNote").textContent = `${m.length} titre${m.length > 1 ? "s" : ""} que vous voulez voir tous les deux`;
+    $("#rail").innerHTML = m.map(d => `<button class="mcard" data-open="${esc(d.id)}" aria-label="Voir la fiche de ${esc(d.title)}">
+      <div class="pf">${posterImg(d, "w342", "img")}<span class="heart">${IC.heart}</span></div>
+      <b>${esc(d.title)}</b><small>${subLine(d)}</small></button>`).join("");
+  }
+
+  function renderPlatforms(all) {
+    const counts = new Map(), logos = new Map();
+    all.filter(d => !d.seen).forEach(d => (d.providers?.flat || []).forEach(p => { counts.set(p.name, (counts.get(p.name) || 0) + 1); if (!logos.has(p.name)) logos.set(p.name, p.logo); }));
+    if (filt.platform && !counts.has(filt.platform)) filt.platform = "";
+    const list = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+    const box = $("#platforms");
+    box.hidden = !list.length || filt.status === "seen";
+    box.innerHTML = `<button class="pchip" data-pf="" aria-pressed="${!filt.platform}"><span class="all">${IC.grid}</span>Partout</button>` +
+      list.map(([n, c]) => `<button class="pchip" data-pf="${esc(n)}" aria-pressed="${filt.platform === n}">${imgPath(logos.get(n)) ? `<img src="${IMG}w92${imgPath(logos.get(n))}" alt="" loading="lazy">` : ""}${esc(n)}<em>${c}</em></button>`).join("");
+  }
+
+  function cardHtml(d, isNew, i) {
     const both = d.wants?.a && d.wants?.b;
     const mine = !!d.wants?.[who];
-    const other = who === "a" ? "b" : "a";
-    const wantTxt = both ? `Vous deux` : d.wants?.[other] ? `${esc(nameOf(other))} aussi` : "";
-    return `<article class="card ${d.seen ? "seen" : ""} ${both && !d.seen ? "match" : ""}" id="c-${esc(d.id)}" data-id="${esc(d.id)}">
-      ${both && !d.seen ? `<span class="matchflag">♥ MATCH</span>` : ""}
-      ${posterHtml(d)}
-      <div class="body">
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="tag">${d.type === "tv" ? "Série" : "Film"}</span><span class="by">ajouté par ${esc(nameOf(d.addedBy))}</span></div>
+    const prov = d.providers?.flat || [];
+    const pImg = imgPath(d.poster);
+    const provHtml = prov.length
+      ? `<span class="prov">${prov.slice(0, 3).map(p => imgPath(p.logo) ? `<img src="${IMG}w92${imgPath(p.logo)}" alt="${esc(p.name)}" title="${esc(p.name)}" loading="lazy">` : "").join("")}${prov.length > 3 ? `<span class="more">+${prov.length - 3}</span>` : ""}</span>`
+      : (d.providers?.rent?.length ? `<span class="noprov">En location</span>` : "");
+    const wantNames = ["a", "b"].filter(w => d.wants?.[w]);
+    return `<article class="card ${d.seen ? "seen" : ""} ${isNew ? "enter" : ""}" data-id="${esc(d.id)}" style="--i:${i}">
+      ${pImg ? `<img class="glow" src="${IMG}w185${pImg}" alt="" aria-hidden="true" loading="lazy">` : ""}
+      <button class="poster" type="button" data-act="open" aria-label="Voir la fiche de ${esc(d.title)}">
+        <span class="frame">${pImg ? `<img class="img" src="${IMG}w342${pImg}" alt="" loading="lazy" decoding="async">` : `<span class="ph">${mascot("happy")}<span>${esc(d.title)}</span></span>`}</span>
+        <span class="shine"></span>
+        <span class="tl"><span class="pill ${d.type}">${d.type === "tv" ? "Série" : "Film"}</span></span>
+        ${both && !d.seen ? `<span class="ribbon">${IC.heart}MATCH</span>` : ""}
+        ${d.seen ? `<span class="stamp">VU</span>` : ""}
+        ${provHtml}
+      </button>
+      <div class="info">
         <h3>${esc(d.title)}</h3>
-        <div class="meta">${metaHtml(d)}</div>
-        ${d.overview ? `<p class="overview" data-act="more" title="Lire la suite">${esc(d.overview)}</p>` : ""}
-        ${whereHtml(d)}
-        <div class="actions">
-          <button class="act ${mine ? "on-love" : ""}" data-act="want" aria-pressed="${mine}">♥ Envie${wantTxt ? ` · ${wantTxt}` : ""}</button>
-          <button class="act ${d.seen ? "on-seen" : ""}" data-act="seen" aria-pressed="${!!d.seen}">${d.seen ? "Vu ✓" : "Vu ?"}</button>
-          <a class="act" href="${esc(d.link)}" target="_blank" rel="noopener">Où regarder ↗</a>
-          <button class="act" data-act="refresh" title="Mettre à jour les plateformes">↻</button>
-          <button class="act" data-act="del" aria-label="Retirer de la liste">✕</button>
+        <div class="sub">${subLine(d)}</div>
+        <div class="row">
+          <span class="wants" title="${wantNames.length ? "Envie : " + wantNames.map(nameOf).map(esc).join(" et ") : "Personne n'a encore dit envie"}">
+            <span class="av a ${d.wants?.a ? "" : "off"}">${esc(initial("a"))}</span><span class="av b ${d.wants?.b ? "" : "off"}">${esc(initial("b"))}</span>
+          </span>
+          <span class="quick">
+            <button class="qb love" type="button" data-act="want" aria-pressed="${mine}" aria-label="${mine ? "Retirer mon envie" : "J'ai envie de le voir"}" title="${mine ? "Retirer mon envie" : "J'ai envie"}">${mine ? IC.heart : IC.heartO}</button>
+            <button class="qb seen" type="button" data-act="seen" aria-pressed="${!!d.seen}" aria-label="${d.seen ? "Remettre à voir" : "Marquer comme vu"}" title="${d.seen ? "Remettre à voir" : "On l'a vu"}">${IC.check}</button>
+          </span>
         </div>
       </div>
     </article>`;
   }
 
-  $("#list").addEventListener("click", async e => {
-    const btn = e.target.closest("[data-act]"); if (!btn) return;
-    const id = btn.closest(".card").dataset.id, d = items[id];
-    const act = btn.dataset.act;
-    if (act === "more") btn.classList.toggle("open");
-    if (act === "want") update(id, { wants: Object.assign({}, d.wants, { [who]: !d.wants?.[who] }) });
-    if (act === "seen") update(id, { seen: !d.seen, seenAt: d.seen ? 0 : Date.now() });
-    if (act === "del") {
-      if (btn.dataset.confirm) { update(id, { deleted: true }); toast(`« ${d.title} » retiré`); }
-      else { btn.dataset.confirm = "1"; btn.textContent = "Retirer ?"; btn.classList.add("danger"); setTimeout(() => { if (btn.isConnected) { delete btn.dataset.confirm; btn.textContent = "✕"; btn.classList.remove("danger"); } }, 3000); }
+  function render() {
+    renderWho();
+    const all = base();
+    const todo = all.filter(d => !d.seen), seen = all.filter(d => d.seen), match = todo.filter(d => d.wants?.a && d.wants?.b);
+    $("#nTodo").textContent = todo.length; $("#nSeen").textContent = seen.length; $("#nMatch").textContent = match.length;
+    renderStats(live());
+    renderMatches(all);
+    renderPlatforms(all);
+
+    let list = filt.status === "seen" ? seen.sort((x, y) => (y.seenAt || 0) - (x.seenAt || 0))
+      : (filt.status === "match" ? match : todo).sort((x, y) => (y.addedAt || 0) - (x.addedAt || 0));
+    if (filt.platform && filt.status !== "seen") list = list.filter(d => platformsOf(d).includes(filt.platform));
+
+    let n = 0;
+    $("#grid").innerHTML = list.map(d => { const isNew = !shown.has(d.id); shown.add(d.id); return cardHtml(d, isNew, isNew ? n++ : 0); }).join("");
+    $("#grid").hidden = !list.length;
+
+    const empty = $("#empty");
+    empty.hidden = list.length > 0;
+    if (!list.length) {
+      const total = live().length;
+      const [mood, h, p, btn] = !cfg.key
+        ? ["happy", "On branche le projecteur ?", "Ajoute ta clé TMDB gratuite dans les réglages. Ensuite, tape un titre en haut : l'affiche et les plateformes arrivent toutes seules.", `<button class="btn" data-empty="settings">Ouvrir les réglages</button>`]
+        : !total ? ["happy", "La salle est vide", "Tape le nom d'un film ou d'une série dans la barre de recherche pour lancer votre liste.", `<button class="btn" data-empty="search">${IC.plus}Ajouter un premier titre</button>`]
+        : filt.status === "seen" ? ["sleep", "Rien de vu pour l'instant", "Appuyez sur ✓ quand vous avez regardé un film : il viendra se ranger ici.", ""]
+        : filt.status === "match" ? ["love", "Pas encore de coup de cœur commun", "Chacun de votre côté, appuyez sur le cœur. Les titres que vous voulez voir tous les deux arrivent ici.", ""]
+        : ["wow", "Rien avec ces filtres", "Change de type ou de plateforme pour retrouver vos titres.", `<button class="btn ghost" data-empty="reset">Tout afficher</button>`];
+      empty.innerHTML = `${mascot(mood)}<h2>${h}</h2><p>${p}</p>${btn}`;
     }
-    if (act === "refresh") {
-      btn.textContent = "…";
-      try { const f = await fetchDetails(d.type, d.tmdbId); update(id, { providers: f.providers, link: f.link, poster: f.poster || d.poster, region: f.region, checkedAt: f.checkedAt }); toast("Plateformes à jour"); }
-      catch { btn.textContent = "↻"; toast("Mise à jour impossible pour l'instant"); }
-    }
+    $("#rollBtn").disabled = !todo.length;
+    $("#tools").hidden = !live().length;
+    requestAnimationFrame(moveInd);
+  }
+
+  function revealCard(id) {
+    requestAnimationFrame(() => {
+      const el = $(`.card[data-id="${CSS.escape(id)}"]`);
+      if (!el) return;
+      el.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "center" });
+      if (!reduced) setTimeout(() => { el.animate([{ transform: "scale(1)" }, { transform: "scale(1.06)" }, { transform: "scale(1)" }], { duration: 600, easing: "cubic-bezier(.34,1.56,.64,1)" }); const [x, y] = centerOf(el); burst(x, y - 40, 16); }, 450);
+    });
+  }
+
+  /* ---------- Interactions sur la grille ---------- */
+  $("#grid").addEventListener("click", e => {
+    const b = e.target.closest("[data-act]"); if (!b) return;
+    const id = b.closest(".card").dataset.id;
+    if (b.dataset.act === "open") openDetail(id);
+    if (b.dataset.act === "want") { b.classList.add("pop"); toggleWant(id, b); }
+    if (b.dataset.act === "seen") { toggleSeen(id, b); }
   });
+  $("#rail").addEventListener("click", e => { const b = e.target.closest("[data-open]"); if (b) openDetail(b.dataset.open); });
+  $("#empty").addEventListener("click", e => {
+    const b = e.target.closest("[data-empty]"); if (!b) return;
+    if (b.dataset.empty === "settings") openSettings();
+    if (b.dataset.empty === "search") { q.focus(); q.scrollIntoView({ behavior: "smooth", block: "center" }); }
+    if (b.dataset.empty === "reset") { filt.platform = ""; setType("all"); }
+  });
+  if (canHover && !reduced) {
+    $("#grid").addEventListener("pointermove", e => {
+      const p = e.target.closest(".poster"); if (!p) return;
+      const r = p.getBoundingClientRect();
+      p.style.setProperty("--rx", `${((e.clientX - r.left) / r.width - .5) * 10}deg`);
+      p.style.setProperty("--ry", `${-((e.clientY - r.top) / r.height - .5) * 10}deg`);
+    });
+    $("#grid").addEventListener("pointerout", e => { const p = e.target.closest(".poster"); if (p && !p.contains(e.relatedTarget)) { p.style.removeProperty("--rx"); p.style.removeProperty("--ry"); } });
+  }
 
   function update(id, patch) { items[id] = Object.assign({}, items[id], patch, { updatedAt: Date.now() }); commit(); }
 
-  function setFilter(k, v) {
-    filt[k] = v;
-    const group = k === "status" ? "#statusChips" : "#typeChips";
-    if (k !== "platform") $(group).querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed", String(c.dataset[k] === v)));
+  /* ---------- Filtres ---------- */
+  function moveInd() {
+    const on = $(`#tabs button[aria-selected="true"]`), ind = $("#tabInd");
+    if (!on) return;
+    ind.style.left = on.offsetLeft + "px"; ind.style.width = on.offsetWidth + "px";
+  }
+  addEventListener("resize", moveInd);
+  function setTab(s) {
+    filt.status = s; shown.clear();
+    $$("#tabs button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.status === s)));
+    $("#tabs").dataset.on = s;
     render();
   }
-  $("#statusChips").addEventListener("click", e => { const c = e.target.closest(".chip"); if (c) setFilter("status", c.dataset.status); });
-  $("#typeChips").addEventListener("click", e => { const c = e.target.closest(".chip"); if (c) setFilter("type", c.dataset.type); });
-  $("#platformFilter").addEventListener("change", e => setFilter("platform", e.target.value));
-  $("#whoSeg").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; who = b.dataset.who; save(LS.who, who); render(); });
-
-  $("#randomBtn").addEventListener("click", () => {
-    let pool = visible().filter(d => !d.seen);
-    const matches = pool.filter(d => d.wants?.a && d.wants?.b);
-    if (matches.length) pool = matches;
-    if (!pool.length) return;
-    const d = pool[Math.floor(Math.random() * pool.length)];
-    showPick(d, false);
-    pickBody.insertAdjacentHTML("afterbegin", `<p class="hint" style="margin:0">${matches.length ? "Tiré parmi vos envies communes" : "Tiré au sort dans votre liste"} 🎲</p>`);
+  function setType(t) {
+    filt.type = t; shown.clear();
+    $$("#typeSeg button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.type === t)));
+    render();
+  }
+  $("#tabs").addEventListener("click", e => { const b = e.target.closest("button"); if (b) setTab(b.dataset.status); });
+  $("#typeSeg").addEventListener("click", e => { const b = e.target.closest("button"); if (b) setType(b.dataset.type); });
+  $("#platforms").addEventListener("click", e => { const b = e.target.closest("[data-pf]"); if (!b) return; filt.platform = b.dataset.pf; shown.clear(); render(); });
+  $("#who").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b || b.dataset.who === who) return;
+    who = b.dataset.who; save(LS.who, who); render();
+    toast(`Coucou ${nameOf(who)} !`);
   });
 
-  function scrollToCard(id) { requestAnimationFrame(() => document.getElementById("c-" + id)?.scrollIntoView({ behavior: "smooth", block: "center" })); }
+  const nav = $("#nav");
+  addEventListener("scroll", () => nav.classList.toggle("scrolled", scrollY > 8), { passive: true });
 
-  let toastT;
-  function toast(msg) { const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, 2400); }
+  /* ---------- Tirage au sort ---------- */
+  let stopRoll = false;
+  $("#rollBtn").addEventListener("click", () => roll());
+  function roll() {
+    let pool = base().filter(d => !d.seen);
+    if (filt.platform) pool = pool.filter(d => platformsOf(d).includes(filt.platform));
+    if (!pool.length) pool = base().filter(d => !d.seen);
+    const matches = pool.filter(d => d.wants?.a && d.wants?.b);
+    const fromMatches = matches.length > 0;
+    const final = (fromMatches ? matches : pool)[Math.floor(Math.random() * (fromMatches ? matches : pool).length)];
+    if (!final) return;
+    stopRoll = false;
+    const panel = $("#roulettePanel");
+    const bulbs = Array.from({ length: 16 }, (_, i) => {
+      const t = i / 16, per = t < .25 ? [t * 4 * 100, 0] : t < .5 ? [100, (t - .25) * 4 * 100] : t < .75 ? [100 - (t - .5) * 4 * 100, 100] : [0, 100 - (t - .75) * 4 * 100];
+      return `<i style="left:calc(${per[0]}% - 3px);top:calc(${per[1]}% - 3px)"></i>`;
+    }).join("");
+    panel.innerHTML = `<div class="grab"></div><button class="x" type="button" data-close aria-label="Fermer">${IC.x}</button>
+      <div class="roulette">
+        <span class="eyebrow">${fromMatches ? "Parmi vos coups de cœur communs" : "Parmi votre liste"}</span>
+        <div class="reel-wrap">
+          <div class="side" id="sideL"></div>
+          <div style="position:relative"><div class="bulbs">${bulbs}</div><div class="reel" id="reel"></div></div>
+          <div class="side" id="sideR"></div>
+        </div>
+        <h3 id="rollTitle">Roulement de tambour…</h3>
+        <div id="rollMascot">${mascot("wow")}</div>
+        <div class="acts" id="rollActs" hidden>
+          <button class="btn hot" data-r="open">${IC.arrow}Voir la fiche</button>
+          <button class="btn ghost" data-r="again">${IC.dice}Relancer</button>
+        </div>
+      </div>`;
+    openSheet($("#rouletteDlg"));
+    const deck = (fromMatches ? matches : pool);
+    const imgs = deck.map(d => imgPath(d.poster) ? `${IMG}w342${imgPath(d.poster)}` : "");
+    imgs.forEach(s => { if (s) { const im = new Image(); im.src = s; } });
+    const reel = $("#reel"), sl = $("#sideL"), sr = $("#sideR");
+    const frame = (d, el, cls = "") => el.innerHTML = imgPath(d.poster) ? `<img class="${cls}" src="${IMG}w342${imgPath(d.poster)}" alt="">` : `<div class="ph">${esc(d.title)}</div>`;
+    let delay = 55, i = Math.floor(Math.random() * deck.length);
+    const steps = reduced ? 0 : 22 + Math.floor(Math.random() * 6);
+    let k = 0;
+    const tick = () => {
+      if (stopRoll) return;
+      if (k >= steps) {
+        frame(final, reel); reel.classList.add("done");
+        $("#rollTitle").textContent = final.title;
+        $("#rollMascot").innerHTML = mascot("love");
+        $("#rollActs").hidden = false;
+        const [x, y] = centerOf(reel); burst(x, y, 34, "party");
+        return;
+      }
+      i = (i + 1) % deck.length;
+      frame(deck[i], reel, "tick");
+      if (deck.length > 1) { frame(deck[(i - 1 + deck.length) % deck.length], sl); frame(deck[(i + 1) % deck.length], sr); }
+      k++; delay = k > steps - 9 ? delay * 1.28 : delay;
+      setTimeout(tick, delay);
+    };
+    tick();
+    panel.onclick = async e => {
+      const b = e.target.closest("[data-r]"); if (!b) return;
+      if (b.dataset.r === "again") { stopRoll = true; await closeSheet($("#rouletteDlg")); roll(); }
+      if (b.dataset.r === "open") { await closeSheet($("#rouletteDlg")); openDetail(final.id); }
+    };
+  }
+  $("#rouletteDlg").addEventListener("click", e => { if (e.target === e.currentTarget || e.target.closest("[data-close]")) closeSheet(e.currentTarget); });
 
   /* ---------- Réglages ---------- */
   const sDlg = $("#settingsDlg");
   function openSettings() {
     $("#tmdbKey").value = cfg.key; $("#region").value = cfg.region; $("#nameA").value = cfg.nameA; $("#nameB").value = cfg.nameB;
     $("#syncUrl").value = cfg.syncUrl; $("#syncCode").value = cfg.syncCode;
-    $("#importArea").hidden = true; $("#importFoot").hidden = true;
-    sDlg.showModal();
+    $("#importField").hidden = true;
+    syncAv(); openSheet(sDlg);
   }
+  function syncAv() {
+    $("#avA").textContent = ($("#nameA").value.trim()[0] || "1").toUpperCase();
+    $("#avB").textContent = ($("#nameB").value.trim()[0] || "2").toUpperCase();
+  }
+  $("#nameA").addEventListener("input", syncAv); $("#nameB").addEventListener("input", syncAv);
   $("#openSettings").addEventListener("click", openSettings);
-  sDlg.addEventListener("close", () => {
-    if (sDlg.returnValue !== "save") return;
+  sDlg.addEventListener("click", e => { if (e.target === sDlg || e.target.closest("[data-close]")) closeSheet(sDlg); });
+  $("#settingsForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const regionChanged = cfg.region !== $("#region").value;
     cfg = {
       key: $("#tmdbKey").value.trim(), region: $("#region").value,
       nameA: $("#nameA").value.trim(), nameB: $("#nameB").value.trim(),
       syncUrl: $("#syncUrl").value.trim().replace(/\/+$/, ""), syncCode: $("#syncCode").value.trim()
     };
-    save(LS.cfg, cfg); render(); startSync(); toast("Réglages enregistrés");
+    save(LS.cfg, cfg); closeSheet(sDlg); render(); startSync();
+    toast(regionChanged ? "Réglages enregistrés. Utilisez ↻ dans une fiche pour mettre à jour ses plateformes." : "Réglages enregistrés");
   });
   $("#exportBtn").addEventListener("click", async () => {
     const txt = JSON.stringify(items);
     try { await navigator.clipboard.writeText(txt); toast("Liste copiée"); }
-    catch { const a = $("#importArea"); a.hidden = false; a.value = txt; a.select(); toast("Sélectionne et copie le texte"); }
+    catch { $("#importField").hidden = false; const a = $("#importArea"); a.value = txt; a.select(); toast("Sélectionne le texte et copie-le"); }
   });
-  $("#importBtn").addEventListener("click", () => { const a = $("#importArea"); a.hidden = false; a.value = ""; $("#importFoot").hidden = false; a.focus(); });
+  $("#importBtn").addEventListener("click", () => { $("#importField").hidden = false; $("#importArea").value = ""; $("#importArea").focus(); });
   $("#importDo").addEventListener("click", () => {
-    try { const inc = JSON.parse($("#importArea").value); if (typeof inc !== "object" || Array.isArray(inc)) throw 0; merge(inc); commit(); toast("Liste importée"); $("#importArea").hidden = true; $("#importFoot").hidden = true; }
-    catch { toast("Ce texte n'est pas une liste CinéA2"); }
+    try {
+      const inc = JSON.parse($("#importArea").value);
+      if (!inc || typeof inc !== "object" || Array.isArray(inc)) throw 0;
+      merge(inc); commit(); toast("Liste importée"); $("#importField").hidden = true;
+    } catch { toast("Ce texte n'est pas une liste CinéA2", "sleep"); }
   });
 
   /* ---------- Sauvegarde + synchro ---------- */
   function merge(inc) {
     let changed = false;
     for (const [id, r] of Object.entries(inc || {})) {
-      if (!r || typeof r !== "object" || !r.id) continue;
+      if (!r || typeof r !== "object" || !r.id || r.id !== id) continue;
       if (!items[id] || (r.updatedAt || 0) > (items[id].updatedAt || 0)) { items[id] = r; changed = true; }
     }
     return changed;
   }
-
   let pushT;
-  function commit() { save(LS.items, items); render(); clearTimeout(pushT); pushT = setTimeout(push, 400); }
+  function commit(rerender = true) { save(LS.items, items); if (rerender) render(); clearTimeout(pushT); pushT = setTimeout(push, 400); }
 
-  const syncEl = $("#syncState");
-  function syncState(cls, txt) { syncEl.className = "sync " + cls; syncEl.lastElementChild.textContent = txt; }
+  const gear = $("#openSettings");
+  function syncState(cls, txt) { gear.classList.remove("sync-on", "sync-err"); if (cls) gear.classList.add(cls); gear.title = txt ? `Réglages · ${txt}` : "Réglages"; }
   function syncUrl() {
     if (!cfg.syncUrl || !cfg.syncCode || !/^https:\/\//.test(cfg.syncUrl)) return "";
     return `${cfg.syncUrl}/cineadeux/${encodeURIComponent(cfg.syncCode.replace(/[.#$\[\]\/]/g, "_"))}.json`;
@@ -638,29 +1523,29 @@ dialog::backdrop { background: rgb(10 6 14 / .7); }
     try {
       const r = await fetch(u); if (!r.ok) throw 0;
       const remote = await r.json();
-      const changed = merge(remote || {});
-      if (changed) { save(LS.items, items); render(); }
-      // si on a des choses plus récentes que le serveur, on les renvoie
+      if (merge(remote || {})) { save(LS.items, items); render(); }
       const newer = Object.values(items).some(d => !remote?.[d.id] || (d.updatedAt || 0) > (remote[d.id].updatedAt || 0));
       if (newer) await push();
-      syncState("on", "Liste partagée");
-    } catch { syncState("err", "Synchro en pause"); }
+      syncState("sync-on", "liste partagée");
+    } catch { syncState("sync-err", "synchro en pause"); }
   }
   async function push() {
     const u = syncUrl(); if (!u) return;
-    try { const r = await fetch(u, { method: "PATCH", body: JSON.stringify(items) }); if (!r.ok) throw 0; syncState("on", "Liste partagée"); }
-    catch { syncState("err", "Synchro en pause"); }
+    try { const r = await fetch(u, { method: "PATCH", body: JSON.stringify(items) }); if (!r.ok) throw 0; syncState("sync-on", "liste partagée"); }
+    catch { syncState("sync-err", "synchro en pause"); }
   }
   let pollT;
   function startSync() {
     clearInterval(pollT);
-    if (!syncUrl()) { syncState("", "Sur cet appareil"); return; }
+    if (!syncUrl()) { syncState("", ""); return; }
     pull(); pollT = setInterval(() => { if (!document.hidden) pull(); }, 12000);
   }
   document.addEventListener("visibilitychange", () => { if (!document.hidden) pull(); });
+  addEventListener("storage", e => { if (e.key === LS.items) { items = load(LS.items, {}); render(); } });
 
   render();
   startSync();
+  if (document.fonts) document.fonts.ready.then(moveInd);
 })();
 </script>
 </body>
