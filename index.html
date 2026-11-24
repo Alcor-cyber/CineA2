@@ -503,6 +503,8 @@ dialog.closing .panel { animation: sheetDown .26s ease-in both; }
 .two .field label { display: flex; align-items: center; gap: 8px; }
 .two .field label .av { width: 22px; height: 22px; font-size: 10px; }
 .row-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.login-err { margin: 0; padding: 10px 14px; border-radius: 12px; background: rgb(255 61 87 / .12); color: #ff9aa8; font-size: 13.5px; font-weight: 600; }
+.field input:disabled { opacity: .6; }
 .settings .foot { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; position: sticky; bottom: 0; z-index: 3; margin: 0 -22px -22px; padding: 22px 22px 20px; background: linear-gradient(180deg, rgb(21 17 42 / 0), var(--ink-2) 35%); }
 
 /* Tirage au sort */
@@ -691,6 +693,7 @@ dialog.closing .panel { animation: sheetDown .26s ease-in both; }
 
       <div class="fs">
         <h3><i></i>Le couple</h3>
+        <p class="hint" id="namesHint" hidden>Les prénoms viennent de Foyer à deux. Pour les changer, modifiez-les là-bas.</p>
         <div class="two">
           <div class="field"><label for="nameA"><span class="av a" id="avA">A</span>Prénom 1</label><input id="nameA" maxlength="20" placeholder="Toi" autocomplete="off"></div>
           <div class="field"><label for="nameB"><span class="av b" id="avB">B</span>Prénom 2</label><input id="nameB" maxlength="20" placeholder="Ta moitié" autocomplete="off"></div>
@@ -703,6 +706,7 @@ dialog.closing .panel { animation: sheetDown .26s ease-in both; }
           <label for="tmdbKey">Clé API TMDB</label>
           <input id="tmdbKey" type="password" autocomplete="off" placeholder="Colle ta clé ici">
         </div>
+        <p class="hint" id="keyCloudHint" hidden>La clé est enregistrée dans votre liste partagée : l'autre téléphone la reçoit automatiquement.</p>
         <p class="hint">Gratuite : crée un compte sur <a href="https://www.themoviedb.org/signup" target="_blank" rel="noopener">themoviedb.org</a>, puis copie la « Clé d'API » dans <a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noopener">Paramètres → API</a>. Elle donne les titres, les affiches et les plateformes (données JustWatch). Elle reste sur ce téléphone.</p>
         <div class="field">
           <label for="region">Pays pour les plateformes</label>
@@ -716,9 +720,8 @@ dialog.closing .panel { animation: sheetDown .26s ease-in both; }
 
       <div class="fs">
         <h3><i></i>Liste partagée</h3>
-        <p class="hint">Pour avoir la même liste sur vos deux téléphones : crée une base « Realtime Database » gratuite sur <a href="https://console.firebase.google.com" target="_blank" rel="noopener">Firebase</a> (mode test), colle son adresse ici et choisissez un code secret. Mettez les mêmes réglages sur les deux téléphones.</p>
-        <div class="field"><label for="syncUrl">Adresse de la base</label><input id="syncUrl" inputmode="url" autocomplete="off" placeholder="https://mon-projet-default-rtdb.europe-west1.firebasedatabase.app"></div>
-        <div class="field"><label for="syncCode">Code secret du couple</label><input id="syncCode" autocomplete="off" placeholder="ex. popcorn-canape-2847"></div>
+        <p class="hint" id="accountText">La liste reste sur ce téléphone.</p>
+        <div class="row-btns"><button type="button" class="btn ghost" id="accountBtn" hidden>Se connecter</button></div>
       </div>
 
       <div class="fs">
@@ -742,7 +745,27 @@ dialog.closing .panel { animation: sheetDown .26s ease-in both; }
   </div>
 </dialog>
 
+<dialog class="sheet" id="loginDlg" aria-label="Connexion">
+  <div class="panel">
+    <div class="grab"></div>
+    <button class="x" type="button" data-close aria-label="Fermer"><svg class="ico" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    <form class="settings" id="loginForm">
+      <h2><span id="loginMascot"></span>Connexion</h2>
+      <p class="hint">Utilisez le même e-mail et le même mot de passe que sur Foyer à deux. Votre liste de films sera partagée entre vous deux, en direct.</p>
+      <div class="field"><label for="loginEmail">E-mail</label><input id="loginEmail" type="email" autocomplete="username" inputmode="email" required></div>
+      <div class="field"><label for="loginPass">Mot de passe</label><input id="loginPass" type="password" autocomplete="current-password" required></div>
+      <p class="login-err" id="loginErr" role="alert" hidden></p>
+      <div class="foot">
+        <button type="button" class="btn ghost" data-close>Plus tard</button>
+        <button type="submit" class="btn" id="loginBtn">Se connecter</button>
+      </div>
+    </form>
+  </div>
+</dialog>
+
 <div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script src="firebase-config.js"></script>
 
 <script>
 (() => {
@@ -761,7 +784,7 @@ dialog.closing .panel { animation: sheetDown .26s ease-in both; }
   const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
   const imgPath = p => (typeof p === "string" && /^\/[\w\-.]+$/.test(p)) ? p : "";
 
-  let cfg = Object.assign({ key: "", region: "FR", nameA: "", nameB: "", syncUrl: "", syncCode: "" }, load(LS.cfg, {}));
+  let cfg = Object.assign({ key: "", region: "FR", nameA: "", nameB: "" }, load(LS.cfg, {}));
   let items = load(LS.items, {});
   let who = load(LS.who, "a") === "b" ? "b" : "a";
   const filt = { status: "todo", type: "all", platform: "" };
@@ -848,6 +871,7 @@ dialog.closing .panel { animation: sheetDown .26s ease-in both; }
   $("#logoMascot").innerHTML = mascot("happy");
   $("#heroMascot").insertAdjacentHTML("beforeend", mascot("happy"));
   $("#setMascot").innerHTML = mascot("happy");
+  $("#loginMascot").innerHTML = mascot("love");
   const heroM = () => $("#heroMascot .m");
   let moodT;
   function setMood(mood, ms = 2200) {
@@ -1128,7 +1152,7 @@ dialog.closing .panel { animation: sheetDown .26s ease-in both; }
         const f = await fetchDetails(d.type, d.tmdbId);
         const { id: _i, ...rest } = f;
         items[id] = Object.assign({}, items[id], rest, { updatedAt: Date.now() });
-        commit(false);
+        persist(id, false);
         if (currentId === id && $("#detail").open) { const st = $("#detailPanel").scrollTop; $("#detailPanel").innerHTML = detailHtml(items[id], false); $("#detailPanel").scrollTop = st; }
       } catch {}
     }
@@ -1143,7 +1167,7 @@ dialog.closing .panel { animation: sheetDown .26s ease-in both; }
       items[d.id] = Object.assign({}, d, { addedBy: who, addedAt: now, wants: { a: who === "a", b: who === "b" }, seen: false, seenAt: 0, deleted: false, updatedAt: now });
       const [x, y] = centerOf(b); burst(x, y, 26);
       setMood("love", 2400);
-      commit(); await closeSheet($("#detail"));
+      persist(d.id); await closeSheet($("#detail"));
       q.value = ""; $("#clearQ").hidden = true;
       if (filt.status !== "todo") setTab("todo");
       toast(`« ${d.title} » ajouté à votre liste`, "love");
@@ -1362,7 +1386,7 @@ dialog.closing .panel { animation: sheetDown .26s ease-in both; }
     $("#grid").addEventListener("pointerout", e => { const p = e.target.closest(".poster"); if (p && !p.contains(e.relatedTarget)) { p.style.removeProperty("--rx"); p.style.removeProperty("--ry"); } });
   }
 
-  function update(id, patch) { items[id] = Object.assign({}, items[id], patch, { updatedAt: Date.now() }); commit(); }
+  function update(id, patch) { items[id] = Object.assign({}, items[id], patch, { updatedAt: Date.now() }); persist(id); }
 
   /* ---------- Filtres ---------- */
   function moveInd() {
@@ -1464,8 +1488,11 @@ dialog.closing .panel { animation: sheetDown .26s ease-in both; }
   const sDlg = $("#settingsDlg");
   function openSettings() {
     $("#tmdbKey").value = cfg.key; $("#region").value = cfg.region; $("#nameA").value = cfg.nameA; $("#nameB").value = cfg.nameB;
-    $("#syncUrl").value = cfg.syncUrl; $("#syncCode").value = cfg.syncCode;
     $("#importField").hidden = true;
+    const c = cloud();
+    $("#nameA").disabled = $("#nameB").disabled = c && fromFoyer;
+    $("#namesHint").hidden = !(c && fromFoyer); $("#keyCloudHint").hidden = !c;
+    renderAccount();
     syncAv(); openSheet(sDlg);
   }
   function syncAv() {
@@ -1478,12 +1505,11 @@ dialog.closing .panel { animation: sheetDown .26s ease-in both; }
   $("#settingsForm").addEventListener("submit", e => {
     e.preventDefault();
     const regionChanged = cfg.region !== $("#region").value;
-    cfg = {
-      key: $("#tmdbKey").value.trim(), region: $("#region").value,
-      nameA: $("#nameA").value.trim(), nameB: $("#nameB").value.trim(),
-      syncUrl: $("#syncUrl").value.trim().replace(/\/+$/, ""), syncCode: $("#syncCode").value.trim()
-    };
-    save(LS.cfg, cfg); closeSheet(sDlg); render(); startSync();
+    const keyChanged = cfg.key !== $("#tmdbKey").value.trim();
+    Object.assign(cfg, { key: $("#tmdbKey").value.trim(), region: $("#region").value });
+    if (!(cloud() && fromFoyer)) Object.assign(cfg, { nameA: $("#nameA").value.trim(), nameB: $("#nameB").value.trim() });
+    save(LS.cfg, cfg); closeSheet(sDlg); render();
+    if (cloud() && (keyChanged || regionChanged)) fs.doc("cinea2meta/config").set({ tmdbKey: cfg.key, region: cfg.region }, { merge: true }).catch(writeErr);
     toast(regionChanged ? "Réglages enregistrés. Utilisez ↻ dans une fiche pour mettre à jour ses plateformes." : "Réglages enregistrés");
   });
   $("#exportBtn").addEventListener("click", async () => {
@@ -1496,55 +1522,145 @@ dialog.closing .panel { animation: sheetDown .26s ease-in both; }
     try {
       const inc = JSON.parse($("#importArea").value);
       if (!inc || typeof inc !== "object" || Array.isArray(inc)) throw 0;
-      merge(inc); commit(); toast("Liste importée"); $("#importField").hidden = true;
+      merge(inc).forEach(id => persist(id, false)); render(); toast("Liste importée"); $("#importField").hidden = true;
     } catch { toast("Ce texte n'est pas une liste CinéA2", "sleep"); }
   });
 
-  /* ---------- Sauvegarde + synchro ---------- */
+  /* ---------- Sauvegarde + liste partagée (Firebase de Foyer à deux) ---------- */
   function merge(inc) {
-    let changed = false;
+    const changed = [];
     for (const [id, r] of Object.entries(inc || {})) {
       if (!r || typeof r !== "object" || !r.id || r.id !== id) continue;
-      if (!items[id] || (r.updatedAt || 0) > (items[id].updatedAt || 0)) { items[id] = r; changed = true; }
+      if (!items[id] || (r.updatedAt || 0) > (items[id].updatedAt || 0)) { items[id] = r; changed.push(id); }
     }
     return changed;
   }
-  let pushT;
-  function commit(rerender = true) { save(LS.items, items); if (rerender) render(); clearTimeout(pushT); pushT = setTimeout(push, 400); }
+  const clean = o => JSON.parse(JSON.stringify(o));
+
+  const FB_VERSION = "10.12.2";
+  let fs = null, user = null, unsub = [], fromFoyer = false, authReady = false;
+  const cloud = () => !!(fs && user);
+  const writeErr = e => { console.warn(e); toast(e && e.code === "permission-denied" ? "Ce compte n'a pas le droit de modifier la liste" : "Pas de réseau : la modification sera envoyée plus tard", "sleep"); };
+
+  function persist(id, rerender = true) {
+    save(LS.items, items);
+    if (rerender) render();
+    if (!cloud()) return;
+    const d = items[id], ref = fs.collection("cinea2").doc(id);
+    (d && !d.deleted ? ref.set(clean(d)) : ref.delete()).catch(writeErr);
+  }
 
   const gear = $("#openSettings");
   function syncState(cls, txt) { gear.classList.remove("sync-on", "sync-err"); if (cls) gear.classList.add(cls); gear.title = txt ? `Réglages · ${txt}` : "Réglages"; }
-  function syncUrl() {
-    if (!cfg.syncUrl || !cfg.syncCode || !/^https:\/\//.test(cfg.syncUrl)) return "";
-    return `${cfg.syncUrl}/cineadeux/${encodeURIComponent(cfg.syncCode.replace(/[.#$\[\]\/]/g, "_"))}.json`;
-  }
-  async function pull() {
-    const u = syncUrl(); if (!u) return;
-    try {
-      const r = await fetch(u); if (!r.ok) throw 0;
-      const remote = await r.json();
-      if (merge(remote || {})) { save(LS.items, items); render(); }
-      const newer = Object.values(items).some(d => !remote?.[d.id] || (d.updatedAt || 0) > (remote[d.id].updatedAt || 0));
-      if (newer) await push();
+
+  function renderAccount() {
+    const t = $("#accountText"), b = $("#accountBtn");
+    if (!window.FIREBASE_CONFIG) { t.textContent = "La liste reste sur ce téléphone."; b.hidden = true; return; }
+    if (cloud()) {
+      t.textContent = `Connecté avec ${user.email}. La liste est partagée entre vous deux, en direct.`;
+      b.textContent = "Se déconnecter"; b.dataset.act = "logout"; b.hidden = false;
       syncState("sync-on", "liste partagée");
-    } catch { syncState("sync-err", "synchro en pause"); }
+    } else {
+      t.textContent = authReady ? "Pas connecté : la liste reste sur ce téléphone." : "Connexion à votre liste partagée…";
+      b.textContent = "Se connecter"; b.dataset.act = "login"; b.hidden = !authReady;
+      syncState(authReady ? "sync-err" : "", authReady ? "pas connecté" : "");
+    }
   }
-  async function push() {
-    const u = syncUrl(); if (!u) return;
-    try { const r = await fetch(u, { method: "PATCH", body: JSON.stringify(items) }); if (!r.ok) throw 0; syncState("sync-on", "liste partagée"); }
-    catch { syncState("sync-err", "synchro en pause"); }
+  $("#accountBtn").addEventListener("click", async e => {
+    const act = e.currentTarget.dataset.act;
+    await closeSheet(sDlg);
+    if (act === "logout") firebase.auth().signOut(); else openLogin();
+  });
+
+  const loginDlg = $("#loginDlg");
+  const LOGIN_ERRORS = {
+    "auth/invalid-credential": "E-mail ou mot de passe incorrect.", "auth/wrong-password": "E-mail ou mot de passe incorrect.",
+    "auth/user-not-found": "E-mail ou mot de passe incorrect.", "auth/invalid-email": "Cette adresse e-mail n'est pas valide.",
+    "auth/too-many-requests": "Trop d'essais. Patientez quelques minutes puis réessayez.",
+    "auth/network-request-failed": "Pas de connexion internet. Vérifiez le réseau et réessayez.",
+    "auth/user-disabled": "Ce compte a été désactivé dans Firebase."
+  };
+  function loginError(msg) { const el = $("#loginErr"); el.textContent = msg || ""; el.hidden = !msg; }
+  function openLogin(msg) { loginError(msg); openSheet(loginDlg); if (canHover) setTimeout(() => $("#loginEmail").focus(), 350); }
+  loginDlg.addEventListener("click", e => { if (e.target === loginDlg || e.target.closest("[data-close]")) closeSheet(loginDlg); });
+  $("#loginForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    const btn = $("#loginBtn"); btn.disabled = true; btn.textContent = "Connexion…"; loginError("");
+    try { await firebase.auth().signInWithEmailAndPassword($("#loginEmail").value.trim(), $("#loginPass").value); $("#loginPass").value = ""; }
+    catch (err) { loginError(LOGIN_ERRORS[err.code] || "Connexion impossible. Réessayez dans un instant."); }
+    btn.disabled = false; btn.textContent = "Se connecter";
+  });
+
+  const loadScript = src => new Promise((res, rej) => { const el = document.createElement("script"); el.src = src; el.onload = res; el.onerror = () => rej(new Error(src)); document.head.appendChild(el); });
+
+  async function startCloud() {
+    renderAccount();
+    if (!window.FIREBASE_CONFIG) return;
+    try { if (!window.firebase) for (const m of ["app", "auth", "firestore"]) await loadScript(`https://www.gstatic.com/firebasejs/${FB_VERSION}/firebase-${m}-compat.js`); }
+    catch { authReady = true; renderAccount(); syncState("sync-err", "hors ligne"); toast("Le serveur en ligne ne répond pas : liste de ce téléphone uniquement", "sleep"); return; }
+    if (!firebase.apps.length) firebase.initializeApp(window.FIREBASE_CONFIG);
+    const db = firebase.firestore();
+    firebase.auth().onAuthStateChanged(async u => {
+      unsub.forEach(f => f()); unsub = []; fs = null; user = null; authReady = true;
+      if (!u) { renderAccount(); openLogin(); return; }
+      try { await db.doc("cinea2meta/config").get(); }
+      catch (err) {
+        if (err.code === "permission-denied") { await firebase.auth().signOut(); openLogin(`Le compte ${u.email} n'a pas accès à la liste partagée.`); return; }
+      }
+      fs = db; user = u;
+      closeSheet(loginDlg);
+      try { await sendLocal(); } catch (err) { console.warn(err); }
+      listenCloud();
+      renderAccount();
+    });
   }
-  let pollT;
-  function startSync() {
-    clearInterval(pollT);
-    if (!syncUrl()) { syncState("", ""); return; }
-    pull(); pollT = setInterval(() => { if (!document.hidden) pull(); }, 12000);
+
+  // Première connexion : envoie ce que ce téléphone contient (titres et clé TMDB) dans la liste partagée.
+  async function sendLocal() {
+    const snap = await fs.collection("cinea2").get();
+    const remote = new Map(snap.docs.map(d => [d.id, d.data()]));
+    const batch = fs.batch(); let n = 0, writes = 0;
+    for (const d of Object.values(items)) {
+      if (!d || !d.id || d.deleted) continue;
+      const r = remote.get(d.id);
+      if (!r || (d.updatedAt || 0) > (r.updatedAt || 0)) { batch.set(fs.collection("cinea2").doc(d.id), clean(d)); n++; writes++; }
+    }
+    if (cfg.key) {
+      const meta = await fs.doc("cinea2meta/config").get();
+      if (!(meta.exists && meta.data().tmdbKey)) { batch.set(fs.doc("cinea2meta/config"), { tmdbKey: cfg.key, region: cfg.region }, { merge: true }); writes++; }
+    }
+    if (writes) await batch.commit();
+    if (n) toast(`${n} titre${n > 1 ? "s" : ""} ajouté${n > 1 ? "s" : ""} à votre liste partagée`, "love");
   }
-  document.addEventListener("visibilitychange", () => { if (!document.hidden) pull(); });
-  addEventListener("storage", e => { if (e.key === LS.items) { items = load(LS.items, {}); render(); } });
+
+  function listenCloud() {
+    let first = true;
+    unsub.push(fs.collection("cinea2").onSnapshot(s => {
+      const next = {}; s.docs.forEach(d => { next[d.id] = Object.assign({}, d.data(), { id: d.id }); });
+      items = next; save(LS.items, items); render();
+      if (first) { first = false; toast(`Bonjour ${nameOf(who)} ! Votre liste est partagée`); }
+    }, err => { console.warn(err); syncState("sync-err", "synchro en pause"); }));
+    unsub.push(fs.doc("cinea2meta/config").onSnapshot(s => {
+      const m = s.exists ? s.data() : {};
+      if (m.tmdbKey) cfg.key = m.tmdbKey;
+      if (m.region) cfg.region = m.region;
+      save(LS.cfg, cfg); render();
+    }, () => {}));
+    // Prénoms et « qui est qui » repris de Foyer à deux (lecture seule)
+    unsub.push(fs.doc("config/couple").onSnapshot(s => {
+      const c = s.exists ? s.data() : {};
+      if (c.a || c.b) { fromFoyer = true; if (c.a) cfg.nameA = String(c.a).slice(0, 20); if (c.b) cfg.nameB = String(c.b).slice(0, 20); save(LS.cfg, cfg); render(); }
+    }, () => {}));
+    fs.doc("prefs/" + user.email).get().then(s => {
+      const me = s.exists ? s.data().me : null;
+      if (me === "a" || me === "b") { who = me; save(LS.who, who); render(); }
+    }).catch(() => {});
+  }
+
+  addEventListener("storage", e => { if (e.key === LS.items && !cloud()) { items = load(LS.items, {}); render(); } });
 
   render();
-  startSync();
+  startCloud();
   if (document.fonts) document.fonts.ready.then(moveInd);
 })();
 </script>

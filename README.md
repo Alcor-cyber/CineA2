@@ -4,21 +4,23 @@ La liste des films et séries à voir à deux, avec Popcorn, la mascotte. Chacun
 
 L'appli tient dans un seul fichier, `index.html`, hébergé par GitHub Pages.
 
+## Liste partagée
+
+CinéA2 utilise le même projet Firebase que Foyer à deux (`firebase-config.js`). On se connecte avec le même e-mail et le même mot de passe, et la liste est partagée entre vous deux, en direct.
+
+- Les films sont dans la collection Firestore `cinea2`, la clé TMDB et le pays dans `cinea2meta/config`. CinéA2 ne modifie aucune donnée de Foyer à deux : il lit seulement les prénoms (`config/couple`) et qui est qui (`prefs`).
+- Les règles Firestore de Foyer à deux protègent déjà ces collections : seuls vos deux comptes y ont accès.
+- À la première connexion, les titres déjà enregistrés sur le téléphone sont envoyés dans la liste partagée.
+
 ## Premier lancement
 
-1. Créez un compte gratuit sur [themoviedb.org](https://www.themoviedb.org/signup), puis copiez la « Clé d'API » dans [Paramètres → API](https://www.themoviedb.org/settings/api).
-2. Dans l'appli, ouvrez les réglages (⚙︎), collez la clé et mettez vos deux prénoms.
-
-La clé reste dans le navigateur de chaque téléphone. Elle n'est pas enregistrée dans ce dépôt public.
+1. Connectez-vous avec votre compte Foyer à deux.
+2. Ouvrez les réglages (⚙︎) et collez votre clé TMDB (gratuite : compte sur [themoviedb.org](https://www.themoviedb.org/signup), puis « Clé d'API » dans [Paramètres → API](https://www.themoviedb.org/settings/api)). Il suffit de le faire une fois : l'autre téléphone la reçoit automatiquement. Elle est rangée dans Firestore, pas dans ce dépôt public.
 
 ## Installer sur le téléphone
 
 - **iPhone (Safari)** : bouton **Partager**, puis **Sur l'écran d'accueil**.
 - **Android (Chrome)** : menu **⋮**, puis **Ajouter à l'écran d'accueil**.
-
-## Liste commune sur les deux téléphones (optionnel)
-
-Sans réglage, chaque téléphone garde sa propre liste. Pour en partager une seule, créez une « Realtime Database » dans Firebase, puis collez son adresse et le même code secret dans les réglages des deux téléphones.
 
 | Téléphone | Fiche d'un film |
 |---|---|
