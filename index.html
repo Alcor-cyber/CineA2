@@ -156,14 +156,17 @@ img { max-width: 100%; display: block; }
 .spark.k3 { right: -10%; top: 52%; color: var(--bubble); width: 14px; height: 14px; animation-delay: 1.6s; }
 @keyframes twinkle { 0%, 100% { transform: scale(.4) rotate(0); opacity: .2; } 50% { transform: scale(1) rotate(90deg); opacity: 1; } }
 
-.stats { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
-.stat {
-  display: inline-flex; align-items: center; gap: 8px; padding: 7px 13px 7px 10px; border-radius: 999px;
-  background: rgb(255 255 255 / .05); border: 1px solid var(--line); font-size: 13.5px; color: var(--muted);
+.stats {
+  grid-column: 1 / -1; display: grid; grid-template-columns: repeat(var(--n, 4), minmax(0, 1fr)); margin-top: 18px; max-width: 560px;
+  border-radius: 18px; border: 1px solid var(--line); background: rgb(255 255 255 / .045);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); overflow: hidden;
 }
-.stat span { white-space: nowrap; }
-.stat b { color: var(--text); font-weight: 700; font-variant-numeric: tabular-nums; }
-.stat i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); box-shadow: 0 0 12px var(--c); }
+.stat { position: relative; display: grid; gap: 3px; padding: 12px 14px 11px; min-width: 0; }
+.stat + .stat { border-left: 1px solid var(--line); }
+.stat::before { content: ""; position: absolute; left: 14px; right: 14px; top: 0; height: 2px; border-radius: 0 0 2px 2px; background: var(--c); box-shadow: 0 0 12px var(--c); }
+.stat b { font: 800 22px/1.05 var(--display); letter-spacing: -.02em; color: var(--text); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.stat b em { font-style: normal; font-size: .62em; margin-left: 2px; color: var(--muted); }
+.stat small { font-size: 12.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* ---------- Recherche ---------- */
 .search { position: relative; grid-column: 1 / -1; margin-top: 18px; z-index: 20; }
@@ -675,7 +678,10 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
   .two, .envies { grid-template-columns: 1fr; }
   .settings { padding: 26px 18px 18px; }
   .settings .foot { margin: 0 -18px -18px; padding-inline: 18px; }
-  .stat { font-size: 12.5px; padding: 6px 11px 6px 9px; }
+  .stat { padding: 11px 10px 10px; }
+  .stat::before { left: 10px; right: 10px; }
+  .stat b { font-size: 19px; }
+  .stat small { font-size: 11.5px; }
   .sec-h { flex-direction: column; align-items: flex-start; gap: 4px; }
   .sec-h h2 { font-size: 17px; }
 }
@@ -1406,13 +1412,14 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
     const minutes = todo.filter(d => d.type === "movie").reduce((s, d) => s + (d.runtime || 0), 0);
     const series = todo.filter(d => d.type === "tv").length;
     const st = [
-      [`<b>${todo.length}</b> à voir`, "var(--butter)"],
-      [`<b>${match.length}</b> match${match.length > 1 ? "s" : ""}`, "var(--cherry)"],
+      [String(todo.length), "à voir", "var(--butter)"],
+      [String(match.length), match.length > 1 ? "matchs" : "match", "var(--cherry)"]
     ];
-    if (minutes) st.push([`<b>${Math.round(minutes / 60)} h</b> de films`, "var(--sky)"]);
-    if (series) st.push([`<b>${series}</b> série${series > 1 ? "s" : ""}`, "var(--mint)"]);
+    if (minutes) st.push([`${Math.round(minutes / 60)}<em>h</em>`, "de films", "var(--sky)"]);
+    if (series) st.push([String(series), series > 1 ? "séries" : "série", "var(--mint)"]);
     $("#stats").hidden = !all.length;
-    $("#stats").innerHTML = st.map(([t, c]) => `<span class="stat" style="--c:${c}"><i></i><span>${t}</span></span>`).join("");
+    $("#stats").style.setProperty("--n", st.length);
+    $("#stats").innerHTML = st.map(([n, l, c]) => `<div class="stat" style="--c:${c}"><b>${n}</b><small>${l}</small></div>`).join("");
   }
 
   function renderMatches(all) {
