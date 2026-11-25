@@ -85,8 +85,10 @@ img { max-width: 100%; display: block; }
 @keyframes drift2 { to { transform: translate(-16vmax, 12vmax) scale(.9); } }
 @keyframes drift3 { to { transform: translate(-12vmax, -8vmax) scale(1.2); } }
 /* Économie de batterie : décor figé quand une fenêtre est ouverte, l'appli en arrière-plan ou inactive */
-html.lock .stage .spot, html.lock .nav *, html.lock main *, html.lock main *::before, html.lock main *::after,
-html.idle *, html.idle *::before, html.idle *::after { animation-play-state: paused !important; }
+/* (seulement les éléments animés en continu : une règle trop large ralentirait l'ouverture des fiches) */
+html.lock .stage .spot, html.lock .nav :is(.bob, .shadow, .kpop, .blink),
+html.lock main :is(.bob, .shadow, .kpop, .blink, .zz, .spark, .grad, .ribbon .ico, .mcard .heart, .newon),
+html.idle :is(.stage .spot, .bob, .shadow, .kpop, .blink, .zz, .spark, .grad, .ribbon .ico, .mcard .heart, .newon, .bulbs i, .sp-dots i) { animation-play-state: paused !important; }
 @media (hover: none), (max-width: 640px) {
   /* les projecteurs sont déjà des dégradés doux : pas de flou à recalculer sur téléphone */
   .stage .spot { filter: none; will-change: auto; }
