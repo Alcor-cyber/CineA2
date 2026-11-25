@@ -281,6 +281,32 @@ img { max-width: 100%; display: block; }
 .seg button { border: 0; background: transparent; padding: 6px 13px; border-radius: 999px; font-weight: 600; font-size: 13px; color: var(--muted); transition: background .25s, color .25s; }
 .seg button[aria-pressed="true"] { background: var(--text); color: var(--outline); }
 
+.tools-mid { display: inline-flex; align-items: center; gap: 8px; }
+.gbtn {
+  position: relative; display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 15px; border-radius: 999px;
+  border: 1px solid var(--line); background: rgb(255 255 255 / .03); color: var(--muted); font-weight: 600; font-size: 13px; white-space: nowrap;
+  transition: background .25s, color .25s, border-color .25s, transform .3s var(--spring);
+}
+.gbtn .ico { width: 18px; height: 18px; }
+.gbtn:hover { color: var(--text); }
+.gbtn:active { transform: scale(.94); }
+.gbtn[aria-expanded="true"] { color: var(--text); border-color: var(--line-2); background: rgb(255 255 255 / .09); }
+.gbtn.on { color: var(--outline); background: var(--butter); border-color: var(--butter); box-shadow: 0 6px 18px -6px rgb(255 200 58 / .7); }
+.gbtn .gl { max-width: 14ch; overflow: hidden; text-overflow: ellipsis; }
+.gbtn .dot { position: absolute; right: 1px; top: 1px; width: 11px; height: 11px; border-radius: 50%; background: var(--cherry); border: 2px solid var(--ink); display: none; }
+.genres { display: flex; flex-wrap: wrap; gap: 8px; padding: 14px 0 2px; }
+.genres:not([hidden]) { animation: drop .3s var(--out); }
+.gchip {
+  display: inline-flex; align-items: center; gap: 7px; padding: 7px 13px; border-radius: 999px; border: 1px solid var(--line);
+  background: rgb(255 255 255 / .04); font-size: 13px; font-weight: 600; color: var(--muted);
+  transition: border-color .2s, background .2s, color .2s, transform .3s var(--spring);
+}
+.gchip:active { transform: scale(.94); }
+.gchip i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); box-shadow: 0 0 8px var(--c); }
+.gchip em { font-style: normal; font-size: 11.5px; color: var(--faint); font-variant-numeric: tabular-nums; }
+.gchip[aria-pressed="true"] { border-color: var(--c); background: color-mix(in srgb, var(--c) 16%, transparent); color: var(--text); }
+.gchip.zero { opacity: .5; }
+.roll .l-short { display: none; }
 .platforms { display: flex; gap: 8px; overflow-x: auto; padding: 14px 2px 4px; margin-inline: -2px; scrollbar-width: none; }
 .platforms::-webkit-scrollbar { display: none; }
 .pchip {
@@ -551,7 +577,8 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
 
 /* Tirage au sort */
 .roulette { padding: 30px 22px 24px; display: grid; justify-items: center; text-align: center; gap: 16px; }
-.roulette .eyebrow { justify-self: center; }
+.roulette .eyebrow { justify-self: center; max-width: 100%; padding-inline: 44px; flex-wrap: wrap; justify-content: center; text-align: center; line-height: 1.6; }
+.roulette .eyebrow::before { display: none; }
 .reel-wrap { position: relative; display: grid; grid-template-columns: 70px 170px 70px; gap: 14px; align-items: center; margin-top: 6px; }
 .reel { position: relative; width: 170px; aspect-ratio: 2 / 3; border-radius: 18px; overflow: hidden; background: var(--ink-3); box-shadow: 0 0 0 3px var(--butter), 0 0 50px -6px rgb(255 200 58 / .6); }
 .reel img { width: 100%; height: 100%; object-fit: cover; }
@@ -685,7 +712,14 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
   .sec-h { flex-direction: column; align-items: flex-start; gap: 4px; }
   .sec-h h2 { font-size: 17px; }
 }
-@media (max-width: 380px) { .tools .roll span { display: none; } }
+@media (max-width: 640px) {
+  .tools .roll { flex: 1; padding-inline: 12px; }
+  .roll .l-long { display: none; }
+  .roll .l-short { display: inline; }
+  .gbtn { padding: 0 12px; }
+  .gbtn .gl { display: none; }
+  .gbtn.on .dot { display: block; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
@@ -759,16 +793,22 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
       <button role="tab" data-status="match" aria-selected="false">Matchs <span class="n" id="nMatch">0</span></button>
       <button role="tab" data-status="seen" aria-selected="false">Vus <span class="n" id="nSeen">0</span></button>
     </div>
-    <div class="seg" id="typeSeg" role="group" aria-label="Type">
-      <button type="button" data-type="all" aria-pressed="true">Tout</button>
-      <button type="button" data-type="movie" aria-pressed="false">Films</button>
-      <button type="button" data-type="tv" aria-pressed="false">Séries</button>
+    <div class="tools-mid">
+      <div class="seg" id="typeSeg" role="group" aria-label="Type">
+        <button type="button" data-type="all" aria-pressed="true">Tout</button>
+        <button type="button" data-type="movie" aria-pressed="false">Films</button>
+        <button type="button" data-type="tv" aria-pressed="false">Séries</button>
+      </div>
+      <button class="gbtn" id="genreBtn" type="button" aria-expanded="false" aria-controls="genres" aria-label="Trier par catégorie" title="Trier par catégorie">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></svg><span class="gl" id="genreLbl">Catégories</span><span class="dot"></span>
+      </button>
     </div>
     <button class="btn roll" id="rollBtn" type="button">
       <svg class="ico" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1.3" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.3" fill="currentColor"/><circle cx="15.5" cy="8.5" r="1.3" fill="currentColor"/><circle cx="8.5" cy="15.5" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/></svg>
-      <span>Tirer au sort</span>
+      <span class="l-long">Tirer au sort</span><span class="l-short">Hasard</span>
     </button>
   </div>
+  <div class="genres" id="genres" role="group" aria-label="Catégories" hidden></div>
   <div class="platforms" id="platforms" role="group" aria-label="Plateformes"></div>
 
   <section class="grid" id="grid" aria-live="polite"></section>
@@ -893,7 +933,12 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
   if (!Array.isArray(cfg.platforms)) cfg.platforms = [];
   let items = load(LS.items, {});
   let who = load(LS.who, "a") === "b" ? "b" : "a";
-  const filt = { status: "todo", type: "all", platform: "" };
+  const filt = { status: "todo", type: "all", platform: "", genre: "" };
+  // « Action & Aventure » (séries) compte à la fois comme Action et comme Aventure
+  const genresOf = d => [...new Set((d.genres || []).flatMap(g => String(g).split(/\s*&\s*/)).map(g => g.trim()).filter(Boolean).map(g => g[0].toUpperCase() + g.slice(1)))];
+  const G_COLORS = ["var(--butter)", "var(--cherry)", "var(--sky)", "var(--mint)", "var(--bubble)", "#b48cff", "#ff9f3a"];
+  const gColor = g => G_COLORS[[...g].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7) % G_COLORS.length];
+  let genresOpen = false;
   const shown = new Set();
 
   const nameOf = w => (w === "a" ? cfg.nameA : cfg.nameB) || (w === "a" ? "Moi" : "Ma moitié");
@@ -1392,7 +1437,33 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
 
   /* ---------- Rendu ---------- */
   function platformsOf(d) { return (d.providers?.flat || []).map(p => platKey(p.name)); }
-  function base() { return live().filter(d => filt.type === "all" || d.type === filt.type); }
+  function base() { return live().filter(d => (filt.type === "all" || d.type === filt.type) && (!filt.genre || genresOf(d).includes(filt.genre))); }
+
+  function renderGenres() {
+    const pool = live().filter(d => (filt.type === "all" || d.type === filt.type) && (filt.status === "seen" ? d.seen : !d.seen));
+    const counts = new Map();
+    pool.forEach(d => genresOf(d).forEach(g => counts.set(g, (counts.get(g) || 0) + 1)));
+    const list = [...counts.entries()].sort((x, y) => y[1] - x[1] || x[0].localeCompare(y[0], "fr"));
+    if (filt.genre && !counts.has(filt.genre)) list.unshift([filt.genre, 0]);
+    const btn = $("#genreBtn"), box = $("#genres");
+    btn.hidden = !list.length;
+    btn.classList.toggle("on", !!filt.genre);
+    $("#genreLbl").textContent = filt.genre || "Catégories";
+    btn.title = filt.genre ? `Catégorie : ${filt.genre}` : "Trier par catégorie";
+    btn.setAttribute("aria-expanded", String(genresOpen && list.length > 0));
+    box.hidden = !(genresOpen && list.length);
+    box.innerHTML = `<button class="gchip" type="button" data-g="" aria-pressed="${!filt.genre}" style="--c:var(--text)">Toutes</button>` +
+      list.map(([g, c]) => `<button class="gchip ${c ? "" : "zero"}" type="button" data-g="${esc(g)}" aria-pressed="${filt.genre === g}" style="--c:${gColor(g)}"><i></i>${esc(g)}<em>${c}</em></button>`).join("");
+  }
+
+  // Ce que le tirage au sort peut choisir : l'onglet, le type, la catégorie et la plateforme affichés
+  function rollPool() {
+    let pool = base().filter(d => !d.seen);
+    if (filt.platform) pool = pool.filter(d => platformsOf(d).includes(filt.platform));
+    const matches = pool.filter(d => d.wants?.a && d.wants?.b);
+    if (filt.status === "match" || matches.length) return { deck: matches, fromMatches: true };
+    return { deck: pool, fromMatches: false };
+  }
 
   function renderWho() {
     $$("#who button").forEach(b => {
@@ -1495,6 +1566,7 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
     renderStats(live());
     renderMatches(all);
     renderPlatforms(all);
+    renderGenres();
 
     let list = filt.status === "seen" ? seen.sort((x, y) => (y.seenAt || 0) - (x.seenAt || 0))
       : (filt.status === "match" ? match : todo).sort((x, y) => (y.addedAt || 0) - (x.addedAt || 0));
@@ -1513,10 +1585,10 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
         : !total ? ["happy", "La salle est vide", "Tape le nom d'un film ou d'une série dans la barre de recherche pour lancer votre liste.", `<button class="btn" data-empty="search">${IC.plus}Ajouter un premier titre</button>`]
         : filt.status === "seen" ? ["sleep", "Rien de vu pour l'instant", "Appuyez sur ✓ quand vous avez regardé un film : il viendra se ranger ici.", ""]
         : filt.status === "match" ? ["love", "Pas encore de coup de cœur commun", "Chacun de votre côté, appuyez sur le cœur. Les titres que vous voulez voir tous les deux arrivent ici.", ""]
-        : ["wow", "Rien avec ces filtres", "Change de type ou de plateforme pour retrouver vos titres.", `<button class="btn ghost" data-empty="reset">Tout afficher</button>`];
+        : ["wow", "Rien avec ces filtres", "Change de type, de catégorie ou de plateforme pour retrouver vos titres.", `<button class="btn ghost" data-empty="reset">Tout afficher</button>`];
       empty.innerHTML = `${mascot(mood)}<h2>${h}</h2><p>${p}</p>${btn}`;
     }
-    $("#rollBtn").disabled = !todo.length;
+    $("#rollBtn").disabled = !rollPool().deck.length;
     $("#tools").hidden = !live().length;
     requestAnimationFrame(moveInd);
   }
@@ -1543,7 +1615,7 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
     const b = e.target.closest("[data-empty]"); if (!b) return;
     if (b.dataset.empty === "settings") openSettings();
     if (b.dataset.empty === "search") { q.focus(); q.scrollIntoView({ behavior: "smooth", block: "center" }); }
-    if (b.dataset.empty === "reset") { filt.platform = ""; setType("all"); }
+    if (b.dataset.empty === "reset") { filt.platform = ""; filt.genre = ""; setType("all"); }
   });
   if (canHover && !reduced) {
     $("#grid").addEventListener("pointermove", e => {
@@ -1577,6 +1649,11 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
   }
   $("#tabs").addEventListener("click", e => { const b = e.target.closest("button"); if (b) setTab(b.dataset.status); });
   $("#typeSeg").addEventListener("click", e => { const b = e.target.closest("button"); if (b) setType(b.dataset.type); });
+  $("#genreBtn").addEventListener("click", () => { genresOpen = !genresOpen; renderGenres(); });
+  $("#genres").addEventListener("click", e => {
+    const b = e.target.closest("[data-g]"); if (!b) return;
+    filt.genre = b.dataset.g; shown.clear(); render();
+  });
   $("#platforms").addEventListener("click", e => {
     if (e.target.closest("[data-pf-settings]")) { openSettings(); setTimeout(() => $("#platFs").scrollIntoView({ behavior: "smooth", block: "start" }), 450); return; }
     const b = e.target.closest("[data-pf]"); if (!b) return; filt.platform = b.dataset.pf; shown.clear(); render();
@@ -1594,13 +1671,13 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
   let stopRoll = false;
   $("#rollBtn").addEventListener("click", () => roll());
   function roll() {
-    let pool = base().filter(d => !d.seen);
-    if (filt.platform) pool = pool.filter(d => platformsOf(d).includes(filt.platform));
-    if (!pool.length) pool = base().filter(d => !d.seen);
-    const matches = pool.filter(d => d.wants?.a && d.wants?.b);
-    const fromMatches = matches.length > 0;
-    const final = (fromMatches ? matches : pool)[Math.floor(Math.random() * (fromMatches ? matches : pool).length)];
+    const { deck, fromMatches } = rollPool();
+    const final = deck[Math.floor(Math.random() * deck.length)];
     if (!final) return;
+    const scope = [fromMatches ? "Parmi vos coups de cœur communs" : "Parmi votre liste"];
+    if (filt.type !== "all") scope.push(filt.type === "tv" ? "séries" : "films");
+    if (filt.genre) scope.push(filt.genre.toLowerCase());
+    if (filt.platform) scope.push(filt.platform);
     stopRoll = false;
     const panel = $("#roulettePanel");
     const bulbs = Array.from({ length: 16 }, (_, i) => {
@@ -1609,7 +1686,7 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
     }).join("");
     panel.innerHTML = `<div class="grab"></div><button class="x" type="button" data-close aria-label="Fermer">${IC.x}</button>
       <div class="roulette">
-        <span class="eyebrow">${fromMatches ? "Parmi vos coups de cœur communs" : "Parmi votre liste"}</span>
+        <span class="eyebrow">${esc(scope.join(" · "))}</span>
         <div class="reel-wrap">
           <div class="side" id="sideL"></div>
           <div style="position:relative"><div class="bulbs">${bulbs}</div><div class="reel" id="reel"></div></div>
@@ -1623,7 +1700,6 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
         </div>
       </div>`;
     openSheet($("#rouletteDlg"));
-    const deck = (fromMatches ? matches : pool);
     const imgs = deck.map(d => imgPath(d.poster) ? `${IMG}w342${imgPath(d.poster)}` : "");
     imgs.forEach(s => { if (s) { const im = new Image(); im.src = s; } });
     const reel = $("#reel"), sl = $("#sideL"), sr = $("#sideR");
