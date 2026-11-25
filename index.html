@@ -2397,7 +2397,7 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
   async function onSwipe(dir, r) {
     const k = skey(r);
     if (dir === "left") { swAdd(who, k); return; }
-    if (dir === "up") { swAdd("vu", k); return; }
+    if (dir === "up") { swAdd("vu", k); markSeen(r.media_type, r.id); return; }
     const other = who === "a" ? "b" : "a", d = items[k];
     const match = !!(d && !d.deleted && !d.seen && d.wants?.[other]);
     if (match) showMatch(r); else { const [x, y] = centerOf($("#deck")); burst(x, y, 12, "love"); }
@@ -2683,6 +2683,32 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
   const STALE = 7 * 864e5;
   let refreshT, refreshing = false;
   function scheduleRefresh() { clearTimeout(refreshT); refreshT = setTimeout(autoRefresh, 2500); }
+  // Déjà vu (swipe vers le haut) : le titre rejoint l'onglet « Vus ».
+  async function markSeen(type, id, quiet = false) {
+    const k = `${type}-${id}`, d = items[k], now = Date.now();
+    if (d && !d.deleted) { if (!d.seen) update(k, { seen: true, seenAt: now }); return true; }
+    try {
+      const f = await fetchDetails(type, id);
+      items[k] = Object.assign({}, f, { addedBy: who, addedAt: now, wants: { a: false, b: false }, seen: true, seenAt: now, deleted: false, updatedAt: now });
+      persist(k, !quiet);
+      return true;
+    } catch { return false; }
+  }
+  // Une seule fois par titre : range dans « Vus » les titres envoyés vers le haut avant cette mise à jour.
+  async function backfillSeen() {
+    const done = new Set(load("cad.vuDone", []));
+    const todo = SW.vu.filter(k => !done.has(k));
+    let n = 0;
+    for (const k of todo) {
+      const m = /^(movie|tv)-(\d+)$/.exec(k);
+      if (m && !(items[k] && !items[k].deleted)) { if (!(await markSeen(m[1], +m[2], true))) continue; n++; }
+      else if (m && items[k] && !items[k].seen) { update(k, { seen: true, seenAt: Date.now() }); n++; }
+      done.add(k);
+    }
+    save("cad.vuDone", [...done]);
+    if (n) { render(); toast(`${n} titre${n > 1 ? "s" : ""} déjà vu${n > 1 ? "s" : ""} rangé${n > 1 ? "s" : ""} dans « Vus »`); }
+  }
+
   async function autoRefresh() {
     if (refreshing || !cfg.key) return;
     refreshing = true;
@@ -2712,6 +2738,7 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
     if (due.length) render();
     if (news.length === 1) toast(`« ${news[0][0]} » vient d'arriver sur ${news[0][1]}`, "love");
     else if (news.length > 1) toast(`${news.length} titres viennent d'arriver sur vos plateformes`, "love");
+    if (cfg.key) backfillSeen().catch(() => {});
   }
   document.addEventListener("visibilitychange", () => { if (!document.hidden) scheduleRefresh(); });
 

@@ -31,7 +31,7 @@ Dans les suggestions, le mode **Swipe** présente les titres un par un :
 
 - **à droite** : j'ai envie, le titre s'ajoute à votre liste avec votre cœur ;
 - **à gauche** : pas pour moi, il ne vous sera plus proposé ;
-- **vers le haut** : déjà vu, il disparaît des suggestions pour vous deux.
+- **vers le haut** : déjà vu, il rejoint votre onglet « Vus » et disparaît des suggestions pour vous deux.
 
 Si l'autre avait déjà swipé le même titre à droite : « C'est un match ! ».
 
