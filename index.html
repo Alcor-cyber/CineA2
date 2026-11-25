@@ -321,19 +321,6 @@ img { max-width: 100%; display: block; }
   .sortpanel .linkbtn { grid-column: 1 / -1; justify-self: center; padding: 4px 10px; }
 }
 .roll .l-short { display: none; }
-.platforms { display: flex; gap: 8px; overflow-x: auto; padding: 14px 2px 4px; margin-inline: -2px; scrollbar-width: none; }
-.platforms::-webkit-scrollbar { display: none; }
-.pchip {
-  flex: none; display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px 4px 4px; border-radius: 999px;
-  border: 1px solid var(--line); background: rgb(255 255 255 / .04); font-size: 13px; font-weight: 600; color: var(--muted);
-  transition: border-color .2s, background .2s, color .2s, transform .3s var(--spring);
-}
-.pchip:hover { color: var(--text); transform: translateY(-1px); }
-.pchip img, .pchip .all { width: 26px; height: 26px; border-radius: 8px; object-fit: cover; }
-.pchip .all { display: grid; place-items: center; background: linear-gradient(135deg, var(--butter), var(--cherry)); color: var(--outline); }
-.pchip .all .ico { width: 14px; height: 14px; }
-.pchip em { font-style: normal; font-size: 11.5px; color: var(--faint); font-variant-numeric: tabular-nums; }
-.pchip[aria-pressed="true"] { border-color: var(--butter); background: rgb(255 200 58 / .12); color: var(--text); }
 
 /* ---------- Grille d'affiches ---------- */
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 30px 20px; margin-block: 22px 70px; }
@@ -388,9 +375,6 @@ img { max-width: 100%; display: block; }
 .warn .acc { flex: none; }
 .prov-chip.mine { border-color: rgb(52 224 176 / .6); background: rgb(52 224 176 / .1); }
 .prov-chip.mine::after { content: "✓"; color: var(--mint); font-weight: 800; }
-.pchip.zero { opacity: .5; }
-.pchip.add { border-style: dashed; color: var(--butter); }
-.pchip.add .all { background: rgb(255 200 58 / .15); color: var(--butter); }
 .plat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
 .plat {
   position: relative; display: flex; align-items: center; gap: 10px; min-width: 0; padding: 6px 8px 6px 6px; border-radius: 14px;
@@ -881,8 +865,8 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
     <div class="field"><label for="genreSel">Catégorie</label><select id="genreSel"></select></div>
     <div class="field"><label for="platSel">Plateforme</label><select id="platSel"></select></div>
     <button type="button" class="linkbtn" id="sortReset" hidden>Tout effacer</button>
+    <button type="button" class="linkbtn" id="sortPlatSettings" hidden>Choisir nos plateformes</button>
   </div>
-  <div class="platforms" id="platforms" role="group" aria-label="Plateformes"></div>
 
   <section class="grid" id="grid" aria-live="polite"></section>
   <div class="empty" id="empty" hidden></div>
@@ -1543,12 +1527,14 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
     const genres = [...counts.entries()].sort((x, y) => y[1] - x[1] || x[0].localeCompare(y[0], "fr"));
     if (filt.genre && !counts.has(filt.genre)) genres.unshift([filt.genre, 0]);
     const plats = platformChoices(all);
+    if (filt.platform && !plats.some(x => x[0] === filt.platform)) filt.platform = "";
     const opt = (v, label, sel) => `<option value="${esc(v)}"${sel ? " selected" : ""}>${esc(label)}</option>`;
     const gs = $("#genreSel"), ps = $("#platSel");
     gs.innerHTML = opt("", "Toutes", !filt.genre) + genres.map(([g, c]) => opt(g, `${g} (${c})`, filt.genre === g)).join("");
     ps.innerHTML = opt("", "Toutes", !filt.platform) + plats.map(([n, c]) => opt(n, `${n} (${c})`, filt.platform === n)).join("");
     gs.classList.toggle("on", !!filt.genre); ps.classList.toggle("on", !!filt.platform);
     $("#sortReset").hidden = !(filt.genre || filt.platform);
+    $("#sortPlatSettings").hidden = (cfg.platforms || []).length > 0;
     const active = [filt.genre, filt.platform].filter(Boolean);
     const btn = $("#genreBtn");
     btn.hidden = !live().length;
@@ -1610,16 +1596,7 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
       : [...counts.entries()].sort((x, y) => y[1] - x[1]).map(([n, c]) => [n, c, logos.get(n)]);
   }
 
-  function renderPlatforms(all) {
-    const mine = cfg.platforms || [];
-    const list = platformChoices(all);
-    if (filt.platform && !list.some(x => x[0] === filt.platform)) filt.platform = "";
-    const box = $("#platforms");
-    box.hidden = filt.status === "seen" || !all.length;
-    box.innerHTML = `<button class="pchip" data-pf="" aria-pressed="${!filt.platform}"><span class="all">${IC.grid}</span>Partout</button>` +
-      list.map(([n, c, logo]) => `<button class="pchip ${c ? "" : "zero"}" data-pf="${esc(n)}" aria-pressed="${filt.platform === n}">${imgPath(logo) ? `<img src="${IMG}w92${imgPath(logo)}" alt="" loading="lazy">` : ""}${esc(n)}<em>${c}</em></button>`).join("") +
-      (mine.length ? "" : `<button class="pchip add" data-pf-settings="1"><span class="all">${IC.plus}</span>Choisir nos plateformes</button>`);
-  }
+
 
   function cardHtml(d, isNew, i) {
     const both = d.wants?.a && d.wants?.b;
@@ -1666,7 +1643,6 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
     $("#nTodo").textContent = todo.length; $("#nSeen").textContent = seen.length; $("#nMatch").textContent = match.length;
     renderStats(live());
     renderMatches(all);
-    renderPlatforms(all);
     renderSort(all);
 
     let list = filt.status === "seen" ? seen.sort((x, y) => (y.seenAt || 0) - (x.seenAt || 0))
@@ -1754,10 +1730,8 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
   $("#genreSel").addEventListener("change", e => { filt.genre = e.target.value; shown.clear(); render(); });
   $("#platSel").addEventListener("change", e => { filt.platform = e.target.value; shown.clear(); render(); });
   $("#sortReset").addEventListener("click", () => { filt.genre = ""; filt.platform = ""; shown.clear(); render(); });
-  $("#platforms").addEventListener("click", e => {
-    if (e.target.closest("[data-pf-settings]")) { openSettings(); setTimeout(() => $("#platFs").scrollIntoView({ behavior: "smooth", block: "start" }), 450); return; }
-    const b = e.target.closest("[data-pf]"); if (!b) return; filt.platform = b.dataset.pf; shown.clear(); render();
-  });
+  $("#sortPlatSettings").addEventListener("click", () => { openSettings(); setTimeout(() => $("#platFs").scrollIntoView({ behavior: "smooth", block: "start" }), 450); });
+
 
   const nav = $("#nav");
   addEventListener("scroll", () => nav.classList.toggle("scrolled", scrollY > 8), { passive: true });
