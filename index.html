@@ -1564,6 +1564,24 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
     [/^arte/i, q => `https://www.arte.tv/fr/search/?q=${q}`],
     [/france ?tv|france\.tv/i, q => `https://www.france.tv/recherche/?q=${q}`]
   ];
+  // Sur iPhone, ces plateformes s'ouvrent directement dans leur appli grâce à leur adresse spéciale.
+  const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const APP_SCHEME = [
+    [/netflix/i, q => `nflx://www.netflix.com/search?q=${q}`]
+  ];
+  function appUrl(name, d) {
+    if (!isIOS) return "";
+    const m = APP_SCHEME.find(([re]) => re.test(name || ""));
+    return m ? m[1](encodeURIComponent(d.title || d.original || "")) : "";
+  }
+  // Toucher un lien d'appli : ouvre l'appli ; si rien ne s'ouvre, propose le site.
+  document.addEventListener("click", e => {
+    const a = e.target.closest("a[data-app]"); if (!a) return;
+    e.preventDefault();
+    const web = a.href, name = a.dataset.name || "la plateforme";
+    location.href = a.dataset.app;
+    setTimeout(() => { if (!document.hidden) toastAction(`L'appli ${name} ne s'est pas ouverte`, "Ouvrir le site", () => window.open(web, "_blank", "noopener")); }, 1800);
+  });
   function watchUrl(name, d) {
     const m = PLAT_SEARCH.find(([re]) => re.test(name || ""));
     if (m) return m[1](encodeURIComponent(d.title || d.original || ""));
@@ -1575,9 +1593,10 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
     if (!pr && p.rent?.length) { pr = p.rent[0]; verb = "Louer sur"; }
     if (!pr) return "";
     const url = watchUrl(pr.name, d); if (!url) return "";
-    const direct = PLAT_SEARCH.some(([re]) => re.test(pr.name));
+    const direct = PLAT_SEARCH.some(([re]) => re.test(pr.name)), app = appUrl(pr.name, d);
     const logo = imgPath(pr.logo) ? `<img src="${IMG}w92${imgPath(pr.logo)}" alt="">` : `<span class="lg">${IC.play}</span>`;
-    return `<a class="btn watch" href="${esc(url)}" target="_blank" rel="noopener">${logo}<span>${verb} ${esc(platKey(pr.name))}<small>${direct ? "Ouvre l'appli sur ce titre" : "Via la page TMDB, puis touchez le logo"}</small></span>${IC.ext}</a>`;
+    const hint = app ? `Ouvre l'appli ${esc(platKey(pr.name))} sur ce titre` : direct ? "Ouvre la recherche de ce titre" : "Via la page TMDB, puis touchez le logo";
+    return `<a class="btn watch" href="${esc(url)}" target="_blank" rel="noopener"${app ? ` data-app="${esc(app)}" data-name="${esc(platKey(pr.name))}"` : ""}>${logo}<span>${verb} ${esc(platKey(pr.name))}<small>${hint}</small></span>${IC.ext}</a>`;
   }
   function provList(list, d) {
     const mine = myPlats();
@@ -1585,7 +1604,8 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
       const url = d ? watchUrl(p.name, d) : "";
       const inner = `${imgPath(p.logo) ? `<img src="${IMG}w92${imgPath(p.logo)}" alt="" loading="lazy">` : ""}${esc(p.name)}`;
       const cls = `prov-chip ${mine.has(platKey(p.name)) ? "mine" : ""}`;
-      return url ? `<a class="${cls}" href="${esc(url)}" target="_blank" rel="noopener" title="Ouvrir ${esc(p.name)}">${inner}</a>` : `<span class="${cls}">${inner}</span>`;
+      const app = d ? appUrl(p.name, d) : "";
+      return url ? `<a class="${cls}" href="${esc(url)}" target="_blank" rel="noopener" title="Ouvrir ${esc(p.name)}"${app ? ` data-app="${esc(app)}" data-name="${esc(platKey(p.name))}"` : ""}>${inner}</a>` : `<span class="${cls}">${inner}</span>`;
     }).join("")}</div>`;
   }
 
