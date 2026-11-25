@@ -46,6 +46,7 @@ Dans les réglages, cochez les abonnements que vous avez (Netflix, Prime Video, 
 - **Pas chez vous** : disponible sur d'autres plateformes que les vôtres ;
 - **À louer** : seulement en location ou à l'achat ;
 - **Introuvable** : disponible nulle part en streaming pour l'instant.
+- **Au cinéma** : sorti en salle en France ces quatre derniers mois et pas encore sur une plateforme (ou « Le 15 déc. au ciné » s'il n'est pas encore sorti).
 
 ## Installer sur le téléphone
 

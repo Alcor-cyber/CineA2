@@ -379,6 +379,8 @@ html.idle :is(.stage .spot, .bob, .shadow, .kpop, .blink, .zz, .spark, .grad, .r
 .acc.other { --ac: var(--butter); }
 .acc.rent { --ac: var(--sky); }
 .acc.none { --ac: #d4cfe6; }
+.acc.cinema { --ac: linear-gradient(100deg, #ff9f3a, var(--cherry)); color: #fff; }
+.warn.cinema { background: rgb(255 159 58 / .08); border-color: rgb(255 159 58 / .4); }
 .poster .acc { position: absolute; right: 10px; bottom: 10px; z-index: 3; }
 @media (max-width: 420px) { .poster .acc { font-size: 10px; padding: 3px 7px 3px 5px; right: 8px; bottom: 9px; } .poster .prov { left: 8px; } }
 .warn { display: flex; gap: 12px; align-items: center; padding: 12px 14px; border-radius: 14px; font-size: 13.5px; line-height: 1.45; background: rgb(255 255 255 / .04); border: 1px solid var(--line-2); }
@@ -693,7 +695,7 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
 
 /* ---------- Nouveau sur une plateforme ---------- */
 .newon {
-  position: absolute; right: 10px; bottom: 10px; z-index: 3; display: inline-flex; align-items: center; gap: 4px; max-width: calc(100% - 20px);
+  position: absolute; left: 10px; top: 42px; z-index: 3; display: inline-flex; align-items: center; gap: 4px; max-width: calc(100% - 20px);
   padding: 4px 9px 4px 7px; border-radius: 999px; font-size: 10.5px; font-weight: 800; color: var(--outline); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   background: linear-gradient(100deg, var(--mint), #8ff5d6); box-shadow: 0 4px 14px -4px rgb(52 224 176 / .8);
   animation: newPulse 2.4s ease-in-out infinite;
@@ -1194,7 +1196,17 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
     if (d.providers?.rent?.length || d.providers?.buy?.length) return "rent";
     return "none";
   }
-  const accHtml = k => `<span class="acc ${k}" title="${ACC[k][2]}">${ACC[k][0]}<span class="t">${ACC[k][1]}</span></span>`;
+  ACC.cinema = ['<svg class="ico" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 5v14M17 5v14M3 9.5h4M3 14.5h4M17 9.5h4M17 14.5h4"/></svg>', "Au cinéma", "En salle en ce moment, pas encore sur une plateforme"];
+  // Un film sorti en salle en France ces 4 derniers mois (ou dans les 2 prochains) et pas encore en abonnement
+  const relDays = d => d.releaseDate ? (Date.now() - Date.parse(d.releaseDate + "T12:00:00")) / 864e5 : NaN;
+  const inCinema = d => d.type === "movie" && !(d.providers?.flat || []).length && relDays(d) > -60 && relDays(d) < 120;
+  const statusOf = d => inCinema(d) ? "cinema" : access(d);
+  const frDate = iso => new Date(iso + "T12:00:00").toLocaleDateString("fr-FR", { day: "numeric", month: "long" });
+  function accHtml(k, d) {
+    let label = ACC[k][1];
+    if (k === "cinema" && d && relDays(d) < 0) label = `Le ${new Date(d.releaseDate + "T12:00:00").toLocaleDateString("fr-FR", { day: "numeric", month: "short" })} au ciné`;
+    return `<span class="acc ${k}" title="${ACC[k][2]}">${ACC[k][0]}<span class="t">${esc(label)}</span></span>`;
+  }
 
   /* ---------- Mascotte : Popcorn ---------- */
   function mascot(mood = "happy", extra = "") {
@@ -1363,8 +1375,14 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
     return { flat, rent, buy, link: res.link || "" };
   }
 
+  // Date de sortie en salle dans votre pays (sinon la date de sortie mondiale)
+  function releaseFrom(rd, fallback) {
+    const reg = (rd?.results || []).find(r => r.iso_3166_1 === cfg.region);
+    const dates = (reg?.release_dates || []).filter(x => x.type === 3 || x.type === 2).map(x => String(x.release_date || "").slice(0, 10)).filter(Boolean).sort();
+    return dates[0] || String(fallback || "").slice(0, 10);
+  }
   async function fetchDetails(type, tmdbId) {
-    const d = await tmdb(`/${type}/${tmdbId}`, { language: "fr-FR", append_to_response: "watch/providers,videos,credits", include_video_language: "fr,en,null" });
+    const d = await tmdb(`/${type}/${tmdbId}`, { language: "fr-FR", append_to_response: type === "movie" ? "watch/providers,videos,credits,release_dates" : "watch/providers,videos,credits", include_video_language: "fr,en,null" });
     const date = d.release_date || d.first_air_date || "";
     const prov = providersFrom(d["watch/providers"]);
     const vids = (d.videos?.results || []).filter(v => v.site === "YouTube" && /Trailer|Teaser/.test(v.type));
@@ -1388,6 +1406,7 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
       director, trailer,
       providers: { flat: prov.flat, rent: prov.rent, buy: prov.buy },
       link: prov.link || `https://www.themoviedb.org/${type}/${tmdbId}/watch?locale=${cfg.region}`,
+      releaseDate: type === "movie" ? releaseFrom(d.release_dates, d.release_date) : "",
       region: cfg.region, checkedAt: Date.now()
     };
   }
@@ -1497,7 +1516,11 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
   const isNewOn = d => !!(d.newOn && d.newOn.name && !d.seen && Date.now() - (d.newOn.at || 0) < 14 * 864e5);
   function warnHtml(d) {
     if (isNewOn(d)) return `<div class="warn new">${IC.spark}<span>Arrivé sur <b>${esc(d.newOn.name)}</b> le ${new Date(d.newOn.at).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}.</span></div>`;
-    const a = access(d); if (!a || a === "ok") return "";
+    const a = statusOf(d); if (!a || a === "ok") return "";
+    if (a === "cinema") {
+      const txt = relDays(d) < 0 ? `Sort au cinéma le ${frDate(d.releaseDate)}.` : `En salle depuis le ${frDate(d.releaseDate)}, pas encore sur une plateforme.`;
+      return `<div class="warn cinema">${accHtml(a, d)}<span>${txt} L'appli vous préviendra quand il arrivera ${myPlats().size ? "sur l'une de vos plateformes" : "en streaming"}.</span></div>`;
+    }
     const others = [...new Set((d.providers?.flat || []).map(p => platKey(p.name)))];
     const txt = a === "other" ? `Pas sur vos plateformes. Disponible sur ${others.slice(0, 4).map(esc).join(", ")}${others.length > 4 ? "…" : ""}.`
       : a === "rent" ? "Sur aucun abonnement pour l'instant : seulement en location ou à l'achat."
@@ -1597,8 +1620,9 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
       persist(d.id); await closeSheet($("#detail"));
       q.value = ""; $("#clearQ").hidden = true;
       if (filt.status !== "todo") setTab("todo");
-      const acc = access(d);
-      if (acc && acc !== "ok") toast(`« ${d.title} » ajouté, mais ${acc === "other" ? "pas sur vos plateformes" : acc === "rent" ? "seulement en location" : "pas encore en streaming"}`, "wow");
+      const acc = statusOf(d);
+      if (acc === "cinema") toast(`« ${d.title} » ajouté : il est au cinéma en ce moment`, "love");
+      else if (acc && acc !== "ok") toast(`« ${d.title} » ajouté, mais ${acc === "other" ? "pas sur vos plateformes" : acc === "rent" ? "seulement en location" : "pas encore en streaming"}`, "wow");
       else toast(`« ${d.title} » ajouté à votre liste`, "love");
       if (suggDlg.open) paintSugg(); else revealCard(d.id);
       return;
@@ -1768,7 +1792,7 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
   function cardHtml(d, isNew, i) {
     const both = d.wants?.a && d.wants?.b;
     const mine = !!d.wants?.[who];
-    const mineSet = myPlats(), acc = access(d);
+    const mineSet = myPlats(), acc = statusOf(d);
     const prov = (d.providers?.flat || []).slice().sort((x, y) => mineSet.has(platKey(y.name)) - mineSet.has(platKey(x.name)));
     const maxL = acc && acc !== "ok" ? 2 : 3;
     const pImg = imgPath(d.poster);
@@ -1783,7 +1807,7 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
         <span class="shine"></span>
         <span class="tl"><span class="pill ${d.type}">${d.type === "tv" ? "Série" : "Film"}</span></span>
         ${both && !d.seen ? `<span class="ribbon">${IC.heart}MATCH</span>` : ""}
-        ${acc && acc !== "ok" ? accHtml(acc) : ""}
+        ${acc && acc !== "ok" && !isNewOn(d) ? accHtml(acc, d) : ""}
         ${isNewOn(d) ? `<span class="newon">${IC.spark}Nouveau sur ${esc(d.newOn.name)}</span>` : ""}
         ${d.seen ? `<span class="stamp">VU</span>` : ""}
         ${provHtml}
@@ -2514,13 +2538,17 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
   async function autoRefresh() {
     if (refreshing || !cfg.key) return;
     refreshing = true;
-    const due = live().filter(d => !d.seen && d.tmdbId && (!d.checkedAt || Date.now() - d.checkedAt > STALE))
+    const due = live().filter(d => !d.seen && d.tmdbId && (!d.checkedAt || Date.now() - d.checkedAt > STALE || (d.type === "movie" && d.releaseDate === undefined)))
       .sort((x, y) => (x.checkedAt || 0) - (y.checkedAt || 0)).slice(0, 30);
     const news = [];
     for (const d of due) {
       try {
         const prov = providersFrom(await tmdb(`/${d.type}/${d.tmdbId}/watch/providers`));
         const cur = items[d.id]; if (!cur || cur.deleted) continue;
+        if (cur.type === "movie" && cur.releaseDate === undefined) {
+          const info = await tmdb(`/movie/${cur.tmdbId}`, { append_to_response: "release_dates" });
+          cur.releaseDate = releaseFrom(info.release_dates, info.release_date);
+        }
         const before = access(cur), beforeFlat = new Set((cur.providers?.flat || []).map(p => platKey(p.name)));
         const next = Object.assign({}, cur, { providers: { flat: prov.flat, rent: prov.rent, buy: prov.buy }, link: prov.link || cur.link, region: cfg.region, checkedAt: Date.now(), updatedAt: Date.now() });
         const flatNow = prov.flat.map(p => platKey(p.name)), mine = myPlats();
