@@ -25,6 +25,20 @@ Chacun se connecte avec son compte : le compte de Thomas est reconnu automatique
 
 La bobine de film en haut ouvre les suggestions : le top du moment **au cinéma** (sorties en salle des six dernières semaines) et **sur les plateformes** (films et séries les plus regardés, sur vos plateformes ou partout). On peut trier par catégorie, et ajouter un titre à la liste en un geste.
 
+## Swipe
+
+Dans les suggestions, le mode **Swipe** présente les titres un par un :
+
+- **à droite** : j'ai envie, le titre s'ajoute à votre liste avec votre cœur ;
+- **à gauche** : pas pour moi, il ne vous sera plus proposé ;
+- **vers le haut** : déjà vu, il disparaît des suggestions pour vous deux.
+
+Si l'autre avait déjà swipé le même titre à droite : « C'est un match ! ».
+
+## Plateformes à jour
+
+À chaque ouverture, l'appli revérifie les titres à voir qui n'ont pas été vérifiés depuis une semaine. Quand un titre arrive sur l'une de vos plateformes, il affiche un badge « Nouveau sur … » pendant deux semaines.
+
 ## Nos plateformes
 
 Dans les réglages, cochez les abonnements que vous avez (Netflix, Prime Video, Disney+…). Le choix est partagé entre vos deux téléphones. Les raccourcis de filtre n'affichent plus que vos plateformes, et un badge signale les titres que vous ne pouvez pas regarder :

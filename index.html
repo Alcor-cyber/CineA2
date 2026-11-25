@@ -681,6 +681,107 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
 .sg-msg2 { grid-column: 1 / -1; display: grid; justify-items: center; gap: 10px; text-align: center; padding: 30px 10px; color: var(--muted); }
 .sg-msg2 .m { width: 80px; height: 92px; }
 
+/* ---------- Nouveau sur une plateforme ---------- */
+.newon {
+  position: absolute; right: 10px; bottom: 10px; z-index: 3; display: inline-flex; align-items: center; gap: 4px; max-width: calc(100% - 20px);
+  padding: 4px 9px 4px 7px; border-radius: 999px; font-size: 10.5px; font-weight: 800; color: var(--outline); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  background: linear-gradient(100deg, var(--mint), #8ff5d6); box-shadow: 0 4px 14px -4px rgb(52 224 176 / .8);
+  animation: newPulse 2.4s ease-in-out infinite;
+}
+.newon .ico { width: 12px; height: 12px; flex: none; }
+@keyframes newPulse { 50% { box-shadow: 0 4px 22px -2px rgb(52 224 176 / 1); } }
+.warn.new { background: rgb(52 224 176 / .08); border-color: rgb(52 224 176 / .4); }
+.warn.new .ico { width: 20px; height: 20px; color: var(--mint); flex: none; }
+
+/* ---------- Swipe ---------- */
+.sg-view { display: inline-flex; }
+.sg-view button { display: inline-flex; align-items: center; gap: 6px; }
+.sg-view .ico { width: 16px; height: 16px; }
+.sg-tools .toprow { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+#suggPanel.swiping .sg-head, #suggPanel.swiping .sg-note, #suggPanel.swiping .sg-grid, #suggPanel.swiping .sg-more { display: none; }
+#suggPanel.swiping .sg-tools { position: static; padding-top: 70px; }
+#suggPanel.swiping #suggView { position: absolute; left: 18px; top: 16px; z-index: 5; }
+.swipe { display: grid; justify-items: center; gap: 14px; padding: 2px 22px 22px; }
+.deck {
+  --ch: clamp(240px, calc(100dvh - var(--sheet-top) - 365px), 560px);
+  position: relative; width: min(100%, calc(var(--ch) * .667)); height: var(--ch); touch-action: none;
+}
+.swcard {
+  position: absolute; inset: 0; border-radius: 22px; overflow: hidden; background: var(--ink-3);
+  box-shadow: 0 30px 60px -22px rgb(0 0 0 / .95), 0 0 0 1px rgb(255 255 255 / .1);
+  transform: translateY(calc(var(--d) * 14px)) scale(calc(1 - var(--d) * .05)); transition: transform .3s var(--out);
+  user-select: none; -webkit-user-select: none; touch-action: none; cursor: grab; will-change: transform;
+}
+.swcard:not(.top) { pointer-events: none; filter: brightness(.6); }
+.swcard.top { animation: promote .32s var(--out); }
+.swcard.top:active { cursor: grabbing; }
+@keyframes promote { from { transform: translateY(14px) scale(.95); filter: brightness(.6); } }
+.swcard img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; -webkit-user-drag: none; }
+.swcard .ph { height: 100%; }
+.swcard::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgb(12 10 23 / .35) 0%, transparent 22%, transparent 52%, rgb(12 10 23 / .95) 100%); pointer-events: none; }
+.swcard .tp { position: absolute; left: 14px; top: 14px; z-index: 2; }
+.swcard .tp .pill { -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); background: rgb(12 10 23 / .6); }
+.swinfo { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; padding: 18px 18px 16px; pointer-events: none; }
+.swinfo h3 { font-family: var(--display); font-weight: 800; font-size: clamp(20px, 5.4vw, 26px); line-height: 1.05; letter-spacing: -.02em; margin: 0; text-wrap: balance; }
+.swinfo p { margin: 6px 0 0; color: rgb(255 255 255 / .82); font-size: 13.5px; }
+.swinfo .ov { margin-top: 8px; font-size: 13px; color: rgb(255 255 255 / .7); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.sw-stamp {
+  position: absolute; top: 26px; z-index: 3; opacity: 0; pointer-events: none;
+  font: 800 22px/1 var(--display); letter-spacing: .08em; text-transform: uppercase;
+  padding: 8px 12px; border: 3.5px solid currentColor; border-radius: 12px; background: rgb(12 10 23 / .35);
+}
+.sw-stamp.yes { left: 18px; color: var(--mint); transform: rotate(-14deg); }
+.sw-stamp.no { right: 18px; color: var(--cherry); transform: rotate(14deg); }
+.sw-stamp.vu { left: 50%; top: 38%; color: var(--sky); transform: translateX(-50%) rotate(-6deg); }
+.sw-btns { display: flex; gap: 20px; align-items: center; }
+.swb {
+  display: grid; place-items: center; width: 58px; height: 58px; border-radius: 50%; border: 1px solid var(--line-2);
+  background: rgb(255 255 255 / .05); transition: transform .3s var(--spring), background .2s;
+}
+.swb .ico { width: 26px; height: 26px; stroke-width: 2.6; }
+.swb:hover { transform: scale(1.08); }
+.swb:active { transform: scale(.86); }
+.swb.no { color: var(--cherry); }
+.swb.vu { width: 48px; height: 48px; color: var(--sky); }
+.swb.vu .ico { width: 22px; height: 22px; }
+.swb.yes { width: 68px; height: 68px; border: 0; color: #fff; background: linear-gradient(135deg, var(--cherry), var(--bubble)); box-shadow: 0 12px 30px -10px rgb(255 61 87 / .9); }
+.swb.yes .ico { width: 30px; height: 30px; }
+.swb[disabled] { opacity: .35; pointer-events: none; }
+@media (max-height: 820px) { .sw-hint { display: none; } .deck { --ch: clamp(240px, calc(100dvh - var(--sheet-top) - 340px), 560px); } }
+.sw-hint { margin: 0; font-size: 12.5px; color: var(--muted); text-align: center; max-width: 40ch; line-height: 1.5; }
+.sw-empty { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 8px; text-align: center; padding: 20px; border-radius: 22px; border: 1px dashed var(--line-2); color: var(--muted); }
+.sw-empty .m { width: 90px; height: 104px; }
+.sw-empty b { color: var(--text); font-family: var(--display); font-size: 18px; }
+.swcard.sk { background: linear-gradient(90deg, var(--ink-3) 0%, var(--ink-4) 50%, var(--ink-3) 100%); background-size: 200% 100%; animation: shimmer 1.2s linear infinite; }
+
+/* C'est un match ! */
+.match-ov {
+  position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; padding: 24px; text-align: center;
+  background: radial-gradient(circle at 50% 32%, rgb(255 61 87 / .55), transparent 58%), radial-gradient(circle at 50% 85%, rgb(255 122 198 / .35), transparent 55%), rgb(12 10 23 / .93);
+  animation: fade .3s ease both;
+}
+.match-ov[hidden] { display: none; }
+.mo-in { display: grid; justify-items: center; gap: 12px; max-width: 420px; }
+.mo-title {
+  font: 800 clamp(40px, 12vw, 60px)/1 var(--display); letter-spacing: -.035em;
+  background: linear-gradient(100deg, var(--butter), var(--cherry) 50%, var(--bubble)); -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: moPop .8s var(--spring) both;
+}
+@keyframes moPop { from { transform: scale(.2) rotate(-10deg); opacity: 0; } }
+.match-ov p { margin: 0; color: rgb(255 255 255 / .75); animation: spFade .5s ease .35s both; }
+.mo-row { display: flex; align-items: center; margin-top: 8px; }
+.mo-row .av { position: relative; z-index: 2; width: 66px; height: 66px; font-size: 24px; box-shadow: 0 0 0 4px var(--ink), 0 12px 30px -6px rgb(0 0 0 / .7); }
+.mo-row .av.a { margin-right: -16px; animation: moA .9s var(--spring) .25s both; }
+.mo-row .av.b { margin-left: -16px; animation: moB .9s var(--spring) .25s both; }
+@keyframes moA { from { transform: translateX(-140px) rotate(-40deg); opacity: 0; } }
+@keyframes moB { from { transform: translateX(140px) rotate(40deg); opacity: 0; } }
+.mo-poster { width: 150px; aspect-ratio: 2 / 3; border-radius: 16px; overflow: hidden; background: var(--ink-3); box-shadow: 0 0 0 3px var(--cherry), 0 24px 60px -10px rgb(255 61 87 / .85); animation: moPoster .9s var(--spring) .1s both; }
+.mo-poster img { width: 100%; height: 100%; object-fit: cover; }
+@keyframes moPoster { from { transform: scale(.5) rotate(8deg); opacity: 0; } }
+.match-ov h3 { font: 800 22px/1.15 var(--display); margin: 6px 0 0; letter-spacing: -.01em; text-wrap: balance; animation: spFade .5s ease .5s both; }
+.mo-m .m { width: 62px; height: 72px; }
+.match-ov .acts { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 6px; animation: spFade .5s ease .7s both; }
+
 /* ---------- Intro ---------- */
 #splash {
   position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; overflow: hidden; cursor: pointer;
@@ -882,9 +983,15 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
     <button class="x" type="button" data-close aria-label="Fermer"><svg class="ico" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
     <div class="sg-head"><span id="suggMascot"></span><div><span class="eyebrow">Le top du moment</span><h2>Suggestions</h2></div></div>
     <div class="sg-tools">
-      <div class="seg" id="suggTabs" role="group" aria-label="Où regarder">
-        <button type="button" data-src="cinema" aria-pressed="true">Au cinéma</button>
-        <button type="button" data-src="streaming" aria-pressed="false">Sur les plateformes</button>
+      <div class="toprow">
+        <div class="seg" id="suggTabs" role="group" aria-label="Où regarder">
+          <button type="button" data-src="cinema" aria-pressed="true">Au cinéma</button>
+          <button type="button" data-src="streaming" aria-pressed="false">Sur les plateformes</button>
+        </div>
+        <div class="seg sg-view" id="suggView" role="group" aria-label="Affichage">
+          <button type="button" data-view="grid" aria-pressed="true" aria-label="Grille" title="Grille"><svg class="ico" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg></button>
+          <button type="button" data-view="swipe" aria-pressed="false" title="Swipe"><svg class="ico" viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="17" rx="2.5" transform="rotate(8 12 11.5)"/><path d="M3 8.5 1.5 12 3 15.5M21 8.5l1.5 3.5-1.5 3.5"/></svg>Swipe</button>
+        </div>
       </div>
       <div class="row">
         <div class="field"><label for="suggGenre">Catégorie</label><select id="suggGenre"><option value="">Toutes</option></select></div>
@@ -895,7 +1002,17 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
     <p class="sg-note" id="suggNote"></p>
     <div class="sg-grid" id="suggGrid"></div>
     <div class="sg-more"><button type="button" class="btn ghost" id="suggMore" hidden>Voir plus</button></div>
+    <div class="swipe" id="swipeArea" hidden>
+      <div class="deck" id="deck"></div>
+      <div class="sw-btns">
+        <button type="button" class="swb no" data-sw="left" aria-label="Pas pour moi" title="Pas pour moi"><svg class="ico" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+        <button type="button" class="swb vu" data-sw="up" aria-label="Déjà vu" title="Déjà vu"><svg class="ico" viewBox="0 0 24 24"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+        <button type="button" class="swb yes" data-sw="right" aria-label="J'ai envie" title="J'ai envie"><svg class="ico fill" viewBox="0 0 24 24"><path d="M12 21s-7.6-4.7-9.5-9.5C1.3 8.2 3.4 4.5 7 4.5c2.1 0 3.7 1.2 5 3 1.3-1.8 2.9-3 5-3 3.6 0 5.7 3.7 4.5 7C19.6 16.3 12 21 12 21z"/></svg></button>
+      </div>
+      <p class="sw-hint">À droite : j'ai envie, le titre s'ajoute à votre liste. À gauche : pas pour moi. Vers le haut : déjà vu, il ne reviendra plus.</p>
+    </div>
   </div>
+  <div class="match-ov" id="matchOv" hidden></div>
 </dialog>
 <dialog class="sheet" id="rouletteDlg" aria-label="Tirage au sort"><div class="panel" id="roulettePanel"></div></dialog>
 
@@ -998,7 +1115,7 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
   "use strict";
   const IMG = "https://image.tmdb.org/t/p/";
   const API = "https://api.themoviedb.org/3";
-  const LS = { items: "cad.items", cfg: "cad.cfg", who: "cad.who" };
+  const LS = { items: "cad.items", cfg: "cad.cfg", who: "cad.who", sw: "cad.sw" };
   const REGION_NAME = { FR: "en France", BE: "en Belgique", CH: "en Suisse", CA: "au Canada", LU: "au Luxembourg", US: "aux États-Unis", GB: "au Royaume-Uni", ES: "en Espagne" };
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const canHover = matchMedia("(hover: hover)").matches;
@@ -1008,6 +1125,9 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const load = (k, d) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } };
   const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+  // Swipes : « a » et « b » = titres refusés par chacun, « vu » = titres déjà vus (cachés des suggestions pour vous deux)
+  let SW = Object.assign({ a: [], b: [], vu: [] }, load(LS.sw, {}));
+  ["a", "b", "vu"].forEach(k => { if (!Array.isArray(SW[k])) SW[k] = []; });
   const imgPath = p => (typeof p === "string" && /^\/[\w\-.]+$/.test(p)) ? p : "";
 
   let cfg = Object.assign({ key: "", region: "FR", nameA: "", nameB: "", platforms: [] }, load(LS.cfg, {}));
@@ -1042,6 +1162,7 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
     arrow: '<svg class="ico" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
     tv: '<svg class="ico" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M8 21h8M9 2l3 4 3-4"/></svg>',
     grid: '<svg class="ico" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>',
+    spark: '<svg class="ico fill" viewBox="0 0 24 24"><path d="M12 1.5l2.3 7.2 7.2 2.3-7.2 2.3L12 20.5l-2.3-7.2L2.5 11l7.2-2.3z"/></svg>',
     dice: '<svg class="ico" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1.3" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/></svg>'
   };
 
@@ -1153,7 +1274,7 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
       el.className = "kernel" + (t ? " " + t : "");
       if (t === "h") el.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 21s-7.6-4.7-9.5-9.5C1.3 8.2 3.4 4.5 7 4.5c2.1 0 3.7 1.2 5 3 1.3-1.8 2.9-3 5-3 3.6 0 5.7 3.7 4.5 7C19.6 16.3 12 21 12 21z"/></svg>';
       if (t === "c") el.style.setProperty("--c", colors[i % colors.length]);
-      document.body.appendChild(el);
+      ([...document.querySelectorAll("dialog[open]")].pop() || document.body).appendChild(el);
       const ang = -Math.PI / 2 + (Math.random() - .5) * Math.PI * 1.3;
       const v = 90 + Math.random() * 150, dx = Math.cos(ang) * v, up = Math.sin(ang) * v;
       const fall = 160 + Math.random() * 200, rot = (Math.random() - .5) * 720, s = .7 + Math.random() * .6;
@@ -1353,7 +1474,9 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
     return `<div class="wlist">${list.map(p => `<span class="prov-chip ${mine.has(platKey(p.name)) ? "mine" : ""}">${imgPath(p.logo) ? `<img src="${IMG}w92${imgPath(p.logo)}" alt="" loading="lazy">` : ""}${esc(p.name)}</span>`).join("")}</div>`;
   }
 
+  const isNewOn = d => !!(d.newOn && d.newOn.name && !d.seen && Date.now() - (d.newOn.at || 0) < 14 * 864e5);
   function warnHtml(d) {
+    if (isNewOn(d)) return `<div class="warn new">${IC.spark}<span>Arrivé sur <b>${esc(d.newOn.name)}</b> le ${new Date(d.newOn.at).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}.</span></div>`;
     const a = access(d); if (!a || a === "ok") return "";
     const others = [...new Set((d.providers?.flat || []).map(p => platKey(p.name)))];
     const txt = a === "other" ? `Pas sur vos plateformes. Disponible sur ${others.slice(0, 4).map(esc).join(", ")}${others.length > 4 ? "…" : ""}.`
@@ -1520,7 +1643,7 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
     const panel = dlg.querySelector(".panel");
     let y0 = null, dy = 0;
     panel.addEventListener("touchstart", e => {
-      if (panel.scrollTop > 0 || e.touches.length > 1 || e.target.closest("select, input, textarea")) { y0 = null; return; }
+      if (panel.scrollTop > 0 || e.touches.length > 1 || e.target.closest("select, input, textarea, .swipe, .match-ov")) { y0 = null; return; }
       y0 = e.touches[0].clientY; dy = 0; panel.style.transition = "none";
     }, { passive: true });
     panel.addEventListener("touchmove", e => {
@@ -1641,6 +1764,7 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
         <span class="tl"><span class="pill ${d.type}">${d.type === "tv" ? "Série" : "Film"}</span></span>
         ${both && !d.seen ? `<span class="ribbon">${IC.heart}MATCH</span>` : ""}
         ${acc && acc !== "ok" ? accHtml(acc) : ""}
+        ${isNewOn(d) ? `<span class="newon">${IC.spark}Nouveau sur ${esc(d.newOn.name)}</span>` : ""}
         ${d.seen ? `<span class="stamp">VU</span>` : ""}
         ${provHtml}
       </button>
@@ -1827,7 +1951,7 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
 
   /* ---------- Suggestions : le top du moment ---------- */
   const suggDlg = $("#suggDlg");
-  const SG = { src: "cinema", genre: "", type: "all", mine: true, page: 1, pages: 1, results: [], genres: null, req: 0 };
+  const SG = { src: "cinema", view: "grid", genre: "", type: "all", mine: true, page: 1, pages: 1, results: [], genres: null, gname: null, req: 0, err: "", loading: false, moreBusy: false };
   $("#suggMascot").innerHTML = mascot("happy");
   const isoDay = n => { const d = new Date(); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
 
@@ -1841,6 +1965,7 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
       map.get(n)[kind].push(g.id);
     }));
     add(m.genres, "movie"); add(t.genres, "tv");
+    SG.gname = new Map([...(m.genres || []), ...(t.genres || [])].map(g => [g.id, String(g.name).split(/\s*&\s*/)[0].trim()]));
     SG.genres = [...map.values()].sort((x, y) => x.name.localeCompare(y.name, "fr"));
   }
   async function myProviderIds() {
@@ -1888,7 +2013,7 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
     const res = await Promise.all(calls);
     return { pages: Math.max(1, ...res.map(r => r.pages)), results: res.flatMap(r => r.results).sort((x, y) => (y.popularity || 0) - (x.popularity || 0)) };
   }
-  function suggCard(r, i) {
+  function suggCard(r, i, k = i) {
     const id = `${r.media_type}-${r.id}`, inList = items[id] && !items[id].deleted;
     const title = r.title || r.name || "", p = imgPath(r.poster_path);
     const date = r.release_date || r.first_air_date || "";
@@ -1898,18 +2023,31 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
       sub = `${future ? "Sortie" : "Sorti"} le ${d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}`;
     }
     if (r.vote_average && r.vote_count > 5) sub += ` · ★ ${String(Math.round(r.vote_average * 10) / 10).replace(".", ",")}`;
-    return `<button type="button" class="scard" data-i="${i}" style="--i:${i % 20}" aria-label="${esc(title)}${inList ? ", déjà dans votre liste" : ""}">
+    return `<button type="button" class="scard" data-i="${i}" style="--i:${k % 20}" aria-label="${esc(title)}${inList ? ", déjà dans votre liste" : ""}">
       <span class="pf">${p ? `<img src="${IMG}w342${p}" alt="" loading="lazy" decoding="async">` : `<span class="ph">${mascot("happy")}<span>${esc(title)}</span></span>`}
         ${SG.src === "streaming" ? `<span class="tp"><span class="pill ${r.media_type}">${r.media_type === "tv" ? "Série" : "Film"}</span></span>` : ""}
-        ${i < 10 ? `<span class="rank"><small>#</small>${i + 1}</span>` : ""}
+        ${k < 10 ? `<span class="rank"><small>#</small>${k + 1}</span>` : ""}
         <span class="badge ${inList ? "in" : ""}">${inList ? IC.check : IC.plus}</span></span>
       <b>${esc(title)}</b><small class="sub">${esc(sub)}</small></button>`;
   }
-  function paintSugg() { $("#suggGrid").innerHTML = SG.results.map(suggCard).join(""); }
+  const skey = r => `${r.media_type}-${r.id}`;
+  const swiped = new Set(); // swipés pendant cette visite (le temps que la liste se mette à jour)
+  const msgHtml = t => `<div class="sg-msg2">${mascot("sleep")}<span>${t}</span></div>`;
+
+  function paintSugg() {
+    if (SG.view === "swipe") { renderDeck(); return; }
+    const grid = $("#suggGrid");
+    if (SG.err) { grid.innerHTML = msgHtml(SG.err); return; }
+    if (SG.loading && !SG.results.length) { grid.innerHTML = Array.from({ length: 12 }, (_, i) => `<div class="scard sk" style="--i:${i}"><span class="pf"></span><b></b></div>`).join(""); return; }
+    const vis = SG.results.map((r, i) => [r, i]).filter(([r]) => !SW.vu.includes(skey(r)));
+    grid.innerHTML = vis.length ? vis.map(([r, i], k) => suggCard(r, i, k)).join("") : msgHtml("Rien ne correspond à ce tri pour l'instant. Essayez une autre catégorie.");
+  }
+
   async function loadSugg(more = false) {
-    const my = ++SG.req, grid = $("#suggGrid");
-    if (!cfg.key) { grid.innerHTML = `<div class="sg-msg2">${mascot("sleep")}<span>Ajoutez d'abord la clé TMDB dans les réglages pour voir les suggestions.</span></div>`; $("#suggMore").hidden = true; return; }
-    if (!more) { SG.page = 1; SG.results = []; grid.innerHTML = Array.from({ length: 12 }, (_, i) => `<div class="scard sk" style="--i:${i}"><span class="pf"></span><b></b></div>`).join(""); }
+    const my = ++SG.req;
+    SG.err = "";
+    if (!cfg.key) { SG.results = []; SG.err = "Ajoutez d'abord la clé TMDB dans les réglages pour voir les suggestions."; paintSugg(); $("#suggMore").hidden = true; return; }
+    if (!more) { SG.page = 1; SG.results = []; SG.loading = true; paintSugg(); }
     $("#suggMore").disabled = true;
     $("#suggNote").textContent = SG.src === "cinema" ? `Les films les plus populaires sortis en salle ces six dernières semaines ${REGION_NAME[cfg.region] || ""}.`
       : SG.mine && (cfg.platforms || []).length ? `Les titres les plus regardés en ce moment sur ${cfg.platforms.map(p => p.name).join(", ")}.` : `Les titres les plus regardés en ce moment sur les plateformes ${REGION_NAME[cfg.region] || ""}.`;
@@ -1917,24 +2055,172 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
       await suggGenres(); if (my !== SG.req) return; suggControls();
       const r = await fetchSugg(SG.page);
       if (my !== SG.req) return;
-      const seenIds = new Set(SG.results.map(x => `${x.media_type}-${x.id}`));
-      SG.results = SG.results.concat(r.results.filter(x => !seenIds.has(`${x.media_type}-${x.id}`)));
+      const have = new Set(SG.results.map(skey));
+      SG.results = SG.results.concat(r.results.filter(x => !have.has(skey(x))));
       SG.pages = r.pages;
-      if (!SG.results.length) grid.innerHTML = `<div class="sg-msg2">${mascot("sleep")}<span>Rien ne correspond à ce tri pour l'instant. Essayez une autre catégorie.</span></div>`;
-      else paintSugg();
-      $("#suggMore").hidden = SG.page >= SG.pages || !SG.results.length;
     } catch (err) {
       if (my !== SG.req) return;
-      grid.innerHTML = `<div class="sg-msg2">${mascot("sleep")}<span>${err.code === "badkey" ? "La clé TMDB est refusée. Vérifiez-la dans les réglages." : "Impossible de charger les suggestions. Vérifiez la connexion et réessayez."}</span></div>`;
-      $("#suggMore").hidden = true;
+      SG.err = err.code === "badkey" ? "La clé TMDB est refusée. Vérifiez-la dans les réglages." : "Impossible de charger les suggestions. Vérifiez la connexion et réessayez.";
     }
+    SG.loading = false;
+    paintSugg();
+    $("#suggMore").hidden = SG.view === "swipe" || SG.page >= SG.pages || !SG.results.length || !!SG.err;
     $("#suggMore").disabled = false;
   }
-  $("#openSugg").addEventListener("click", () => { openSheet(suggDlg); $("#suggPanel").scrollTop = 0; suggControls(); loadSugg(); });
+
+  function setSuggView(v) {
+    SG.view = v;
+    $$("#suggView button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.view === v)));
+    $("#suggPanel").classList.toggle("swiping", v === "swipe");
+    $("#swipeArea").hidden = v !== "swipe";
+    $("#suggMore").hidden = v === "swipe" || SG.page >= SG.pages || !SG.results.length;
+    $("#suggPanel").scrollTop = 0;
+    paintSugg();
+  }
+
+  // Titres proposés au swipe : ni déjà vus, ni déjà refusés ou voulus par moi
+  function swipeable() {
+    return SG.results.filter(r => {
+      const k = skey(r);
+      if (swiped.has(k) || SW.vu.includes(k) || SW[who].includes(k)) return false;
+      const d = items[k];
+      return !(d && !d.deleted && (d.seen || d.wants?.[who]));
+    });
+  }
+  function swCard(r, depth) {
+    const title = r.title || r.name || "", p = imgPath(r.poster_path);
+    const year = (r.release_date || r.first_air_date || "").slice(0, 4);
+    const genres = [...new Set((r.genre_ids || []).map(id => SG.gname?.get(id)).filter(Boolean))].slice(0, 2);
+    const bits = [year, ...genres].filter(Boolean);
+    if (r.vote_average && r.vote_count > 5) bits.push(`★ ${String(Math.round(r.vote_average * 10) / 10).replace(".", ",")}`);
+    return `<div class="swcard ${depth === 0 ? "top" : ""}" data-k="${esc(skey(r))}" style="--d:${depth}">
+      ${p ? `<img src="${IMG}w500${p}" alt="" draggable="false">` : `<div class="ph">${mascot("happy")}<span>${esc(title)}</span></div>`}
+      <span class="tp"><span class="pill ${r.media_type}">${r.media_type === "tv" ? "Série" : "Film"}</span></span>
+      <span class="sw-stamp yes">Envie</span><span class="sw-stamp no">Non merci</span><span class="sw-stamp vu">Déjà vu</span>
+      <div class="swinfo"><h3>${esc(title)}</h3><p>${bits.map(esc).join(" · ")}</p>${r.overview ? `<div class="ov">${esc(r.overview)}</div>` : ""}</div>
+    </div>`;
+  }
+  function renderDeck() {
+    const deck = $("#deck"), btns = $$("#swipeArea .swb");
+    const list = swipeable();
+    if (list.length < 5 && !SG.loading && !SG.err && !SG.moreBusy && SG.page < SG.pages && SG.results.length) {
+      SG.moreBusy = true; SG.page++;
+      loadSugg(true).finally(() => { SG.moreBusy = false; });
+    }
+    let html;
+    if (SG.err) html = `<div class="sw-empty">${mascot("sleep")}<span>${esc(SG.err)}</span></div>`;
+    else if (!list.length) html = SG.loading || SG.moreBusy ? `<div class="swcard sk" style="--d:0"></div>`
+      : `<div class="sw-empty">${mascot("sleep")}<b>Plus rien à swiper ici</b><span>Changez de catégorie ou revenez dans quelques jours.</span></div>`;
+    else html = list.slice(0, 3).map((r, i) => swCard(r, i)).reverse().join("");
+    deck.innerHTML = html;
+    btns.forEach(b => { b.disabled = !list.length; });
+  }
+
+  // Glisser une carte
+  let drag = null;
+  const clamp01 = v => Math.max(0, Math.min(1, v));
+  function stamps(c, dx, dy) {
+    const up = -dy > Math.abs(dx);
+    c.querySelector(".sw-stamp.yes").style.opacity = up ? 0 : clamp01(dx / 100);
+    c.querySelector(".sw-stamp.no").style.opacity = up ? 0 : clamp01(-dx / 100);
+    c.querySelector(".sw-stamp.vu").style.opacity = up ? clamp01(-dy / 90) : 0;
+  }
+  $("#deck").addEventListener("pointerdown", e => {
+    const c = e.target.closest(".swcard.top"); if (!c || e.button > 0) return;
+    drag = { c, x0: e.clientX, y0: e.clientY, dx: 0, dy: 0 };
+    try { c.setPointerCapture(e.pointerId); } catch {}
+    c.style.transition = "none"; c.style.animation = "none";
+  });
+  $("#deck").addEventListener("pointermove", e => {
+    if (!drag) return;
+    drag.dx = e.clientX - drag.x0; drag.dy = e.clientY - drag.y0;
+    drag.c.style.transform = `translate(${drag.dx}px, ${drag.dy}px) rotate(${drag.dx / 16}deg)`;
+    stamps(drag.c, drag.dx, drag.dy);
+  });
+  function endDrag() {
+    if (!drag) return;
+    const { c, dx, dy } = drag; drag = null;
+    if (Math.abs(dx) < 6 && Math.abs(dy) < 6) {
+      c.style.transform = "";
+      const r = SG.results.find(x => skey(x) === c.dataset.k);
+      if (r) choose({ media_type: r.media_type, id: r.id });
+      return;
+    }
+    const dir = -dy > 90 && -dy > Math.abs(dx) ? "up" : dx > 100 ? "right" : dx < -100 ? "left" : "";
+    if (!dir) { c.style.transition = "transform .4s var(--spring)"; c.style.transform = ""; stamps(c, 0, 0); return; }
+    fly(c, dir);
+  }
+  $("#deck").addEventListener("pointerup", endDrag);
+  $("#deck").addEventListener("pointercancel", endDrag);
+
+  function fly(c, dir) {
+    const k = c.dataset.k, r = SG.results.find(x => skey(x) === k); if (!r) return;
+    c.classList.remove("top"); c.style.animation = "none";
+    stamps(c, dir === "right" ? 200 : dir === "left" ? -200 : 0, dir === "up" ? -200 : 0);
+    c.style.transition = "transform .42s cubic-bezier(.4,0,.9,.6), opacity .42s ease-in";
+    c.style.transform = dir === "up" ? `translate(0, ${-innerHeight}px) rotate(-6deg)` : `translate(${dir === "right" ? innerWidth : -innerWidth}px, 60px) rotate(${dir === "right" ? 30 : -30}deg)`;
+    c.style.opacity = "0";
+    swiped.add(k);
+    onSwipe(dir, r);
+    setTimeout(renderDeck, 240);
+  }
+  $("#swipeArea").addEventListener("click", e => {
+    const b = e.target.closest("[data-sw]"); if (!b) return;
+    const c = $("#deck .swcard.top"); if (c) fly(c, b.dataset.sw);
+  });
+  document.addEventListener("keydown", e => {
+    if (!suggDlg.open || SG.view !== "swipe" || [...document.querySelectorAll("dialog[open]")].pop() !== suggDlg || !$("#matchOv").hidden) return;
+    const dir = { ArrowRight: "right", ArrowLeft: "left", ArrowUp: "up" }[e.key]; if (!dir) return;
+    const c = $("#deck .swcard.top"); if (c) { e.preventDefault(); fly(c, dir); }
+  });
+
+  function swAdd(key, k) {
+    if (SW[key].includes(k)) return;
+    SW[key] = SW[key].concat(k).slice(-1500); save(LS.sw, SW);
+    if (cloud()) fs.doc("cinea2meta/swipes").set({ [key]: SW[key] }, { merge: true }).catch(writeErr);
+  }
+  async function onSwipe(dir, r) {
+    const k = skey(r);
+    if (dir === "left") { swAdd(who, k); return; }
+    if (dir === "up") { swAdd("vu", k); return; }
+    const other = who === "a" ? "b" : "a", d = items[k];
+    const match = !!(d && !d.deleted && !d.seen && d.wants?.[other]);
+    if (match) showMatch(r); else { const [x, y] = centerOf($("#deck")); burst(x, y, 12, "love"); }
+    if (d && !d.deleted) { update(k, { wants: Object.assign({ a: false, b: false }, d.wants, { [who]: true }) }); return; }
+    try {
+      const f = await fetchDetails(r.media_type, r.id), now = Date.now();
+      items[k] = Object.assign({}, f, { addedBy: who, addedAt: now, wants: { a: who === "a", b: who === "b" }, seen: false, seenAt: 0, deleted: false, updatedAt: now });
+      persist(k);
+    } catch { toast(`Impossible d'ajouter « ${r.title || r.name} » pour l'instant`, "sleep"); }
+  }
+
+  function showMatch(r) {
+    const ov = $("#matchOv"), p = imgPath(r.poster_path), title = r.title || r.name || "";
+    ov.innerHTML = `<div class="mo-in">
+      <div class="mo-title">C'est un match !</div>
+      <p>Vous avez tous les deux envie de voir</p>
+      <div class="mo-row"><span class="av a">${esc(initial("a"))}</span><div class="mo-poster">${p ? `<img src="${IMG}w342${p}" alt="">` : ""}</div><span class="av b">${esc(initial("b"))}</span></div>
+      <h3>${esc(title)}</h3>
+      <div class="mo-m">${mascot("love")}</div>
+      <div class="acts"><button type="button" class="btn hot" data-mo="open">Voir la fiche</button><button type="button" class="btn ghost" data-mo="close">Continuer à swiper</button></div>
+    </div>`;
+    ov.hidden = false;
+    ov.onclick = e => {
+      const b = e.target.closest("[data-mo]"); if (!b) return;
+      ov.hidden = true;
+      if (b.dataset.mo === "open") choose({ media_type: r.media_type, id: r.id });
+    };
+    setTimeout(() => burst(innerWidth / 2, innerHeight * .38, 40, "love"), 250);
+    setTimeout(() => burst(innerWidth / 2, innerHeight * .38, 30, "party"), 700);
+  }
+
+  $("#openSugg").addEventListener("click", () => { openSheet(suggDlg); $("#suggPanel").scrollTop = 0; $("#matchOv").hidden = true; suggControls(); loadSugg(); });
   suggDlg.addEventListener("click", e => {
     if (e.target === suggDlg || e.target.closest("[data-close]")) { closeSheet(suggDlg); return; }
     const t = e.target.closest("#suggTabs button");
     if (t && t.dataset.src !== SG.src) { SG.src = t.dataset.src; suggControls(); loadSugg(); return; }
+    const v = e.target.closest("#suggView button");
+    if (v && v.dataset.view !== SG.view) { setSuggView(v.dataset.view); return; }
     const c = e.target.closest(".scard[data-i]");
     if (c) { const r = SG.results[+c.dataset.i]; if (r) choose({ media_type: r.media_type, id: r.id }); }
   });
@@ -2102,9 +2388,9 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
 
   async function startCloud() {
     renderAccount();
-    if (!window.FIREBASE_CONFIG) return;
+    if (!window.FIREBASE_CONFIG) { scheduleRefresh(); return; }
     try { if (!window.firebase) for (const m of ["app", "auth", "firestore"]) await loadScript(`https://www.gstatic.com/firebasejs/${FB_VERSION}/firebase-${m}-compat.js`); }
-    catch { authReady = true; renderAccount(); syncState("sync-err", "hors ligne"); toast("Le serveur en ligne ne répond pas : liste de ce téléphone uniquement", "sleep"); return; }
+    catch { authReady = true; renderAccount(); syncState("sync-err", "hors ligne"); toast("Le serveur en ligne ne répond pas : liste de ce téléphone uniquement", "sleep"); scheduleRefresh(); return; }
     if (!firebase.apps.length) firebase.initializeApp(window.FIREBASE_CONFIG);
     const db = firebase.firestore();
     firebase.auth().onAuthStateChanged(async u => {
@@ -2137,6 +2423,10 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
       const meta = await fs.doc("cinea2meta/config").get();
       if (!(meta.exists && meta.data().tmdbKey)) { batch.set(fs.doc("cinea2meta/config"), { tmdbKey: cfg.key, region: cfg.region, platforms: cfg.platforms }, { merge: true }); writes++; }
     }
+    const swDoc = await fs.doc("cinea2meta/swipes").get(), remoteSw = swDoc.exists ? swDoc.data() : {};
+    const swPatch = {};
+    ["a", "b", "vu"].forEach(k => { const r = Array.isArray(remoteSw[k]) ? remoteSw[k] : []; const extra = SW[k].filter(x => !r.includes(x)); if (extra.length) swPatch[k] = r.concat(extra).slice(-1500); });
+    if (Object.keys(swPatch).length) { batch.set(fs.doc("cinea2meta/swipes"), swPatch, { merge: true }); writes++; }
     if (writes) await batch.commit();
     if (n) toast(`${n} titre${n > 1 ? "s" : ""} ajouté${n > 1 ? "s" : ""} à votre liste partagée`, "love");
   }
@@ -2146,7 +2436,7 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
     unsub.push(fs.collection("cinea2").onSnapshot(s => {
       const next = {}; s.docs.forEach(d => { next[d.id] = Object.assign({}, d.data(), { id: d.id }); });
       items = next; save(LS.items, items); render();
-      if (first) { first = false; toast(`Bonjour ${nameOf(who)} ! Votre liste est partagée`); }
+      if (first) { first = false; toast(`Bonjour ${nameOf(who)} ! Votre liste est partagée`); scheduleRefresh(); }
     }, err => { console.warn(err); syncState("sync-err", "synchro en pause"); }));
     unsub.push(fs.doc("cinea2meta/config").onSnapshot(s => {
       const m = s.exists ? s.data() : {};
@@ -2155,12 +2445,51 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
       if (Array.isArray(m.platforms)) cfg.platforms = m.platforms.filter(p => p && typeof p.name === "string").map(p => ({ name: p.name.slice(0, 60), logo: imgPath(p.logo), ids: (Array.isArray(p.ids) ? p.ids : []).filter(Number.isInteger).slice(0, 8) }));
       save(LS.cfg, cfg); render();
     }, () => {}));
+    unsub.push(fs.doc("cinea2meta/swipes").onSnapshot(s => {
+      const m = s.exists ? s.data() : {};
+      ["a", "b", "vu"].forEach(k => { if (Array.isArray(m[k])) SW[k] = m[k].filter(x => typeof x === "string").slice(-1500); });
+      save(LS.sw, SW);
+      if (suggDlg.open && SG.view === "grid") paintSugg();
+    }, () => {}));
     // Prénoms et « qui est qui » repris de Foyer à deux (lecture seule)
     unsub.push(fs.doc("config/couple").onSnapshot(s => {
       const c = s.exists ? s.data() : {};
       if (c.a || c.b) { fromFoyer = true; if (c.a) cfg.nameA = String(c.a).slice(0, 20); if (c.b) cfg.nameB = String(c.b).slice(0, 20); save(LS.cfg, cfg); render(); }
     }, () => {}));
   }
+
+  /* ---------- Plateformes à jour toutes seules ---------- */
+  // Revérifie les titres à voir pas vérifiés depuis une semaine et signale ceux qui arrivent chez vous.
+  const STALE = 7 * 864e5;
+  let refreshT, refreshing = false;
+  function scheduleRefresh() { clearTimeout(refreshT); refreshT = setTimeout(autoRefresh, 2500); }
+  async function autoRefresh() {
+    if (refreshing || !cfg.key) return;
+    refreshing = true;
+    const due = live().filter(d => !d.seen && d.tmdbId && (!d.checkedAt || Date.now() - d.checkedAt > STALE))
+      .sort((x, y) => (x.checkedAt || 0) - (y.checkedAt || 0)).slice(0, 30);
+    const news = [];
+    for (const d of due) {
+      try {
+        const prov = providersFrom(await tmdb(`/${d.type}/${d.tmdbId}/watch/providers`));
+        const cur = items[d.id]; if (!cur || cur.deleted) continue;
+        const before = access(cur), beforeFlat = new Set((cur.providers?.flat || []).map(p => platKey(p.name)));
+        const next = Object.assign({}, cur, { providers: { flat: prov.flat, rent: prov.rent, buy: prov.buy }, link: prov.link || cur.link, region: cfg.region, checkedAt: Date.now(), updatedAt: Date.now() });
+        const flatNow = prov.flat.map(p => platKey(p.name)), mine = myPlats();
+        let arrived = "";
+        if (mine.size) { if (before !== "ok" && access(next) === "ok") arrived = flatNow.find(n => mine.has(n) && !beforeFlat.has(n)) || flatNow.find(n => mine.has(n)); }
+        else if (!beforeFlat.size && flatNow.length) arrived = flatNow[0];
+        if (arrived) { next.newOn = { name: arrived, at: Date.now() }; news.push([next.title, arrived]); }
+        items[d.id] = next; persist(d.id, false);
+      } catch (err) { if (err.code === "badkey" || err.code === "nokey") break; }
+      await new Promise(res => setTimeout(res, 150));
+    }
+    refreshing = false;
+    if (due.length) render();
+    if (news.length === 1) toast(`« ${news[0][0]} » vient d'arriver sur ${news[0][1]}`, "love");
+    else if (news.length > 1) toast(`${news.length} titres viennent d'arriver sur vos plateformes`, "love");
+  }
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) scheduleRefresh(); });
 
   addEventListener("storage", e => { if (e.key === LS.items && !cloud()) { items = load(LS.items, {}); render(); } });
 
