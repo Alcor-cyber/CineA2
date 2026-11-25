@@ -39,6 +39,10 @@ Si l'autre avait déjà swipé le même titre à droite : « C'est un match ! »
 
 À chaque ouverture, l'appli revérifie les titres à voir qui n'ont pas été vérifiés depuis une semaine. Quand un titre arrive sur l'une de vos plateformes, il affiche un badge « Nouveau sur … » pendant deux semaines.
 
+## Hors ligne
+
+L'appli est gardée sur le téléphone (`sw.js`) : elle s'ouvre tout de suite, même sans réseau, avec votre dernière liste et les affiches déjà vues. Les cœurs, « Vu » et ajouts faits hors ligne sont envoyés automatiquement au retour du réseau. Quand une nouvelle version est publiée, un message « Nouvelle version prête » propose de la charger.
+
 ## Nos plateformes
 
 Dans les réglages, cochez les abonnements que vous avez (Netflix, Prime Video, Disney+…). Le choix est partagé entre vos deux téléphones. Les raccourcis de filtre n'affichent plus que vos plateformes, et un badge signale les titres que vous ne pouvez pas regarder :
