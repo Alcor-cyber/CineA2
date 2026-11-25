@@ -54,10 +54,10 @@ Dans les réglages, cochez les abonnements que vous avez (Netflix, Prime Video, 
 
 | Téléphone | Fiche d'un film |
 |---|---|
-| ![](apercu-telephone.png) | ![](apercu-fiche.png) |
+| ![](apercu-telephone.jpg) | ![](apercu-fiche.jpg) |
 
-![](apercu-ordinateur.png)
+![](apercu-ordinateur.jpg)
 
-![](apercu-tirage.png)
+![](apercu-tirage.jpg)
 
 (Les affiches et logos des captures sont des exemples dessinés ; l'appli affiche les vrais.)
