@@ -106,17 +106,21 @@ img { max-width: 100%; display: block; }
 .logo b { font-family: var(--display); font-weight: 800; font-size: 21px; letter-spacing: -.02em; line-height: 1; }
 .logo b span { background: linear-gradient(100deg, var(--butter), var(--cherry) 55%, var(--bubble)); -webkit-background-clip: text; background-clip: text; color: transparent; }
 
-.who { display: inline-flex; gap: 4px; padding: 4px; border-radius: 999px; background: rgb(255 255 255 / .05); border: 1px solid var(--line); }
-.who button { display: inline-flex; align-items: center; gap: 8px; border: 0; background: transparent; border-radius: 999px; padding: 3px 12px 3px 3px; color: var(--muted); font-weight: 600; font-size: 13.5px; transition: background .3s, color .3s; }
-.who button[aria-pressed="true"] { background: rgb(255 255 255 / .1); color: var(--text); }
-.who .nm { max-width: 9ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.reel {
+  display: inline-flex; align-items: center; gap: 8px; height: 42px; padding: 0 16px 0 12px; border-radius: 999px; flex: none;
+  border: 1px solid rgb(255 200 58 / .35); background: linear-gradient(100deg, rgb(255 200 58 / .16), rgb(255 61 87 / .14));
+  color: var(--text); font-weight: 700; font-size: 13.5px; transition: transform .3s var(--spring), border-color .2s, box-shadow .3s;
+}
+.reel .ico { width: 22px; height: 22px; color: var(--butter); transition: transform .9s var(--out); }
+.reel:hover { border-color: var(--butter); box-shadow: 0 8px 24px -10px rgb(255 200 58 / .7); }
+.reel:hover .ico { transform: rotate(180deg); }
+.reel:active { transform: scale(.94); }
 .av {
   width: 28px; height: 28px; border-radius: 50%; display: inline-grid; place-items: center; flex: none;
   font: 700 12px/1 var(--display); color: var(--outline);
   background: var(--c, var(--pa)); box-shadow: 0 0 0 2px var(--ink);
 }
 .av.a { --c: var(--pa); } .av.b { --c: var(--pb); }
-.who button[aria-pressed="false"] .av { filter: saturate(.3) brightness(.7); }
 
 .gear {
   position: relative; width: 42px; height: 42px; border-radius: 50%; flex: none;
@@ -635,6 +639,61 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
 .hero-mascot .m.boing .bob { animation: boing .7s var(--spring); }
 @keyframes boing { 30% { transform: scale(1.12, .88); } 60% { transform: scale(.94, 1.08) translateY(-10px); } }
 
+/* ---------- Suggestions ---------- */
+#suggDlg .panel { min-height: min(90dvh, 920px); }
+.sg-head { display: flex; align-items: center; gap: 14px; padding: 28px 70px 4px 22px; }
+.sg-head .m { width: 52px; height: 60px; flex: none; }
+.sg-head h2 { font-family: var(--display); font-weight: 800; font-size: 26px; margin: 4px 0 0; letter-spacing: -.02em; }
+.sg-tools {
+  position: sticky; top: 0; z-index: 4; display: grid; gap: 12px; padding: 14px 22px 14px;
+  background: linear-gradient(180deg, var(--ink-2) 82%, rgb(21 17 42 / 0));
+}
+.sg-tools .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; }
+.sg-tools .seg button { padding: 8px 14px; font-size: 13.5px; }
+.sg-tools .field { flex: 1 1 140px; min-width: 0; }
+.sg-tools .field label { font-size: 11.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+.sg-tools .field select {
+  width: 100%; padding: 10px 36px 10px 12px; border-radius: 12px; border: 1px solid var(--line-2); background-color: var(--ink);
+  font-size: 14.5px; font-weight: 600; -webkit-appearance: none; appearance: none; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23aba4c7' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 10px center; background-size: 18px;
+}
+.sg-tools .field select:focus { outline: none; border-color: var(--butter); box-shadow: 0 0 0 4px rgb(255 200 58 / .15); }
+.sg-tools .field select.on { border-color: var(--butter); background-color: rgb(255 200 58 / .1); }
+.switch { display: inline-flex; align-items: center; gap: 10px; font-size: 13.5px; font-weight: 600; color: var(--muted); cursor: pointer; user-select: none; }
+.switch input {
+  -webkit-appearance: none; appearance: none; width: 42px; height: 24px; border-radius: 999px; margin: 0; flex: none; cursor: pointer;
+  background: var(--ink-4); position: relative; transition: background .25s;
+}
+.switch input::after { content: ""; position: absolute; left: 3px; top: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform .3s var(--spring); }
+.switch input:checked { background: var(--mint); }
+.switch input:checked::after { transform: translateX(18px); }
+.switch input:checked + span { color: var(--text); }
+.sg-note { margin: 0; padding: 0 22px; font-size: 12.5px; color: var(--muted); }
+.sg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 20px 12px; padding: 8px 22px 10px; }
+@media (max-width: 520px) { .sg-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px 10px; padding-inline: 18px; } .sg-tools { padding-inline: 18px; } .sg-head { padding-left: 18px; } .sg-note { padding-inline: 18px; } }
+.scard { position: relative; display: block; width: 100%; border: 0; background: none; padding: 0; text-align: left; min-width: 0; animation: rise .5s var(--out) both; animation-delay: calc(var(--i) * 28ms); }
+.scard .pf { position: relative; display: block; width: 100%; aspect-ratio: 2 / 3; border-radius: 12px; overflow: hidden; background: var(--ink-3); box-shadow: 0 12px 26px -14px rgb(0 0 0 / .9), 0 0 0 1px rgb(255 255 255 / .06); transition: transform .4s var(--spring), box-shadow .3s; }
+.scard:hover .pf { transform: translateY(-4px); box-shadow: 0 20px 34px -14px rgb(0 0 0 / .95), 0 0 0 1px rgb(255 255 255 / .16); }
+.scard .pf img { width: 100%; height: 100%; object-fit: cover; }
+.scard .pf .ph { font-size: 11px; }
+.scard .pf .ph .m { width: 36px; height: 42px; }
+.scard .pf::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 55%, rgb(12 10 23 / .8)); }
+.scard .rank { position: absolute; left: 7px; bottom: 2px; z-index: 2; font: 800 30px/1 var(--display); letter-spacing: -.04em; color: #fff; text-shadow: 0 2px 12px rgb(0 0 0 / .8); }
+.scard .rank small { font-size: .5em; color: var(--butter); margin-right: 1px; }
+.scard .badge { position: absolute; right: 6px; top: 6px; z-index: 2; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--butter); color: var(--outline); box-shadow: 0 4px 12px -2px rgb(0 0 0 / .6); }
+.scard .badge.in { background: var(--mint); }
+.scard .badge .ico { width: 15px; height: 15px; stroke-width: 2.8; }
+.scard .tp { position: absolute; left: 6px; top: 6px; z-index: 2; }
+.scard .tp .pill { -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); background: rgb(12 10 23 / .6); font-size: 9.5px; padding: 2px 6px; }
+.scard b { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-top: 8px; font-size: 13.5px; line-height: 1.25; }
+.scard small.sub { display: block; margin-top: 2px; color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.scard.sk .pf { background: linear-gradient(90deg, var(--ink-3) 0%, var(--ink-4) 50%, var(--ink-3) 100%); background-size: 200% 100%; animation: shimmer 1.2s linear infinite; }
+.scard.sk b { height: 12px; width: 80%; border-radius: 6px; background: var(--ink-3); }
+.sg-more { display: flex; justify-content: center; padding: 8px 22px 26px; }
+.sg-msg2 { grid-column: 1 / -1; display: grid; justify-items: center; gap: 10px; text-align: center; padding: 30px 10px; color: var(--muted); }
+.sg-msg2 .m { width: 80px; height: 92px; }
+
 /* ---------- Intro ---------- */
 #splash {
   position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; overflow: hidden; cursor: pointer;
@@ -699,8 +758,8 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
 
 /* ---------- Petits écrans ---------- */
 @media (max-width: 640px) {
-  .who .nm { display: none; }
-  .who button { padding: 3px; }
+  .reel { width: 42px; padding: 0; justify-content: center; }
+  .reel .rl { display: none; }
   .hero { padding-block: 22px 10px; gap: 4px 12px; }
   .hero-mascot { width: 104px; }
   .search-box { padding-left: 16px; }
@@ -753,10 +812,10 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
 <header class="nav" id="nav">
   <div class="wrap">
     <a class="logo" href="#" aria-label="CinéA2, haut de page"><span id="logoMascot"></span><b>Ciné<span>A2</span></b></a>
-    <div class="who" id="who" role="group" aria-label="Qui utilise l'appli">
-      <button type="button" data-who="a" aria-pressed="true"><span class="av a">A</span><span class="nm">Moi</span></button>
-      <button type="button" data-who="b" aria-pressed="false"><span class="av b">B</span><span class="nm">Ma moitié</span></button>
-    </div>
+    <button class="reel" id="openSugg" type="button" aria-label="Suggestions : le top du moment" title="Suggestions : le top du moment">
+      <svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8.2"/><circle cx="11" cy="11" r="1.4"/><circle cx="11" cy="6.3" r="1.8"/><circle cx="15.5" cy="9.6" r="1.8"/><circle cx="13.8" cy="14.9" r="1.8"/><circle cx="8.2" cy="14.9" r="1.8"/><circle cx="6.5" cy="9.6" r="1.8"/><path d="M19.2 11v8.3c0 .9.7 1.7 1.6 1.7H23"/></svg>
+      <span class="rl">Suggestions</span>
+    </button>
     <button class="gear" id="openSettings" type="button" aria-label="Réglages" title="Réglages">
       <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     </button>
@@ -830,6 +889,27 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
 </main>
 
 <dialog class="sheet" id="detail" aria-label="Fiche"><div class="panel" id="detailPanel"></div></dialog>
+<dialog class="sheet" id="suggDlg" aria-label="Suggestions">
+  <div class="panel" id="suggPanel">
+    <div class="grab"></div>
+    <button class="x" type="button" data-close aria-label="Fermer"><svg class="ico" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    <div class="sg-head"><span id="suggMascot"></span><div><span class="eyebrow">Le top du moment</span><h2>Suggestions</h2></div></div>
+    <div class="sg-tools">
+      <div class="seg" id="suggTabs" role="group" aria-label="Où regarder">
+        <button type="button" data-src="cinema" aria-pressed="true">Au cinéma</button>
+        <button type="button" data-src="streaming" aria-pressed="false">Sur les plateformes</button>
+      </div>
+      <div class="row">
+        <div class="field"><label for="suggGenre">Catégorie</label><select id="suggGenre"><option value="">Toutes</option></select></div>
+        <div class="field" id="suggTypeF" hidden><label for="suggType">Type</label><select id="suggType"><option value="all">Films et séries</option><option value="movie">Films</option><option value="tv">Séries</option></select></div>
+      </div>
+      <label class="switch" id="suggMineW" hidden><input type="checkbox" id="suggMine" checked><span>Seulement nos plateformes</span></label>
+    </div>
+    <p class="sg-note" id="suggNote"></p>
+    <div class="sg-grid" id="suggGrid"></div>
+    <div class="sg-more"><button type="button" class="btn ghost" id="suggMore" hidden>Voir plus</button></div>
+  </div>
+</dialog>
 <dialog class="sheet" id="rouletteDlg" aria-label="Tirage au sort"><div class="panel" id="roulettePanel"></div></dialog>
 
 <dialog class="sheet" id="settingsDlg" aria-label="Réglages">
@@ -1390,7 +1470,7 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
       const acc = access(d);
       if (acc && acc !== "ok") toast(`« ${d.title} » ajouté, mais ${acc === "other" ? "pas sur vos plateformes" : acc === "rent" ? "seulement en location" : "pas encore en streaming"}`, "wow");
       else toast(`« ${d.title} » ajouté à votre liste`, "love");
-      revealCard(d.id);
+      if (suggDlg.open) paintSugg(); else revealCard(d.id);
       return;
     }
     const id = currentId, d = items[id]; if (!d) return;
@@ -1489,13 +1569,6 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
   }
 
   function renderWho() {
-    $$("#who button").forEach(b => {
-      const w = b.dataset.who;
-      b.setAttribute("aria-pressed", String(w === who));
-      b.querySelector(".av").textContent = initial(w);
-      b.querySelector(".nm").textContent = nameOf(w);
-      b.title = `C'est ${nameOf(w)}`;
-    });
     const h = new Date().getHours();
     const hello = h >= 18 || h < 5 ? "Bonsoir" : "Bonjour";
     $("#greet").textContent = `${hello}, ${nameOf(who)}`;
@@ -1685,11 +1758,6 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
     if (e.target.closest("[data-pf-settings]")) { openSettings(); setTimeout(() => $("#platFs").scrollIntoView({ behavior: "smooth", block: "start" }), 450); return; }
     const b = e.target.closest("[data-pf]"); if (!b) return; filt.platform = b.dataset.pf; shown.clear(); render();
   });
-  $("#who").addEventListener("click", e => {
-    const b = e.target.closest("button"); if (!b || b.dataset.who === who) return;
-    who = b.dataset.who; save(LS.who, who); render();
-    toast(`Coucou ${nameOf(who)} !`);
-  });
 
   const nav = $("#nav");
   addEventListener("scroll", () => nav.classList.toggle("scrolled", scrollY > 8), { passive: true });
@@ -1759,9 +1827,127 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
   }
   $("#rouletteDlg").addEventListener("click", e => { if (e.target === e.currentTarget || e.target.closest("[data-close]")) closeSheet(e.currentTarget); });
 
+  /* ---------- Suggestions : le top du moment ---------- */
+  const suggDlg = $("#suggDlg");
+  const SG = { src: "cinema", genre: "", type: "all", mine: true, page: 1, pages: 1, results: [], genres: null, req: 0 };
+  $("#suggMascot").innerHTML = mascot("happy");
+  const isoDay = n => { const d = new Date(); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
+
+  async function suggGenres() {
+    if (SG.genres) return;
+    const [m, t] = await Promise.all(["movie", "tv"].map(k => tmdb(`/genre/${k}/list`, { language: "fr-FR" })));
+    const map = new Map();
+    const add = (list, kind) => (list || []).forEach(g => String(g.name).split(/\s*&\s*/).forEach(n => {
+      n = n.trim(); if (!n) return; n = n[0].toUpperCase() + n.slice(1);
+      if (!map.has(n)) map.set(n, { name: n, movie: [], tv: [] });
+      map.get(n)[kind].push(g.id);
+    }));
+    add(m.genres, "movie"); add(t.genres, "tv");
+    SG.genres = [...map.values()].sort((x, y) => x.name.localeCompare(y.name, "fr"));
+  }
+  async function myProviderIds() {
+    const mine = cfg.platforms || []; if (!mine.length) return [];
+    await loadPlatCatalog();
+    const ids = new Set();
+    mine.forEach(p => {
+      (p.ids || []).forEach(i => ids.add(i));
+      (platCatalogAll.find(c => c.name === p.name)?.ids || []).forEach(i => ids.add(i));
+      live().forEach(d => (d.providers?.flat || []).forEach(q => { if (platKey(q.name) === p.name && q.id) ids.add(q.id); }));
+    });
+    return [...ids];
+  }
+  function suggControls() {
+    $$("#suggTabs button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.src === SG.src)));
+    const streaming = SG.src === "streaming";
+    $("#suggTypeF").hidden = !streaming;
+    $("#suggMineW").hidden = !(streaming && (cfg.platforms || []).length);
+    $("#suggMine").checked = SG.mine;
+    const kinds = streaming ? (SG.type === "all" ? ["movie", "tv"] : [SG.type]) : ["movie"];
+    const list = (SG.genres || []).filter(g => kinds.some(k => g[k].length));
+    if (SG.genre && !list.some(g => g.name === SG.genre)) SG.genre = "";
+    const gs = $("#suggGenre");
+    gs.innerHTML = `<option value="">Toutes</option>` + list.map(g => `<option value="${esc(g.name)}"${g.name === SG.genre ? " selected" : ""}>${esc(g.name)}</option>`).join("");
+    gs.classList.toggle("on", !!SG.genre);
+    $("#suggType").value = SG.type; $("#suggType").classList.toggle("on", SG.type !== "all");
+  }
+  async function fetchSugg(page) {
+    const g = (SG.genres || []).find(x => x.name === SG.genre);
+    if (SG.src === "cinema") {
+      const q = { language: "fr-FR", region: cfg.region, sort_by: "popularity.desc", with_release_type: "3|2", "release_date.gte": isoDay(-42), "release_date.lte": isoDay(4), include_adult: "false", page };
+      if (g) q.with_genres = g.movie.join("|");
+      const r = await tmdb("/discover/movie", q);
+      return { pages: r.total_pages || 1, results: (r.results || []).map(x => ({ ...x, media_type: "movie" })) };
+    }
+    const prov = SG.mine ? await myProviderIds() : [];
+    const kinds = SG.type === "all" ? ["movie", "tv"] : [SG.type];
+    const calls = kinds.filter(k => !g || g[k].length).map(async k => {
+      const q = { language: "fr-FR", watch_region: cfg.region, sort_by: "popularity.desc", "vote_count.gte": k === "tv" ? 20 : 50, include_adult: "false", page };
+      if (prov.length) q.with_watch_providers = prov.join("|"); else q.with_watch_monetization_types = "flatrate";
+      if (g) q.with_genres = g[k].join("|");
+      const r = await tmdb(`/discover/${k}`, q);
+      return { pages: r.total_pages || 1, results: (r.results || []).map(x => ({ ...x, media_type: k })) };
+    });
+    const res = await Promise.all(calls);
+    return { pages: Math.max(1, ...res.map(r => r.pages)), results: res.flatMap(r => r.results).sort((x, y) => (y.popularity || 0) - (x.popularity || 0)) };
+  }
+  function suggCard(r, i) {
+    const id = `${r.media_type}-${r.id}`, inList = items[id] && !items[id].deleted;
+    const title = r.title || r.name || "", p = imgPath(r.poster_path);
+    const date = r.release_date || r.first_air_date || "";
+    let sub = date.slice(0, 4);
+    if (SG.src === "cinema" && date) {
+      const d = new Date(date + "T12:00:00"), future = d > new Date();
+      sub = `${future ? "Sortie" : "Sorti"} le ${d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}`;
+    }
+    if (r.vote_average && r.vote_count > 5) sub += ` · ★ ${String(Math.round(r.vote_average * 10) / 10).replace(".", ",")}`;
+    return `<button type="button" class="scard" data-i="${i}" style="--i:${i % 20}" aria-label="${esc(title)}${inList ? ", déjà dans votre liste" : ""}">
+      <span class="pf">${p ? `<img src="${IMG}w342${p}" alt="" loading="lazy" decoding="async">` : `<span class="ph">${mascot("happy")}<span>${esc(title)}</span></span>`}
+        ${SG.src === "streaming" ? `<span class="tp"><span class="pill ${r.media_type}">${r.media_type === "tv" ? "Série" : "Film"}</span></span>` : ""}
+        ${i < 10 ? `<span class="rank"><small>#</small>${i + 1}</span>` : ""}
+        <span class="badge ${inList ? "in" : ""}">${inList ? IC.check : IC.plus}</span></span>
+      <b>${esc(title)}</b><small class="sub">${esc(sub)}</small></button>`;
+  }
+  function paintSugg() { $("#suggGrid").innerHTML = SG.results.map(suggCard).join(""); }
+  async function loadSugg(more = false) {
+    const my = ++SG.req, grid = $("#suggGrid");
+    if (!cfg.key) { grid.innerHTML = `<div class="sg-msg2">${mascot("sleep")}<span>Ajoutez d'abord la clé TMDB dans les réglages pour voir les suggestions.</span></div>`; $("#suggMore").hidden = true; return; }
+    if (!more) { SG.page = 1; SG.results = []; grid.innerHTML = Array.from({ length: 12 }, (_, i) => `<div class="scard sk" style="--i:${i}"><span class="pf"></span><b></b></div>`).join(""); }
+    $("#suggMore").disabled = true;
+    $("#suggNote").textContent = SG.src === "cinema" ? `Les films les plus populaires sortis en salle ces six dernières semaines ${REGION_NAME[cfg.region] || ""}.`
+      : SG.mine && (cfg.platforms || []).length ? `Les titres les plus regardés en ce moment sur ${cfg.platforms.map(p => p.name).join(", ")}.` : `Les titres les plus regardés en ce moment sur les plateformes ${REGION_NAME[cfg.region] || ""}.`;
+    try {
+      await suggGenres(); if (my !== SG.req) return; suggControls();
+      const r = await fetchSugg(SG.page);
+      if (my !== SG.req) return;
+      const seenIds = new Set(SG.results.map(x => `${x.media_type}-${x.id}`));
+      SG.results = SG.results.concat(r.results.filter(x => !seenIds.has(`${x.media_type}-${x.id}`)));
+      SG.pages = r.pages;
+      if (!SG.results.length) grid.innerHTML = `<div class="sg-msg2">${mascot("sleep")}<span>Rien ne correspond à ce tri pour l'instant. Essayez une autre catégorie.</span></div>`;
+      else paintSugg();
+      $("#suggMore").hidden = SG.page >= SG.pages || !SG.results.length;
+    } catch (err) {
+      if (my !== SG.req) return;
+      grid.innerHTML = `<div class="sg-msg2">${mascot("sleep")}<span>${err.code === "badkey" ? "La clé TMDB est refusée. Vérifiez-la dans les réglages." : "Impossible de charger les suggestions. Vérifiez la connexion et réessayez."}</span></div>`;
+      $("#suggMore").hidden = true;
+    }
+    $("#suggMore").disabled = false;
+  }
+  $("#openSugg").addEventListener("click", () => { openSheet(suggDlg); $("#suggPanel").scrollTop = 0; suggControls(); loadSugg(); });
+  suggDlg.addEventListener("click", e => {
+    if (e.target === suggDlg || e.target.closest("[data-close]")) { closeSheet(suggDlg); return; }
+    const t = e.target.closest("#suggTabs button");
+    if (t && t.dataset.src !== SG.src) { SG.src = t.dataset.src; suggControls(); loadSugg(); return; }
+    const c = e.target.closest(".scard[data-i]");
+    if (c) { const r = SG.results[+c.dataset.i]; if (r) choose({ media_type: r.media_type, id: r.id }); }
+  });
+  $("#suggGenre").addEventListener("change", e => { SG.genre = e.target.value; suggControls(); loadSugg(); });
+  $("#suggType").addEventListener("change", e => { SG.type = e.target.value; suggControls(); loadSugg(); });
+  $("#suggMine").addEventListener("change", e => { SG.mine = e.target.checked; loadSugg(); });
+  $("#suggMore").addEventListener("click", () => { SG.page++; loadSugg(true); });
+
   /* ---------- Réglages ---------- */
   const sDlg = $("#settingsDlg");
-  let platCatalog = null, platCatalogRegion = "", draftPlat = new Set(), platOpts = new Map();
+  let platCatalog = null, platCatalogAll = [], platCatalogRegion = "", draftPlat = new Set(), platOpts = new Map();
   async function loadPlatCatalog() {
     if (!cfg.key || (platCatalog && platCatalogRegion === cfg.region)) return;
     try {
@@ -1769,15 +1955,16 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
       const map = new Map();
       res.flatMap(r => r.results || []).forEach(p => {
         const k = platKey(p.provider_name), pr = p.display_priorities?.[cfg.region] ?? p.display_priority ?? 999, cur = map.get(k);
-        if (!cur) map.set(k, { name: k, logo: p.logo_path, pr });
-        else { cur.pr = Math.min(cur.pr, pr); if (p.provider_name === k) cur.logo = p.logo_path; }
+        if (!cur) map.set(k, { name: k, logo: p.logo_path, pr, ids: [p.provider_id] });
+        else { cur.pr = Math.min(cur.pr, pr); if (p.provider_name === k) cur.logo = p.logo_path; if (!cur.ids.includes(p.provider_id)) cur.ids.push(p.provider_id); }
       });
-      platCatalog = [...map.values()].sort((x, y) => x.pr - y.pr).slice(0, 30); platCatalogRegion = cfg.region;
+      platCatalogAll = [...map.values()];
+      platCatalog = platCatalogAll.slice().sort((x, y) => x.pr - y.pr).slice(0, 30); platCatalogRegion = cfg.region;
     } catch { /* la grille garde les plateformes déjà connues */ }
   }
   function renderPlatGrid() {
     platOpts = new Map();
-    (platCatalog || []).forEach(p => platOpts.set(p.name, { name: p.name, logo: p.logo }));
+    (platCatalog || []).forEach(p => platOpts.set(p.name, { name: p.name, logo: p.logo, ids: p.ids }));
     (cfg.platforms || []).forEach(p => { if (!platOpts.has(p.name)) platOpts.set(p.name, p); });
     live().forEach(d => (d.providers?.flat || []).forEach(p => { const k = platKey(p.name); if (!platOpts.has(k)) platOpts.set(k, { name: k, logo: p.logo }); }));
     const g = $("#platGrid");
@@ -1817,7 +2004,7 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
     Object.assign(cfg, { key: $("#tmdbKey").value.trim(), region: $("#region").value });
     if (!(cloud() && fromFoyer)) Object.assign(cfg, { nameA: $("#nameA").value.trim(), nameB: $("#nameB").value.trim() });
     const before = JSON.stringify(cfg.platforms);
-    cfg.platforms = [...platOpts.values()].filter(p => draftPlat.has(p.name)).map(p => ({ name: p.name, logo: imgPath(p.logo) }));
+    cfg.platforms = [...platOpts.values()].filter(p => draftPlat.has(p.name)).map(p => ({ name: p.name, logo: imgPath(p.logo), ids: (platCatalogAll.find(c => c.name === p.name)?.ids || p.ids || []).slice(0, 8) }));
     const platsChanged = before !== JSON.stringify(cfg.platforms);
     save(LS.cfg, cfg); closeSheet(sDlg); shown.clear(); render();
     if (cloud() && (keyChanged || regionChanged || platsChanged)) fs.doc("cinea2meta/config").set({ tmdbKey: cfg.key, region: cfg.region, platforms: cfg.platforms }, { merge: true }).catch(writeErr);
@@ -1902,6 +2089,17 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
     btn.disabled = false; btn.textContent = "Se connecter";
   });
 
+  // Le compte de Thomas est reconnu par l'empreinte SHA-256 de son e-mail (l'adresse n'est pas écrite ici).
+  // Tout autre compte autorisé par les règles Firestore est celui de Christelle.
+  const THOMAS_SHA256 = "01a4dccb4b6e1d21c70b1f45023c14dc3c4df0b3be778b959c899728eeaa2e19";
+  async function whoFromEmail(email) {
+    try {
+      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(String(email || "").trim().toLowerCase()));
+      const hex = [...new Uint8Array(buf)].map(x => x.toString(16).padStart(2, "0")).join("");
+      return hex === THOMAS_SHA256 ? "a" : "b";
+    } catch { return who; }
+  }
+
   const loadScript = src => new Promise((res, rej) => { const el = document.createElement("script"); el.src = src; el.onload = res; el.onerror = () => rej(new Error(src)); document.head.appendChild(el); });
 
   async function startCloud() {
@@ -1919,6 +2117,7 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
         if (err.code === "permission-denied") { await firebase.auth().signOut(); openLogin(`Le compte ${u.email} n'a pas accès à la liste partagée.`); return; }
       }
       fs = db; user = u;
+      who = await whoFromEmail(u.email); save(LS.who, who); render();
       closeSheet(loginDlg);
       try { await sendLocal(); } catch (err) { console.warn(err); }
       listenCloud();
@@ -1955,7 +2154,7 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
       const m = s.exists ? s.data() : {};
       if (m.tmdbKey) cfg.key = m.tmdbKey;
       if (m.region) cfg.region = m.region;
-      if (Array.isArray(m.platforms)) cfg.platforms = m.platforms.filter(p => p && typeof p.name === "string").map(p => ({ name: p.name.slice(0, 60), logo: imgPath(p.logo) }));
+      if (Array.isArray(m.platforms)) cfg.platforms = m.platforms.filter(p => p && typeof p.name === "string").map(p => ({ name: p.name.slice(0, 60), logo: imgPath(p.logo), ids: (Array.isArray(p.ids) ? p.ids : []).filter(Number.isInteger).slice(0, 8) }));
       save(LS.cfg, cfg); render();
     }, () => {}));
     // Prénoms et « qui est qui » repris de Foyer à deux (lecture seule)
@@ -1963,10 +2162,6 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
       const c = s.exists ? s.data() : {};
       if (c.a || c.b) { fromFoyer = true; if (c.a) cfg.nameA = String(c.a).slice(0, 20); if (c.b) cfg.nameB = String(c.b).slice(0, 20); save(LS.cfg, cfg); render(); }
     }, () => {}));
-    fs.doc("prefs/" + user.email).get().then(s => {
-      const me = s.exists ? s.data().me : null;
-      if (me === "a" || me === "b") { who = me; save(LS.who, who); render(); }
-    }).catch(() => {});
   }
 
   addEventListener("storage", e => { if (e.key === LS.items && !cloud()) { items = load(LS.items, {}); render(); } });
