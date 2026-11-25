@@ -21,6 +21,8 @@
 /* Séance du soir : nuit d'encre balayée de projecteurs colorés, popcorn rayé rouge et blanc,
    affiches au premier plan, une mascotte qui réagit à chaque geste. */
 :root {
+  /* espace laissé en haut des fiches : jamais sous l'heure, l'encoche ou la Dynamic Island de l'iPhone */
+  --sheet-top: max(28px, calc(env(safe-area-inset-top, 0px) + 16px));
   --ink: #0c0a17;
   --ink-2: #15112a;
   --ink-3: #1f1939;
@@ -476,7 +478,7 @@ dialog.sheet.closing::backdrop { animation: fade .25s ease reverse both; }
 @keyframes fade { from { opacity: 0; } }
 .panel {
   position: relative; background: var(--ink-2); border: 1px solid var(--line-2); border-bottom: 0;
-  border-radius: 28px 28px 0 0; overflow: hidden auto; max-height: calc(100dvh - 24px);
+  border-radius: 28px 28px 0 0; overflow: hidden auto; max-height: calc(100dvh - var(--sheet-top));
   padding-bottom: env(safe-area-inset-bottom, 0px);
   box-shadow: 0 -30px 80px -20px rgb(0 0 0 / .8);
   animation: sheetUp .5s var(--out) both;
@@ -493,7 +495,7 @@ dialog.closing .panel { animation: sheetDown .26s ease-in both; }
 .grab::before { content: ""; width: 44px; height: 5px; border-radius: 5px; background: rgb(255 255 255 / .35); margin-top: 8px; }
 @media (min-width: 720px) { .grab { display: none; } }
 .x {
-  position: absolute; right: 14px; top: 14px; z-index: 6; width: 38px; height: 38px; border-radius: 50%; border: 0;
+  position: absolute; right: 12px; top: 14px; z-index: 6; width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgb(255 255 255 / .14);
   display: grid; place-items: center; background: rgb(12 10 23 / .6); color: var(--text);
   -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); transition: transform .3s var(--spring), background .2s;
 }
@@ -624,7 +626,7 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
 @keyframes boing { 30% { transform: scale(1.12, .88); } 60% { transform: scale(.94, 1.08) translateY(-10px); } }
 
 /* ---------- Suggestions ---------- */
-#suggDlg .panel { min-height: min(90dvh, 920px); }
+#suggDlg .panel { min-height: min(90dvh, 920px, calc(100dvh - var(--sheet-top))); }
 .sg-head { display: flex; align-items: center; gap: 14px; padding: 28px 70px 4px 22px; }
 .sg-head .m { width: 52px; height: 60px; flex: none; }
 .sg-head h2 { font-family: var(--display); font-weight: 800; font-size: 26px; margin: 4px 0 0; letter-spacing: -.02em; }
@@ -1513,6 +1515,27 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
   $$("dialog.sheet").forEach(dlg => {
     dlg.addEventListener("close", () => { if (!$("dialog[open]")) document.documentElement.classList.remove("lock"); if (dlg.id === "rouletteDlg" && !dlg.open) rollId++; });
     dlg.addEventListener("cancel", e => { e.preventDefault(); closeSheet(dlg); });
+    // Glisser la fiche vers le bas pour la fermer (téléphone)
+    const panel = dlg.querySelector(".panel");
+    let y0 = null, dy = 0;
+    panel.addEventListener("touchstart", e => {
+      if (panel.scrollTop > 0 || e.touches.length > 1 || e.target.closest("select, input, textarea")) { y0 = null; return; }
+      y0 = e.touches[0].clientY; dy = 0; panel.style.transition = "none";
+    }, { passive: true });
+    panel.addEventListener("touchmove", e => {
+      if (y0 === null) return;
+      dy = e.touches[0].clientY - y0;
+      if (panel.scrollTop > 0) { y0 = null; panel.style.transform = ""; return; }
+      panel.style.transform = dy > 0 ? `translateY(${dy}px)` : "";
+    }, { passive: true });
+    panel.addEventListener("touchend", () => {
+      if (y0 === null) return;
+      y0 = null; panel.style.transition = "transform .25s ease";
+      if (dy > 110) {
+        panel.style.transform = "translateY(100%)";
+        setTimeout(() => { dlg.close(); panel.style.transform = ""; panel.style.transition = ""; }, 240);
+      } else { panel.style.transform = ""; setTimeout(() => { panel.style.transition = ""; }, 260); }
+    });
   });
 
   /* ---------- Rendu ---------- */
