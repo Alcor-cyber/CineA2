@@ -695,6 +695,19 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
 .scard .badge .ico { width: 15px; height: 15px; stroke-width: 2.8; }
 .scard .tp { position: absolute; left: 6px; top: 6px; z-index: 2; }
 .scard .tp .pill { -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); background: rgb(12 10 23 / .6); font-size: 9.5px; padding: 2px 6px; }
+.scard { cursor: pointer; }
+.scard:focus-visible { outline: 2.5px solid var(--butter); outline-offset: 4px; border-radius: 14px; }
+.tr {
+  position: absolute; right: 7px; bottom: 7px; z-index: 3; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
+  color: #fff; text-decoration: none; background: rgb(12 10 23 / .62); border: 1px solid rgb(255 255 255 / .3);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); box-shadow: 0 6px 16px -6px rgb(0 0 0 / .8);
+  transition: transform .3s var(--spring), background .2s;
+}
+.tr .ico { width: 14px; height: 14px; color: var(--butter); margin-left: 2px; }
+.tr:hover { background: rgb(12 10 23 / .85); }
+.tr:active { transform: scale(.88); }
+.swcard .tr { top: 14px; right: 14px; bottom: auto; width: 46px; height: 46px; }
+.swcard .tr .ico { width: 19px; height: 19px; }
 .scard b { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-top: 8px; font-size: 13.5px; line-height: 1.25; }
 .scard small.sub { display: block; margin-top: 2px; color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .scard.sk .pf { background: linear-gradient(90deg, var(--ink-3) 0%, var(--ink-4) 50%, var(--ink-3) 100%); background-size: 200% 100%; animation: shimmer 1.2s linear infinite; }
@@ -2186,6 +2199,7 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
     const res = await Promise.all(calls);
     return { pages: Math.max(1, ...res.map(r => r.pages)), results: res.flatMap(r => r.results).sort((x, y) => (y.popularity || 0) - (x.popularity || 0)) };
   }
+  const skey = r => `${r.media_type}-${r.id}`;
   function suggCard(r, i, k = i) {
     const id = `${r.media_type}-${r.id}`, inList = items[id] && !items[id].deleted;
     const title = r.title || r.name || "", p = imgPath(r.poster_path);
@@ -2196,14 +2210,39 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
       sub = `${future ? "Sortie" : "Sorti"} le ${d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}`;
     }
     if (r.vote_average && r.vote_count > 5) sub += ` · ★ ${String(Math.round(r.vote_average * 10) / 10).replace(".", ",")}`;
-    return `<button type="button" class="scard" data-i="${i}" style="--i:${k % 20}" aria-label="${esc(title)}${inList ? ", déjà dans votre liste" : ""}">
+    return `<div class="scard" role="button" tabindex="0" data-i="${i}" style="--i:${k % 20}" aria-label="${esc(title)}${inList ? ", déjà dans votre liste" : ""}">
       <span class="pf">${p ? `<img src="${IMG}w342${p}" alt="" loading="lazy" decoding="async">` : `<span class="ph">${mascot("happy")}<span>${esc(title)}</span></span>`}
         ${SG.src === "streaming" ? `<span class="tp"><span class="pill ${r.media_type}">${r.media_type === "tv" ? "Série" : "Film"}</span></span>` : ""}
         ${k < 10 ? `<span class="rank"><small>#</small>${k + 1}</span>` : ""}
-        <span class="badge ${inList ? "in" : ""}">${inList ? IC.check : IC.plus}</span></span>
-      <b>${esc(title)}</b><small class="sub">${esc(sub)}</small></button>`;
+        <span class="badge ${inList ? "in" : ""}">${inList ? IC.check : IC.plus}</span>${trailerLink(r)}</span>
+      <b>${esc(title)}</b><small class="sub">${esc(sub)}</small></div>`;
   }
-  const skey = r => `${r.media_type}-${r.id}`;
+  // Bandes-annonces : lien vers la vidéo YouTube trouvée par TMDB (en français d'abord), sinon recherche YouTube.
+  const trailers = new Map(); // "movie-123" → clé YouTube ("" si aucune)
+  const trailerHref = r => {
+    const key = trailers.get(skey(r));
+    if (key) return `https://www.youtube.com/watch?v=${key}`;
+    const y = (r.release_date || r.first_air_date || "").slice(0, 4);
+    return `https://www.youtube.com/results?search_query=${encodeURIComponent(`${r.title || r.name || ""} ${y} bande annonce`)}`;
+  };
+  const trailerLink = r => `<a class="tr" data-k="${esc(skey(r))}" href="${esc(trailerHref(r))}" target="_blank" rel="noopener" aria-label="Bande-annonce de ${esc(r.title || r.name || "")}" title="Bande-annonce">${IC.play}</a>`;
+  let trQueue = [], trBusy = 0;
+  function prefetchTrailers(list) {
+    if (!cfg.key) return;
+    list.forEach(r => { const k = skey(r); if (!trailers.has(k) && !trQueue.some(x => skey(x) === k)) trQueue.push(r); });
+    while (trBusy < 4 && trQueue.length) {
+      const r = trQueue.shift(), k = skey(r); trBusy++;
+      tmdb(`/${r.media_type}/${r.id}/videos`, { language: "fr-FR", include_video_language: "fr,en,null" })
+        .then(v => {
+          const vids = (v.results || []).filter(x => x.site === "YouTube" && /Trailer|Teaser/.test(x.type) && /^[\w-]{6,20}$/.test(x.key));
+          const best = vids.find(x => x.iso_639_1 === "fr" && x.type === "Trailer") || vids.find(x => x.iso_639_1 === "fr") || vids.find(x => x.type === "Trailer") || vids[0];
+          trailers.set(k, best ? best.key : "");
+          if (best) $$(`.tr[data-k="${CSS.escape(k)}"]`).forEach(a => { a.href = trailerHref(r); });
+        })
+        .catch(() => {})
+        .finally(() => { trBusy--; prefetchTrailers([]); });
+    }
+  }
   const swiped = new Set(); // swipés pendant cette visite (le temps que la liste se mette à jour)
   const msgHtml = t => `<div class="sg-msg2">${mascot("sleep")}<span>${t}</span></div>`;
 
@@ -2214,6 +2253,7 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
     if (SG.loading && !SG.results.length) { grid.innerHTML = Array.from({ length: 12 }, (_, i) => `<div class="scard sk" style="--i:${i}"><span class="pf"></span><b></b></div>`).join(""); return; }
     const vis = SG.results.map((r, i) => [r, i]).filter(([r]) => !SW.vu.includes(skey(r)));
     grid.innerHTML = vis.length ? vis.map(([r, i], k) => suggCard(r, i, k)).join("") : msgHtml("Rien ne correspond à ce tri pour l'instant. Essayez une autre catégorie.");
+    prefetchTrailers(vis.map(([r]) => r));
   }
 
   async function loadSugg(more = false) {
@@ -2270,6 +2310,7 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
       ${p ? `<img src="${IMG}w500${p}" alt="" draggable="false">` : `<div class="ph">${mascot("happy")}<span>${esc(title)}</span></div>`}
       <span class="tp"><span class="pill ${r.media_type}">${r.media_type === "tv" ? "Série" : "Film"}</span></span>
       <span class="sw-stamp yes">Envie</span><span class="sw-stamp no">Non merci</span><span class="sw-stamp vu">Déjà vu</span>
+      ${trailerLink(r)}
       <div class="swinfo"><h3>${esc(title)}</h3><p>${bits.map(esc).join(" · ")}</p>${r.overview ? `<div class="ov">${esc(r.overview)}</div>` : ""}</div>
     </div>`;
   }
@@ -2284,7 +2325,7 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
     if (SG.err) html = `<div class="sw-empty">${mascot("sleep")}<span>${esc(SG.err)}</span></div>`;
     else if (!list.length) html = SG.loading || SG.moreBusy ? `<div class="swcard sk" style="--d:0"></div>`
       : `<div class="sw-empty">${mascot("sleep")}<b>Plus rien à swiper ici</b><span>Changez de catégorie ou revenez dans quelques jours.</span></div>`;
-    else html = list.slice(0, 3).map((r, i) => swCard(r, i)).reverse().join("");
+    else { html = list.slice(0, 3).map((r, i) => swCard(r, i)).reverse().join(""); prefetchTrailers(list.slice(0, 6)); }
     deck.innerHTML = html;
     btns.forEach(b => { b.disabled = !list.length; });
   }
@@ -2299,6 +2340,7 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
     c.querySelector(".sw-stamp.vu").style.opacity = up ? clamp01(-dy / 90) : 0;
   }
   $("#deck").addEventListener("pointerdown", e => {
+    if (e.target.closest("a.tr")) return; // le lien bande-annonce ne déclenche pas de glissement
     const c = e.target.closest(".swcard.top"); if (!c || e.button > 0) return;
     drag = { c, x0: e.clientX, y0: e.clientY, dx: 0, dy: 0 };
     try { c.setPointerCapture(e.pointerId); } catch {}
@@ -2394,9 +2436,11 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
     if (t && t.dataset.src !== SG.src) { SG.src = t.dataset.src; suggControls(); loadSugg(); return; }
     const v = e.target.closest("#suggView button");
     if (v && v.dataset.view !== SG.view) { setSuggView(v.dataset.view); return; }
+    if (e.target.closest("a.tr")) return;
     const c = e.target.closest(".scard[data-i]");
     if (c) { const r = SG.results[+c.dataset.i]; if (r) choose({ media_type: r.media_type, id: r.id }); }
   });
+  $("#suggGrid").addEventListener("keydown", e => { if ((e.key === "Enter" || e.key === " ") && e.target.matches(".scard[data-i]")) { e.preventDefault(); e.target.click(); } });
   $("#suggGenre").addEventListener("change", e => { SG.genre = e.target.value; suggControls(); loadSugg(); });
   $("#suggType").addEventListener("change", e => { SG.type = e.target.value; suggControls(); loadSugg(); });
   $("#suggMine").addEventListener("change", e => { SG.mine = e.target.checked; loadSugg(); });
