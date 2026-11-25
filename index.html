@@ -337,7 +337,7 @@ html.idle :is(.stage .spot, .bob, .shadow, .kpop, .blink, .zz, .spark, .grad, .r
 /* ---------- Grille d'affiches ---------- */
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 30px 20px; margin-block: 22px 70px; }
 @media (max-width: 520px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 14px; } }
-.card { position: relative; min-width: 0; perspective: 900px; }
+.card { position: relative; min-width: 0; perspective: 900px; display: flex; flex-direction: column; }
 .card.enter { animation: rise .6s var(--out) both; animation-delay: calc(min(var(--i), 14) * 45ms); }
 @keyframes rise { from { opacity: 0; transform: translateY(18px) scale(.97); } }
 .card.leave { animation: leave .38s var(--out) forwards; }
@@ -424,10 +424,10 @@ html.idle :is(.stage .spot, .bob, .shadow, .kpop, .blink, .zz, .spark, .grad, .r
 }
 .ph .m { width: 54px; height: 62px; opacity: .9; }
 
-.info { padding: 12px 2px 0; min-width: 0; }
+.info { padding: 12px 2px 0; min-width: 0; flex: 1; display: flex; flex-direction: column; }
 .info h3 { margin: 0; font-weight: 700; font-size: 15.5px; line-height: 1.25; letter-spacing: -.005em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .info .sub { color: var(--muted); font-size: 12.5px; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.info .row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 10px; }
+.info .row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: auto; padding-top: 10px; }
 .wants { display: inline-flex; align-items: center; }
 .wants .av { width: 22px; height: 22px; font-size: 10px; box-shadow: 0 0 0 2px var(--ink); }
 .wants .av + .av { margin-left: -5px; }
