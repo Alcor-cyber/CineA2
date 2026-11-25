@@ -543,6 +543,16 @@ dialog.closing .panel { animation: sheetDown .26s ease-in both; }
 .wlist { display: flex; flex-wrap: wrap; gap: 8px; }
 .prov-chip { display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px 4px 4px; border-radius: 12px; background: rgb(255 255 255 / .05); border: 1px solid var(--line); font-size: 13px; font-weight: 600; }
 .prov-chip img { width: 30px; height: 30px; border-radius: 8px; }
+a.prov-chip { color: inherit; text-decoration: none; transition: border-color .2s, background .2s, transform .3s var(--spring); }
+a.prov-chip:hover { border-color: var(--line-2); background: rgb(255 255 255 / .09); }
+a.prov-chip:active { transform: scale(.95); }
+.btn.watch { width: 100%; justify-content: flex-start; gap: 12px; padding: 8px 18px 8px 8px; background: var(--text); color: var(--outline); box-shadow: 0 12px 30px -12px rgb(251 247 255 / .45); font-size: 15.5px; }
+.btn.watch img, .btn.watch .lg { width: 38px; height: 38px; border-radius: 10px; flex: none; object-fit: cover; }
+.btn.watch .lg { display: grid; place-items: center; background: var(--outline); color: var(--butter); }
+.btn.watch .lg .ico { width: 18px; height: 18px; }
+.btn.watch span { flex: 1; text-align: left; }
+.btn.watch small { display: block; font-size: 11.5px; font-weight: 600; color: rgb(29 21 48 / .6); }
+.btn.watch > .ico { width: 18px; height: 18px; opacity: .6; }
 p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-items: center; }
 .envies { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .envie { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 14px; background: rgb(255 255 255 / .04); border: 1px solid var(--line); font-size: 13.5px; }
@@ -1541,9 +1551,42 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
     return p ? `<img class="${cls}" src="${IMG}${size}${p}" alt="Affiche de ${esc(d.title)}" loading="lazy" decoding="async">`
       : `<div class="${cls} ph">${mascot("happy")}<span>${esc(d.title)}</span></div>`;
   }
-  function provList(list) {
+  // Lien vers la recherche du titre sur la plateforme (ouvre l'appli si elle est installée).
+  // TMDB ne donne pas l'adresse exacte du film : pour les autres plateformes, on passe par la page TMDB « Où regarder ».
+  const PLAT_SEARCH = [
+    [/netflix/i, q => `https://www.netflix.com/search?q=${q}`],
+    [/prime video|amazon video|amazon prime/i, q => `https://www.primevideo.com/search/ref=atv_nb_sr?phrase=${q}`],
+    [/disney/i, q => `https://www.disneyplus.com/search?q=${q}`],
+    [/apple tv/i, q => `https://tv.apple.com/fr/search?term=${q}`],
+    [/youtube/i, q => `https://www.youtube.com/results?search_query=${q}`],
+    [/google play/i, q => `https://play.google.com/store/search?q=${q}&c=movies`],
+    [/crunchyroll/i, q => `https://www.crunchyroll.com/fr/search?q=${q}`],
+    [/^arte/i, q => `https://www.arte.tv/fr/search/?q=${q}`],
+    [/france ?tv|france\.tv/i, q => `https://www.france.tv/recherche/?q=${q}`]
+  ];
+  function watchUrl(name, d) {
+    const m = PLAT_SEARCH.find(([re]) => re.test(name || ""));
+    if (m) return m[1](encodeURIComponent(d.title || d.original || ""));
+    return /^https:\/\//.test(d.link || "") ? d.link : "";
+  }
+  function watchButton(d) {
+    const p = d.providers || {}, mine = myPlats(), flat = p.flat || [];
+    let pr = flat.find(x => mine.has(platKey(x.name))) || flat[0], verb = "Regarder sur";
+    if (!pr && p.rent?.length) { pr = p.rent[0]; verb = "Louer sur"; }
+    if (!pr) return "";
+    const url = watchUrl(pr.name, d); if (!url) return "";
+    const direct = PLAT_SEARCH.some(([re]) => re.test(pr.name));
+    const logo = imgPath(pr.logo) ? `<img src="${IMG}w92${imgPath(pr.logo)}" alt="">` : `<span class="lg">${IC.play}</span>`;
+    return `<a class="btn watch" href="${esc(url)}" target="_blank" rel="noopener">${logo}<span>${verb} ${esc(platKey(pr.name))}<small>${direct ? "Ouvre l'appli sur ce titre" : "Via la page TMDB, puis touchez le logo"}</small></span>${IC.ext}</a>`;
+  }
+  function provList(list, d) {
     const mine = myPlats();
-    return `<div class="wlist">${list.map(p => `<span class="prov-chip ${mine.has(platKey(p.name)) ? "mine" : ""}">${imgPath(p.logo) ? `<img src="${IMG}w92${imgPath(p.logo)}" alt="" loading="lazy">` : ""}${esc(p.name)}</span>`).join("")}</div>`;
+    return `<div class="wlist">${list.map(p => {
+      const url = d ? watchUrl(p.name, d) : "";
+      const inner = `${imgPath(p.logo) ? `<img src="${IMG}w92${imgPath(p.logo)}" alt="" loading="lazy">` : ""}${esc(p.name)}`;
+      const cls = `prov-chip ${mine.has(platKey(p.name)) ? "mine" : ""}`;
+      return url ? `<a class="${cls}" href="${esc(url)}" target="_blank" rel="noopener" title="Ouvrir ${esc(p.name)}">${inner}</a>` : `<span class="${cls}">${inner}</span>`;
+    }).join("")}</div>`;
   }
 
   const isNewOn = d => !!(d.newOn && d.newOn.name && !d.seen && Date.now() - (d.newOn.at || 0) < 14 * 864e5);
@@ -1573,9 +1616,9 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
     (d.genres || []).forEach(g => chips.push(`<span class="chip">${esc(g)}</span>`));
 
     const rows = [];
-    if (p.flat?.length) rows.push(`<div class="wrow"><span class="lbl">Abonnement</span>${provList(p.flat)}</div>`);
-    if (p.rent?.length) rows.push(`<div class="wrow"><span class="lbl">Location</span>${provList(p.rent.slice(0, 5))}</div>`);
-    if (!p.rent?.length && p.buy?.length) rows.push(`<div class="wrow"><span class="lbl">Achat</span>${provList(p.buy.slice(0, 5))}</div>`);
+    if (p.flat?.length) rows.push(`<div class="wrow"><span class="lbl">Abonnement</span>${provList(p.flat, d)}</div>`);
+    if (p.rent?.length) rows.push(`<div class="wrow"><span class="lbl">Location</span>${provList(p.rent.slice(0, 5), d)}</div>`);
+    if (!p.rent?.length && p.buy?.length) rows.push(`<div class="wrow"><span class="lbl">Achat</span>${provList(p.buy.slice(0, 5), d)}</div>`);
     const where = rows.length ? `<div class="wgroup">${rows.join("")}</div>` : `<p class="none">Pas encore disponible en streaming ${esc(REGION_NAME[d.region || cfg.region] || "")}.</p>`;
 
     const credits = [];
@@ -1613,6 +1656,7 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
       <div class="d-body">
         <div class="chips">${chips.join("")}</div>
         ${warnHtml(d)}
+        ${watchButton(d)}
         ${d.tagline ? `<p class="tagline">« ${esc(d.tagline)} »</p>` : ""}
         <p class="overview">${esc(d.overview) || "Pas encore de résumé en français."}</p>
         ${credits.length ? `<dl class="credits">${credits.join("")}</dl>` : ""}
