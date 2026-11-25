@@ -84,6 +84,14 @@ img { max-width: 100%; display: block; }
 @keyframes drift1 { to { transform: translate(14vmax, 10vmax) scale(1.15); } }
 @keyframes drift2 { to { transform: translate(-16vmax, 12vmax) scale(.9); } }
 @keyframes drift3 { to { transform: translate(-12vmax, -8vmax) scale(1.2); } }
+/* Économie de batterie : décor figé quand une fenêtre est ouverte, l'appli en arrière-plan ou inactive */
+html.lock .stage .spot, html.lock .nav *, html.lock main *, html.lock main *::before, html.lock main *::after,
+html.idle *, html.idle *::before, html.idle *::after { animation-play-state: paused !important; }
+@media (hover: none), (max-width: 640px) {
+  /* les projecteurs sont déjà des dégradés doux : pas de flou à recalculer sur téléphone */
+  .stage .spot { filter: none; will-change: auto; }
+  .stage::after { mix-blend-mode: normal; opacity: .035; }
+}
 .stage::after {
   content: ""; position: absolute; inset: -50%;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
@@ -1308,6 +1316,16 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
     sp.addEventListener("click", end);
   })();
 
+  /* ---------- Économie de batterie ---------- */
+  // Après 30 s sans geste (ou appli en arrière-plan), les animations décoratives se mettent en pause.
+  (() => {
+    const root = document.documentElement; let t;
+    const wake = () => { root.classList.remove("idle"); clearTimeout(t); t = setTimeout(() => root.classList.add("idle"), 30000); };
+    ["pointerdown", "pointermove", "keydown", "touchstart", "scroll", "wheel"].forEach(ev => addEventListener(ev, wake, { passive: true, capture: true }));
+    document.addEventListener("visibilitychange", () => { if (document.hidden) { clearTimeout(t); root.classList.add("idle"); } else wake(); });
+    wake();
+  })();
+
   /* ---------- Toasts ---------- */
   function toast(msg, mood = "happy") {
     const t = document.createElement("div");
@@ -1677,8 +1695,8 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
     if (filt.platform && !plats.some(x => x[0] === filt.platform)) filt.platform = "";
     const opt = (v, label, sel) => `<option value="${esc(v)}"${sel ? " selected" : ""}>${esc(label)}</option>`;
     const gs = $("#genreSel"), ps = $("#platSel");
-    gs.innerHTML = opt("", "Toutes", !filt.genre) + genres.map(([g, c]) => opt(g, `${g} (${c})`, filt.genre === g)).join("");
-    ps.innerHTML = opt("", "Toutes", !filt.platform) + plats.map(([n, c]) => opt(n, `${n} (${c})`, filt.platform === n)).join("");
+    setHTML(gs, opt("", "Toutes", !filt.genre) + genres.map(([g, c]) => opt(g, `${g} (${c})`, filt.genre === g)).join(""));
+    setHTML(ps, opt("", "Toutes", !filt.platform) + plats.map(([n, c]) => opt(n, `${n} (${c})`, filt.platform === n)).join(""));
     gs.classList.toggle("on", !!filt.genre); ps.classList.toggle("on", !!filt.platform);
     $("#sortReset").hidden = !(filt.genre || filt.platform);
     $("#sortPlatSettings").hidden = (cfg.platforms || []).length > 0;
@@ -1719,7 +1737,7 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
     if (series) st.push([String(series), series > 1 ? "séries" : "série", "var(--mint)"]);
     $("#stats").hidden = !all.length;
     $("#stats").style.setProperty("--n", st.length);
-    $("#stats").innerHTML = st.map(([n, l, c]) => `<div class="stat" style="--c:${c}"><b>${n}</b><small>${l}</small></div>`).join("");
+    setHTML($("#stats"), st.map(([n, l, c]) => `<div class="stat" style="--c:${c}"><b>${n}</b><small>${l}</small></div>`).join(""));
   }
 
   function renderMatches(all) {
@@ -1728,9 +1746,9 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
     sec.hidden = !(m.length && filt.status === "todo");
     if (sec.hidden) return;
     $("#matchesNote").textContent = `${m.length} titre${m.length > 1 ? "s" : ""} que vous voulez voir tous les deux`;
-    $("#rail").innerHTML = m.map(d => `<button class="mcard" data-open="${esc(d.id)}" aria-label="Voir la fiche de ${esc(d.title)}">
+    setHTML($("#rail"), m.map(d => `<button class="mcard" data-open="${esc(d.id)}" aria-label="Voir la fiche de ${esc(d.title)}">
       <div class="pf">${posterImg(d, "w342", "img")}<span class="heart">${IC.heart}</span></div>
-      <b>${esc(d.title)}</b><small>${subLine(d)}</small></button>`).join("");
+      <b>${esc(d.title)}</b><small>${subLine(d)}</small></button>`).join(""));
   }
 
   function platformChoices(all) {
@@ -1784,7 +1802,36 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
     </article>`;
   }
 
-  function render() {
+  // Plusieurs changements d'affilée (synchro, mise à jour des plateformes…) ne redessinent qu'une fois par image.
+  let renderQ = 0;
+  function render() { if (!renderQ) renderQ = requestAnimationFrame(() => { renderQ = 0; renderNow(); }); }
+  // Ne réécrit un bloc que si son contenu a changé
+  const setHTML = (el, html) => { if (el._html !== html) { el._html = html; el.innerHTML = html; } };
+  const tpl = document.createElement("template");
+  // Grille : garde les cartes inchangées, ne recrée que celles qui ont bougé, puis remet l'ordre
+  function patchGrid(list) {
+    const grid = $("#grid");
+    const old = new Map([...grid.children].map(el => [el.dataset.id, el]));
+    let n = 0, prev = null;
+    for (const d of list) {
+      const isNew = !shown.has(d.id); shown.add(d.id);
+      const sig = cardHtml(d, false, 0);
+      let el = old.get(d.id);
+      if (!el || isNew || el._sig !== sig) {
+        tpl.innerHTML = cardHtml(d, isNew, isNew ? n++ : 0).trim();
+        const fresh = tpl.content.firstElementChild; fresh._sig = sig;
+        if (el) el.replaceWith(fresh);
+        el = fresh;
+      }
+      old.delete(d.id);
+      const spot = prev ? prev.nextElementSibling : grid.firstElementChild;
+      if (spot !== el) grid.insertBefore(el, spot);
+      prev = el;
+    }
+    old.forEach(el => el.remove());
+  }
+
+  function renderNow() {
     renderWho();
     const all = base();
     const todo = all.filter(d => !d.seen), seen = all.filter(d => d.seen), match = todo.filter(d => d.wants?.a && d.wants?.b);
@@ -1797,8 +1844,7 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
       : (filt.status === "match" ? match : todo).sort((x, y) => (y.addedAt || 0) - (x.addedAt || 0));
     if (filt.platform && filt.status !== "seen") list = list.filter(d => platformsOf(d).includes(filt.platform));
 
-    let n = 0;
-    $("#grid").innerHTML = list.map(d => { const isNew = !shown.has(d.id); shown.add(d.id); return cardHtml(d, isNew, isNew ? n++ : 0); }).join("");
+    patchGrid(list);
     $("#grid").hidden = !list.length;
 
     const empty = $("#empty");
@@ -1811,7 +1857,7 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
         : filt.status === "seen" ? ["sleep", "Rien de vu pour l'instant", "Appuyez sur ✓ quand vous avez regardé un film : il viendra se ranger ici.", ""]
         : filt.status === "match" ? ["love", "Pas encore de coup de cœur commun", "Chacun de votre côté, appuyez sur le cœur. Les titres que vous voulez voir tous les deux arrivent ici.", ""]
         : ["wow", "Rien avec ces filtres", "Change de type, de catégorie ou de plateforme pour retrouver vos titres.", `<button class="btn ghost" data-empty="reset">Tout afficher</button>`];
-      empty.innerHTML = `${mascot(mood)}<h2>${h}</h2><p>${p}</p>${btn}`;
+      setHTML(empty, `${mascot(mood)}<h2>${h}</h2><p>${p}</p>${btn}`);
     }
     $("#rollBtn").disabled = !rollPool().deck.length;
     $("#tools").hidden = !live().length;
@@ -2493,7 +2539,7 @@ p.none { color: var(--muted); font-size: 13.5px; display: flex; gap: 8px; align-
 
   addEventListener("storage", e => { if (e.key === LS.items && !cloud()) { items = load(LS.items, {}); render(); } });
 
-  render();
+  renderNow();
   startCloud();
   if (document.fonts) document.fonts.ready.then(moveInd);
 })();
